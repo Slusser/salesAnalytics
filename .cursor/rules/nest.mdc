@@ -1,0 +1,58 @@
+---
+globs: *.controller.ts, *.service.ts, *.module.ts, *.dto.ts, *.entity.ts, *.guard.ts, *.interceptor.ts, *.pipe.ts, *.filter.ts
+alwaysApply: false
+---
+# AI Rules for SalesAnalysis
+
+SalesAnalysis (MVP) is a web application for B2B order recording and analysis that integrates data in one place and provides basic sales analytics and trends. The system enables manual order entry and XLSX import, order validation, amount calculations according to a defined algorithm, and metrics presentation on a dashboard.
+
+## BACKEND
+
+### Guidelines for NESTJS
+
+#### NESTJS_CODING_STANDARDS
+
+- Use modular architecture with feature modules for better code organization
+- Implement dependency injection using constructor injection pattern
+- Use decorators (@Injectable, @Controller, @Module) for proper metadata configuration
+- Leverage TypeScript strict mode and explicit typing for all parameters and return values
+- Implement proper error handling with custom exception filters
+- Use DTOs (Data Transfer Objects) for request/response validation with class-validator
+- Implement guards for authentication and authorization logic
+- Implement proper async/await patterns with Promise-based operations
+- Use configuration module for environment-specific settings
+- Implement proper logging with built-in Logger service
+- Split business logic into dedicated service classes
+- Use repository pattern for data access layer abstraction
+
+#### API_DESIGN
+
+- Follow RESTful API conventions for endpoint naming and HTTP methods
+- Implement consistent response structure across all endpoints
+- Use proper HTTP status codes for different response scenarios
+- Implement API versioning strategy for backward compatibility
+- Use query parameters for filtering, sorting, and pagination
+- Implement proper request validation with ValidationPipe
+- Use transform pipes for data serialization and deserialization
+- Implement rate limiting and throttling for API protection
+- Use CORS configuration for cross-origin request handling
+
+#### SWAGGER_DOCUMENTATION
+
+- Use @ApiTags decorator to group related endpoints
+- Implement @ApiOperation for detailed endpoint descriptions
+- Use @ApiResponse decorators for all possible response scenarios
+- Define @ApiProperty in DTOs for comprehensive schema documentation
+- Implement @ApiParam and @ApiQuery for parameter documentation
+- Use @ApiBearerAuth for authentication documentation
+- Create example responses for better API consumer understanding
+- Document error responses with proper status codes and messages
+- Use @ApiExcludeEndpoint for internal endpoints that shouldn't be documented
+
+#### DATABASE_INTEGRATION
+
+- Use Supabase for database operations and migrations
+
+#### SECURITY_PRACTICES
+
+- Use Supabase for authentication and authorization

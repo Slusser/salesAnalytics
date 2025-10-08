@@ -1,0 +1,56 @@
+---
+description: on file generation
+alwaysApply: false
+---
+# AI Rules for SalesAnalysis
+
+SalesAnalysis (MVP) is a web application for B2B order recording and analysis that integrates data in one place and provides basic sales analytics and trends. The system enables manual order entry and XLSX import, order validation, amount calculations according to a defined algorithm, and metrics presentation on a dashboard.
+
+## CODING_PRACTICES
+
+### Guidelines for ARCHITECTURE
+
+#### MONOREPO
+
+##### Nx Workspace Configuration
+- Use Nx 21+ for monorepo management with workspace-aware tooling
+- Configure `nx.json` with proper plugins: `@nx/angular`, `@nx/nest`, `@nx/eslint`, `@nx/playwright`, `@nx/webpack`
+- Implement clear project boundaries with explicit dependencies between apps and libraries
+- Use consistent versioning strategy across all packages (independent or lockstep)
+- Configure namedInputs for optimal caching: `default`, `production`, `sharedGlobals`
+- Set up targetDefaults for common executors to ensure consistent behavior
+
+##### Project Structure & Generators
+- Use Angular CLI generators for frontend components: `@nx/angular:application`, `@nx/angular:library`, `@nx/angular:component`
+- Use Nest CLI generators for backend modules: `@nx/nest:application`, `@nx/nest:library`, `@nx/nest:resource`
+- Configure default generator options in `nx.json`:
+  - Angular apps: `e2eTestRunner: "playwright"`, `linter: "eslint"`, `style: "scss"`, `unitTestRunner: "vitest"`
+  - Angular libraries: `linter: "eslint"`, `unitTestRunner: "vitest"`
+  - Angular components: `style: "css"`
+
+##### Build & Development Workflow
+- Configure build dependencies with `dependsOn: ["^build"]` for proper build order
+- Use Webpack for NestJS backend builds with development/production configurations
+- Use Angular build system for frontend with proper budgets and optimization settings
+- Implement caching strategies for all targets: `build`, `test`, `lint`, `e2e`
+- Configure serve targets for both development and production modes
+
+##### Testing & Quality Assurance
+- Use Vitest for unit testing Angular applications and libraries
+- Use Playwright for e2e testing with proper target configuration
+- Configure ESLint with workspace-wide rules and project-specific overrides
+- Implement proper test coverage reporting and thresholds
+- Use `@nx/vite:test` executor for consistent testing across projects
+
+##### API Documentation & Integration
+- Configure Swagger/OpenAPI documentation generation for NestJS APIs
+- Use `@nestjs/swagger` for automatic API documentation
+- Implement proper API versioning and documentation standards
+- Configure Swagger UI for development and testing environments
+
+##### Database & External Services
+- Configure Supabase client libraries as shared dependencies
+- Implement proper environment configuration for database connections
+- Use shared types and DTOs across frontend and backend projects
+- Configure proper database migration and seeding workflows
+

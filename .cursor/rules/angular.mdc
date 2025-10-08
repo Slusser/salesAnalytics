@@ -1,0 +1,48 @@
+---
+globs: *.component.ts
+alwaysApply: false
+---
+# AI Rules for SalesAnalysis
+
+SalesAnalysis (MVP) is a web application for B2B order recording and analysis that integrates data in one place and provides basic sales analytics and trends. The system enables manual order entry and XLSX import, order validation, amount calculations according to a defined algorithm, and metrics presentation on a dashboard.
+
+
+## FRONTEND
+
+### Guidelines for ANGULAR
+
+#### ANGULAR_CODING_STANDARDS
+
+- Use standalone components, directives, and pipes instead of NgModules
+- Implement signals mixed with RxJS-based observables
+- Use the new inject function instead of constructor injection
+- Implement control flow with @if, @for, and @switch instead of *ngIf, *ngFor, etc.
+- Leverage functional guards and resolvers instead of class-based ones
+- Use the new deferrable views for improved loading states
+- Implement OnPush change detection strategy for improved performance
+- Use TypeScript decorators with explicit visibility modifiers (public, private)
+- Leverage Angular CLI for schematics and code generation
+- Implement proper lazy loading with loadComponent and loadChildren
+- Use RxJs for httpClient data feched only
+- As components UI use NgZorro library
+- For all charts elements use EChart
+- Split *.component.ts file into template file *.component.html, styles file *.component.scss, and component file *.component.ts
+
+#### NGZORRO
+
+- Create a dedicated module for NgZorro imports to keep the app module clean
+- Use theme mixins to customize component styles instead of overriding CSS
+- Leverage the NgZorro theming system for consistent branding
+
+#### ECHART
+- Use ngx-echarts library as the Angular wrapper for ECharts integration
+- Create reusable chart components for common chart types (line, bar, pie, scatter)
+- Implement chart options as signals or computed properties for reactive updates
+- Use ECharts themes for consistent styling across all charts
+- Leverage ECharts responsive features for mobile-friendly charts
+- Implement proper loading states and error handling for chart data
+- Use ECharts animation and transition effects for better user experience
+- Configure chart tooltips with custom formatters for business-specific data display
+- Implement chart interaction handlers (click, hover, zoom) using ECharts event system
+- Implement chart export functionality (PNG, SVG, PDF) using ECharts built-in methods
+- Configure chart dimensions responsively using Angular ViewChild and ResizeObserver
