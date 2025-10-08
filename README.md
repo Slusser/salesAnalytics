@@ -1,82 +1,140 @@
 # SalesAnalysis
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+A monorepo MVP for B2B order recording and sales analysis. It centralizes order data, supports manual entry and XLSX import, validates inputs, calculates amounts using a defined algorithm, and visualizes metrics and trends on a dashboard.
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## Table of Contents
+- [1. Project name](#1-project-name)
+- [2. Project description](#2-project-description)
+- [3. Tech stack](#3-tech-stack)
+- [4. Getting started locally](#4-getting-started-locally)
+- [5. Available scripts](#5-available-scripts)
+- [6. Project scope](#6-project-scope)
+- [7. Project status](#7-project-status)
+- [8. License](#8-license)
 
-## Finish your CI setup
+## 1. Project name
+SalesAnalysis
 
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/Sxx9lpvyMB)
+## 2. Project description
+SalesAnalysis is an MVP web application for B2B order recording and analysis. It integrates sales data in one place, enables manual order entry and XLSX import, performs validation and amount calculations according to a defined algorithm, and presents basic analytics and trends on a dashboard.
 
+This repository is an Nx monorepo containing:
+- Frontend: Angular application (`apps/web`)
+- Backend: NestJS API (`apps/api`) with Swagger docs
+- Shared: common types (`apps/shared/types`)
+- DB: clients and types (e.g., Supabase placeholders in `apps/db`)
 
-## Run tasks
+## 3. Tech stack
+- Angular 20 (Standalone, SCSS)
+- TypeScript 5
+- NestJS 11 (Express)
+- Nx 21 (monorepo/build tooling)
+- Tooling and libs:
+  - Vite 7 + Vitest 3 (web tests), ESLint 9, Prettier
+  - RxJS 7.8, zone.js
+  - Swagger (`@nestjs/swagger`, `swagger-ui-express`)
+  - Axios
+  - Playwright (installed; e2e for web not yet configured), Jest for `api-e2e`
 
-To run the dev server for your app, use:
+## 4. Getting started locally
 
-```sh
+### Prerequisites
+- Node.js ≥ 18 (20 LTS recommended)
+- npm ≥ 9
+
+### Install
+```bash
+npm ci
+```
+
+### Run the backend (API)
+```bash
+npx nx serve api
+```
+- API base URL: `http://localhost:3000/api`
+- Swagger UI: `http://localhost:3000/api/docs`
+
+### Run the frontend (Web)
+```bash
 npx nx serve web
 ```
+- Web app: `http://localhost:4200`
 
-To create a production bundle:
-
-```sh
+### Build
+```bash
+# Production builds
+npx nx build api
 npx nx build web
 ```
+Build artifacts are emitted under `dist/` (projects may output to `dist/apps/<project>` depending on target configuration).
 
-To see all available targets to run for a project, run:
-
-```sh
-npx nx show project web
+### Lint
+```bash
+npx nx lint web
+npx nx lint api
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Tests
+```bash
+# Unit tests (web)
+npx nx test web
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# E2E tests (API)
+npx nx e2e api-e2e
+```
+Note: `web-e2e` project exists but does not yet define runnable Nx targets.
 
-## Add new projects
-
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
-
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
+### Explore the graph
+```bash
+npx nx graph
 ```
 
-To generate a new library, use:
+## 5. Available scripts
+This workspace uses Nx targets instead of root npm scripts. Common commands:
 
-```sh
-npx nx g @nx/angular:lib mylib
-```
+| Task | Command | Notes |
+| --- | --- | --- |
+| Serve API | `npx nx serve api` | Builds with Webpack and runs NestJS (port 3000, `/api`, Swagger at `/api/docs`). |
+| Serve Web | `npx nx serve web` | Angular dev server (port 4200). |
+| Build API | `npx nx build api` | Production bundle for the API. |
+| Build Web | `npx nx build web` | Production bundle for the web app. |
+| Lint | `npx nx lint api` / `npx nx lint web` | ESLint rules configured per project. |
+| Test (web) | `npx nx test web` | Vitest via Vite config. |
+| E2E (api) | `npx nx e2e api-e2e` | Jest-based API e2e suite. |
+| Show project | `npx nx show project <name>` | Inspect available targets for a project. |
+| Graph | `npx nx graph` | Visualize project dependencies. |
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## 6. Project scope
+In scope for MVP:
+- Manual order entry
+- XLSX import
+- Order validation
+- Amount calculations using a defined algorithm
+- Metrics and trends on a dashboard
+- Unified data model across frontend and backend (`apps/shared/types`)
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+Out of scope (for now):
+- Auth and user management (not specified)
+- Production-grade DB provisioning and environment secrets
+- Advanced analytics beyond core KPIs
+- CI/CD pipelines and deployment automation
 
+## 7. Project status
+- Status: Work in Progress (MVP)
+- Current:
+  - Nx monorepo scaffold with Angular and NestJS apps
+  - API runs at `http://localhost:3000/api` with Swagger docs at `/api/docs`
+  - Web app scaffold runs at `http://localhost:4200`
+  - Linting and unit testing configured for web
+  - API e2e project configured (`api-e2e`)
+- Next:
+  - Implement data model, storage (e.g., Supabase) and environment configuration
+  - Implement XLSX import and validation pipeline
+  - Implement amount calculation algorithm and dashboard metrics
+  - Add `web-e2e` targets and scenarios
+  - Add CI and a `LICENSE` file
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Useful links
-
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+## 8. License
+Licensed under the MIT License (see the `license` field in `package.json`). If present, refer to the `LICENSE` file for full terms.
