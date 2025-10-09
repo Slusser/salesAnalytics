@@ -1,5 +1,6 @@
 {
   "compileOnSave": false,
+  "files": ["env.d.ts"],
   "compilerOptions": {
     "rootDir": ".",
     "sourceMap": true,
@@ -18,7 +19,9 @@
       "@shared/types": ["apps/shared/types/src/index.ts"],
       "@db/*": ["apps/db/src/*"],
       "@api/*": ["apps/api/src/*"],
-      "@web/*": ["apps/web/src/*"]
+      "@web/*": ["apps/web/src/*"],
+      "@middleware": ["apps/middleware/index.ts"],
+      "db/*": ["apps/db/*"]
     }
   },
   "exclude": ["node_modules", "tmp"]
