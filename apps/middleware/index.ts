@@ -1,7 +1,7 @@
 import { Injectable, NestMiddleware } from '@nestjs/common'
 import type { NextFunction, Request, Response } from 'express'
 
-import { supabaseClient } from '../db/supabase.client.ts'
+import { supabaseClient } from '../db/supabase.client'
 
 declare module 'express-serve-static-core' {
   interface Request {

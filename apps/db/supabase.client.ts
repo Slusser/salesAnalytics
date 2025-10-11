@@ -1,9 +1,29 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 
-import type { Database } from '../db/database.types.ts'
+import type { Database } from './database.types'
 
-const supabaseUrl = import.meta.env.SUPABASE_URL
-const supabaseAnonKey = import.meta.env.SUPABASE_KEY
+const supabaseUrl = process.env.SUPABASE_URL ?? ''
+const supabaseAnonKey = process.env.SUPABASE_KEY ?? ''
 
-export const supabaseClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Brak konfiguracji Supabase: SUPABASE_URL lub SUPABASE_KEY.')
+}
+
+export const createSupabaseClient = (accessToken?: string): SupabaseClient<Database> =>
+  createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
+      detectSessionInUrl: false
+    },
+    global: accessToken
+      ? {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      : undefined
+  })
+
+export const supabaseClient = createSupabaseClient()
 

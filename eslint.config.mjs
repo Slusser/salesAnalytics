@@ -42,7 +42,6 @@ export default [
       // Consistent code style
       'quotes': ['error', 'single'],
       'semi': ['error', 'always'],
-      'comma-dangle': ['error', 'es5'],
       'object-curly-spacing': ['error', 'always'],
     },
   },
