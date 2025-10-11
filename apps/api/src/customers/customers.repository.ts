@@ -62,6 +62,24 @@ export class CustomersRepository {
     return { data: CustomerMapper.toDto(data) }
   }
 
+  async findById(customerId: string): Promise<{
+    data?: Tables<'customers'> | null
+    error?: PostgrestError
+  }> {
+    const { data, error } = await this.client
+      .from('customers')
+      .select('id, name, is_active, created_at, updated_at, deleted_at')
+      .eq('id', customerId)
+      .maybeSingle()
+
+    if (error) {
+      this.logger.error(`Błąd podczas pobierania klienta ${customerId}`, error)
+      return { error }
+    }
+
+    return { data: (data as Tables<'customers'> | null) ?? null }
+  }
+
   async list(params: ListParams): Promise<ListCustomersResponse> {
     const { page, limit, search, includeInactive } = params
     const offset = (page - 1) * limit

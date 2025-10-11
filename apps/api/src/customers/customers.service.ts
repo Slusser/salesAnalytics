@@ -1,14 +1,22 @@
-import { ForbiddenException, Injectable, Logger } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException
+} from '@nestjs/common'
 import { PostgrestError } from '@supabase/supabase-js'
 
 import type {
   CreateCustomerCommand,
+  CustomerDetailResponse,
   CustomerDto,
   CustomerMutatorContext,
   ListCustomersQuery,
   ListCustomersResponse
 } from 'apps/shared/dtos/customers.dto'
 import { CustomersRepository } from './customers.repository'
+import { CustomerMapper } from './customers.mapper'
 
 export class CustomerDuplicateNameError extends Error {
   readonly code = 'CUSTOMER_DUPLICATE_NAME'
@@ -106,6 +114,51 @@ export class CustomersService {
     }
 
     return result.data
+  }
+
+  async getById(
+    customerId: string,
+    context: CustomerMutatorContext | null
+  ): Promise<CustomerDetailResponse> {
+    if (!context) {
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_GET_BY_ID_FAILED',
+        message: 'Brak kontekstu użytkownika wykonującego operację.'
+      })
+    }
+
+    const { data, error } = await this.repository.findById(customerId)
+
+    if (error) {
+      this.logger.error(`Nie udało się pobrać klienta ${customerId}`, error)
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_GET_BY_ID_FAILED',
+        message: 'Nie udało się pobrać klienta.'
+      })
+    }
+
+    if (!data) {
+      throw new NotFoundException({
+        code: 'CUSTOMERS_GET_BY_ID_NOT_FOUND',
+        message: 'Klient nie został znaleziony.'
+      })
+    }
+
+    const actorRoles = context.actorRoles ?? []
+    const canViewDeleted = actorRoles.some((role) => role === 'editor' || role === 'owner')
+
+    if (data.deleted_at && !canViewDeleted) {
+      throw new NotFoundException({
+        code: 'CUSTOMERS_GET_BY_ID_NOT_FOUND',
+        message: 'Klient nie został znaleziony.'
+      })
+    }
+
+    this.logger.debug(
+      `Pobieranie klienta o identyfikatorze ${customerId}, rola pozwala na usunięte: ${canViewDeleted}`
+    )
+
+    return CustomerMapper.toDto(data)
   }
 
   private handleInsertError(error: PostgrestError): never {

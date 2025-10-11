@@ -5,6 +5,7 @@ import {
   Header,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Query,
   Res,
@@ -18,12 +19,17 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiParam,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger'
 import { plainToInstance } from 'class-transformer'
 
-import type { CustomerDto, CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
+import type {
+  CustomerDetailResponse,
+  CustomerDto,
+  CustomerMutatorContext
+} from 'apps/shared/dtos/customers.dto'
 import { CreateCustomerDto } from './dto/create-customer.dto'
 import { CustomersService } from './customers.service'
 import { JwtAuthGuard } from '../security/jwt-auth.guard'
@@ -31,7 +37,8 @@ import { RolesGuard } from '../security/roles.guard'
 import { Roles } from '../security/roles.decorator'
 import { CurrentUser } from '../security/current-user.decorator'
 import { ListCustomersQueryDto } from './dto/list-customers-query.dto'
-import { ListCustomersResponseDto } from './dto/list-customers-response.dto'
+import { ListCustomersResponseDto, CustomerResponseDto } from './dto/list-customers-response.dto'
+import { CustomerIdParamDto } from './dto/customer-id-param.dto'
 
 @ApiTags('customers')
 @ApiBearerAuth()
@@ -39,6 +46,51 @@ import { ListCustomersResponseDto } from './dto/list-customers-response.dto'
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
+
+  @Get(':customerId')
+  @Roles('viewer', 'editor', 'owner')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Pobierz szczegóły klienta.' })
+  @ApiParam({
+    name: 'customerId',
+    description: 'Identyfikator klienta.',
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  })
+  @ApiOkResponse({
+    description: 'Szczegóły klienta zostały pobrane pomyślnie.',
+    type: CustomerResponseDto
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Klient nie został znaleziony lub jest ukryty dla roli viewer.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_GET_BY_ID_NOT_FOUND' },
+        message: { type: 'string', example: 'Klient nie został znaleziony.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Nie udało się pobrać klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_GET_BY_ID_FAILED' },
+        message: { type: 'string', example: 'Nie udało się pobrać klienta.' }
+      }
+    }
+  })
+  async getById(
+    @Param() params: CustomerIdParamDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<CustomerDetailResponse> {
+    const result = await this.customersService.getById(params.customerId, currentUser)
+    return result
+  }
 
   @Get()
   @Roles('viewer', 'editor', 'owner')
