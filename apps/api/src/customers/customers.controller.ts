@@ -1,12 +1,27 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, Res, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Get,
+  Header,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Res,
+  UseGuards
+} from '@nestjs/common'
 import type { Response } from 'express'
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiForbiddenResponse,
+  ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger'
+import { plainToInstance } from 'class-transformer'
 
 import type { CustomerDto, CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
 import { CreateCustomerDto } from './dto/create-customer.dto'
@@ -15,6 +30,8 @@ import { JwtAuthGuard } from '../security/jwt-auth.guard'
 import { RolesGuard } from '../security/roles.guard'
 import { Roles } from '../security/roles.decorator'
 import { CurrentUser } from '../security/current-user.decorator'
+import { ListCustomersQueryDto } from './dto/list-customers-query.dto'
+import { ListCustomersResponseDto } from './dto/list-customers-response.dto'
 
 @ApiTags('customers')
 @ApiBearerAuth()
@@ -22,6 +39,96 @@ import { CurrentUser } from '../security/current-user.decorator'
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
+
+  @Get()
+  @Roles('viewer', 'editor', 'owner')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Pobierz listę klientów z paginacją i opcjonalnym filtrem.' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Numer strony (domyślnie 1).'
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Limit rekordów na stronie (domyślnie 25, max 100).'
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    type: String,
+    description: 'Fraza wyszukiwania dopasowywana do nazwy klienta (case-insensitive).'
+  })
+  @ApiQuery({
+    name: 'includeInactive',
+    required: false,
+    type: Boolean,
+    description: 'Czy uwzględnić klientów nieaktywnych (wymaga ról editor/owner).'
+  })
+  @ApiOkResponse({
+    description: 'Lista klientów została pobrana pomyślnie.',
+    type: ListCustomersResponseDto
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Brak autoryzacji.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'UNAUTHORIZED' },
+        message: {
+          type: 'string',
+          example: 'Użytkownik nie jest uwierzytelniony.'
+        }
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak wymaganych ról do wyświetlenia nieaktywnych klientów.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do wyświetlenia nieaktywnych klientów.'
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Niepoprawne parametry zapytania.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_LIST_VALIDATION' },
+        message: { type: 'string', example: 'Parametr page musi być większy lub równy 1.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Błąd serwera podczas pobierania listy klientów.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_LIST_FAILED' },
+        message: { type: 'string', example: 'Nie udało się pobrać listy klientów.' }
+      }
+    }
+  })
+  async list(
+    @Query() query: ListCustomersQueryDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<ListCustomersResponseDto> {
+    const result = await this.customersService.list(query, currentUser)
+    return plainToInstance(ListCustomersResponseDto, result)
+  }
 
   @Post()
   @Roles('owner', 'editor')
