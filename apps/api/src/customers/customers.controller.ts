@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Header,
   HttpCode,
@@ -50,6 +51,79 @@ import { UpdateCustomerDto } from './dto/update-customer.dto'
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
+
+  @Delete(':customerId')
+  @Roles('editor', 'owner')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Usuń klienta (soft delete).' })
+  @ApiParam({
+    name: 'customerId',
+    description: 'Identyfikator klienta.',
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  })
+  @ApiOkResponse({
+    description: 'Klient został usunięty (soft delete).',
+    type: CustomerResponseDto
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak uprawnień do usunięcia klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_DELETE_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do usunięcia klienta.'
+        }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Niepoprawny identyfikator klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_DELETE_VALIDATION' },
+        message: {
+          type: 'string',
+          example: 'Parametr customerId musi być poprawnym identyfikatorem UUID v4.'
+        }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Klient nie został znaleziony.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_DELETE_NOT_FOUND' },
+        message: { type: 'string', example: 'Klient nie został znaleziony.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Nie udało się usunąć klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_DELETE_FAILED' },
+        message: { type: 'string', example: 'Nie udało się usunąć klienta.' }
+      }
+    }
+  })
+  async deleteCustomer(
+    @Param() params: CustomerIdParamDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<CustomerDetailResponse> {
+    return this.customersService.delete({
+      customerId: params.customerId,
+      actorId: currentUser.actorId,
+      actorRoles: currentUser.actorRoles
+    })
+  }
 
   @Get(':customerId')
   @Roles('viewer', 'editor', 'owner')

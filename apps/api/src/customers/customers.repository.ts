@@ -6,6 +6,7 @@ import { supabaseClient } from 'apps/db/supabase.client'
 import { CustomerMapper } from './customers.mapper'
 import type {
   CustomerDto,
+  DeleteCustomerCommand,
   ListCustomersQuery,
   ListCustomersResponse,
   UpdateCustomerCommand
@@ -24,6 +25,10 @@ interface ListParams extends Required<Pick<ListCustomersQuery, 'page' | 'limit'>
 
 interface UpdateCustomerParams extends UpdateCustomerCommand {
   customerId: string
+}
+
+type SoftDeleteParams = Pick<DeleteCustomerCommand, 'customerId'> & {
+  deletedAt: string
 }
 
 @Injectable()
@@ -100,6 +105,35 @@ export class CustomersRepository {
     }
 
     return (count ?? 0) > 0
+  }
+
+  async softDelete(params: SoftDeleteParams): Promise<{
+    data?: CustomerDto | null
+    error?: PostgrestError
+  }> {
+    const payload: TablesUpdate<'customers'> = {
+      is_active: false,
+      deleted_at: params.deletedAt,
+      updated_at: new Date().toISOString()
+    }
+
+    const { data, error } = await this.client
+      .from('customers')
+      .update(payload)
+      .eq('id', params.customerId)
+      .select('id, name, is_active, created_at, updated_at, deleted_at')
+      .maybeSingle()
+
+    if (error) {
+      this.logger.error(`Błąd podczas soft-delete klienta ${params.customerId}`, error)
+      return { error }
+    }
+
+    if (!data) {
+      return { data: null }
+    }
+
+    return { data: CustomerMapper.toDto(data as Tables<'customers'>) }
   }
 
   async update(params: UpdateCustomerParams): Promise<{

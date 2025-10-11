@@ -13,9 +13,10 @@ import type {
   CustomerDetailResponse,
   CustomerDto,
   CustomerMutatorContext,
-  UpdateCustomerCommand,
+  DeleteCustomerCommand,
   ListCustomersQuery,
-  ListCustomersResponse
+  ListCustomersResponse,
+  UpdateCustomerCommand
 } from 'apps/shared/dtos/customers.dto'
 import { CustomersRepository } from './customers.repository'
 import { CustomerMapper } from './customers.mapper'
@@ -122,6 +123,83 @@ export class CustomersService {
     if (!result.data) {
       throw new CustomerCreateFailedError()
     }
+
+    return result.data
+  }
+
+  async delete(command: DeleteCustomerCommand): Promise<CustomerDetailResponse> {
+    if (!command) {
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_DELETE_FAILED',
+        message: 'Brak danych polecenia usunięcia klienta.'
+      })
+    }
+
+    const { customerId, actorId } = command
+    const actorRoles = command.actorRoles ?? []
+
+    if (!actorId) {
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_DELETE_FAILED',
+        message: 'Brak identyfikatora użytkownika wykonującego operację.'
+      })
+    }
+
+    const isAuthorized = actorRoles.some((role) => role === 'editor' || role === 'owner')
+
+    if (!isAuthorized) {
+      throw new ForbiddenException({
+        code: 'CUSTOMERS_DELETE_FORBIDDEN',
+        message: 'Brak wymaganych ról do usunięcia klienta.'
+      })
+    }
+
+    this.logger.debug(`Rozpoczęcie soft-delete klienta ${customerId} przez użytkownika ${actorId}`)
+
+    const existing = await this.repository.findById(customerId)
+
+    if (existing.error) {
+      this.logger.error(`Nie udało się pobrać klienta ${customerId} przed usunięciem`, existing.error)
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_DELETE_FAILED',
+        message: 'Nie udało się pobrać klienta.'
+      })
+    }
+
+    const current = existing.data
+
+    if (!current) {
+      throw new NotFoundException({
+        code: 'CUSTOMERS_DELETE_NOT_FOUND',
+        message: 'Klient nie został znaleziony.'
+      })
+    }
+
+    if (current.deleted_at) {
+      this.logger.debug(`Klient ${customerId} już usunięty - zwracam aktualny stan.`)
+      return CustomerMapper.toDto(current)
+    }
+
+    const deletedAt = new Date().toISOString()
+
+    const result = await this.repository.softDelete({
+      customerId,
+      deletedAt
+    })
+
+    if (result.error) {
+      this.logger.error(`Nie udało się usunąć klienta ${customerId}`, result.error)
+      throw this.toDeleteException(result.error)
+    }
+
+    if (!result.data) {
+      throw new NotFoundException({
+        code: 'CUSTOMERS_DELETE_NOT_FOUND',
+        message: 'Klient nie został znaleziony.'
+      })
+    }
+
+    this.logger.debug(`Pomyślnie usunięto klienta ${customerId}`)
 
     return result.data
   }
@@ -307,6 +385,13 @@ export class CustomersService {
 
     this.logger.error('Nie udało się utworzyć klienta', error)
     throw new CustomerCreateFailedError()
+  }
+
+  private toDeleteException(error: PostgrestError): InternalServerErrorException {
+    return new InternalServerErrorException({
+      code: 'CUSTOMERS_DELETE_FAILED',
+      message: 'Nie udało się usunąć klienta.'
+    })
   }
 }
 

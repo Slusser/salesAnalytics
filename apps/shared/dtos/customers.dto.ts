@@ -48,6 +48,14 @@ export interface RestoreCustomerResponse extends CustomerDto {}
 
 export interface CustomerDetailResponse extends CustomerDto {}
 
+export interface DeleteCustomerCommand {
+  customerId: CustomerRow["id"]
+  actorId: string
+  actorRoles: UserRoleValue[]
+}
+
+export interface DeleteCustomerResponse extends CustomerDto {}
+
 /**
  * Response admina aktualizującego użytkownika; przypięte tu dla współdzielenia typów.
  */
