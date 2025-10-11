@@ -7,19 +7,22 @@ import {
   HttpStatus,
   Param,
   Post,
+  Put,
   Query,
   Res,
   UseGuards
 } from '@nestjs/common'
 import type { Response } from 'express'
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
-  ApiQuery,
   ApiParam,
+  ApiQuery,
   ApiResponse,
   ApiTags
 } from '@nestjs/swagger'
@@ -39,6 +42,7 @@ import { CurrentUser } from '../security/current-user.decorator'
 import { ListCustomersQueryDto } from './dto/list-customers-query.dto'
 import { ListCustomersResponseDto, CustomerResponseDto } from './dto/list-customers-response.dto'
 import { CustomerIdParamDto } from './dto/customer-id-param.dto'
+import { UpdateCustomerDto } from './dto/update-customer.dto'
 
 @ApiTags('customers')
 @ApiBearerAuth()
@@ -90,6 +94,80 @@ export class CustomersController {
   ): Promise<CustomerDetailResponse> {
     const result = await this.customersService.getById(params.customerId, currentUser)
     return result
+  }
+
+  @Put(':customerId')
+  @Roles('editor', 'owner')
+  @HttpCode(HttpStatus.OK)
+  @Header('Cache-Control', 'no-store')
+  @ApiOperation({ summary: 'Zaktualizuj istniejącego klienta.' })
+  @ApiParam({
+    name: 'customerId',
+    description: 'Identyfikator klienta.',
+    format: 'uuid',
+    example: '3fa85f64-5717-4562-b3fc-2c963f66afa6'
+  })
+  @ApiOkResponse({
+    description: 'Klient został zaktualizowany.',
+    type: CustomerResponseDto
+  })
+  @ApiBody({
+    type: UpdateCustomerDto,
+    description: 'Dane aktualizowanego klienta.'
+  })
+  @ApiBadRequestResponse({
+    description: 'Niepoprawne dane wejściowe.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_UPDATE_VALIDATION' },
+        message: {
+          type: 'string',
+          example: 'Pole name nie może być puste.'
+        }
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak uprawnień do aktualizacji klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_UPDATE_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do aktualizacji klienta.'
+        }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Klient nie został znaleziony.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_UPDATE_NOT_FOUND' },
+        message: { type: 'string', example: 'Klient nie został znaleziony.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    description: 'Błąd serwera podczas aktualizacji klienta.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'CUSTOMERS_UPDATE_FAILED' },
+        message: { type: 'string', example: 'Nie udało się zaktualizować klienta.' }
+      }
+    }
+  })
+  async update(
+    @Param() params: CustomerIdParamDto,
+    @Body() body: UpdateCustomerDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<CustomerDetailResponse> {
+    return this.customersService.update(params.customerId, body, currentUser)
   }
 
   @Get()
