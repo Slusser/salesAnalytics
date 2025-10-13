@@ -7,7 +7,7 @@
   [disabled]="disabled() || refreshing()"
   (click)="onClick()"
 >
-  <nz-icon nzType="add" nzSpin="refreshing()"/>
+  <nz-icon nzType="reload" [nzSpin]="refreshing()"></nz-icon>
 </button>
 
 
