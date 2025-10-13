@@ -1,0 +1,16 @@
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+
+  &__icon {
+    font-size: 3rem;
+    line-height: 1;
+  }
+}
+
+
+

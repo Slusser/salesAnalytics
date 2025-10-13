@@ -1,0 +1,75 @@
+<nz-table
+  class="customers-table"
+  [nzData]="items()"
+  [nzLoading]="loading()"
+  nzSize="middle"
+>
+  <thead>
+    <tr>
+      <th>Nazwa</th>
+      <th>Status</th>
+      <th>Utworzono</th>
+      <th>Aktualizacja</th>
+      <th class="customers-table__actions">Akcje</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (item of items(); track item.id) {
+      <tr [ngClass]="{ 'customers-table__row--deleted': item.deleted }">
+        <td>
+          <div class="customers-table__name">
+            <span>{{ item.name }}</span>
+            @if (item.deleted) {
+              <nz-tag nzColor="red">Usunięty</nz-tag>
+            }
+          </div>
+        </td>
+        <td>
+          @if (item.isActive) {
+            <nz-tag nzColor="green">Aktywny</nz-tag>
+          } @else {
+            <nz-tag nzColor="default">Nieaktywny</nz-tag>
+          }
+        </td>
+        <td>{{ item.createdAt | date: 'short' }}</td>
+        <td>{{ item.updatedAt | date: 'short' }}</td>
+        <td class="customers-table__actions">
+          <div class="customers-table__actions-buttons">
+            <button nz-button nzType="link" (click)="onEdit(item)">
+              <span nz-icon nzType="edit"></span>
+              Edytuj
+            </button>
+
+            @if (canMutate()) {
+              @if (!item.deleted) {
+                <button
+                  nz-button
+                  nzType="link"
+                  nzDanger
+                  (click)="onSoftDelete(item)"
+                >
+                  <span nz-icon nzType="delete"></span>
+                  Usuń
+                </button>
+              } @else {
+                <button nz-button nzType="link" (click)="onRestore(item)">
+                  <span nz-icon nzType="rollback"></span>
+                  Przywróć
+                </button>
+              }
+            }
+          </div>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="5" class="customers-table__empty">
+          Brak danych
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>
+
+

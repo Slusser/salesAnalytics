@@ -1,0 +1,36 @@
+.filter-bar {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  &__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1;
+
+    input[nz-input] {
+      padding-left: 2rem;
+    }
+
+    &-icon {
+      position: absolute;
+      left: 0.5rem;
+      color: var(--color-text-secondary, #8c8c8c);
+    }
+  }
+
+  &__clear {
+    margin-left: auto;
+  }
+
+  &__toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
+
+

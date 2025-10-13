@@ -1,0 +1,14 @@
+<button
+  nz-button
+  nzType="default"
+  nzShape="circle"
+  nz-tooltip
+  nzTooltipTitle="Odśwież"
+  [disabled]="disabled() || refreshing()"
+  (click)="onClick()"
+>
+  <nz-icon nzType="add" nzSpin="refreshing()"/>
+</button>
+
+
+

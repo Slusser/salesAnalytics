@@ -1,0 +1,35 @@
+<form class="filter-bar" nz-form nzLayout="inline" (submit)="$event.preventDefault()">
+  <label class="filter-bar__search" nz-form-item>
+    <span class="filter-bar__search-icon" nz-icon nzType="search"></span>
+    <input
+      nz-input
+      type="text"
+      placeholder="Szukaj kontrahenta"
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+      [ngModelOptions]="{standalone: true}"
+    />
+    @if (search()) {
+      <button
+        type="button"
+        class="filter-bar__clear"
+        nz-button
+        nzType="link"
+        nzTooltipTitle="Wyczyść"
+        (click)="clearSearch()"
+      >
+        <span nz-icon nzType="close"></span>
+      </button>
+    }
+  </label>
+
+  @if (canToggleInactive()) {
+    <label class="filter-bar__toggle" nz-form-item nzTooltipTitle="Pokaż nieaktywnych">
+      <span>Nieaktywni</span>
+      <nz-switch [ngModel]="includeInactive()" (ngModelChange)="onToggleIncludeInactive($event)" [ngModelOptions]="{standalone: true}"></nz-switch>
+    </label>
+  }
+</form>
+
+
+

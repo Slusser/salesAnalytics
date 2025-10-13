@@ -1,0 +1,13 @@
+<nz-modal
+  [nzVisible]="open()"
+  [nzTitle]="title()"
+  [nzOkText]="confirmLabel()"
+  [nzCancelText]="cancelLabel()"
+  (nzOnCancel)="onCancel()"
+  (nzOnOk)="onOk()"
+>
+  <p>{{ description() }}</p>
+</nz-modal>
+
+
+

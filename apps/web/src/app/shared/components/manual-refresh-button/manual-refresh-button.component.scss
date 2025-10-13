@@ -1,0 +1,13 @@
+:host {
+  display: inline-flex;
+}
+
+button[nz-button] {
+  transition: transform 0.2s ease;
+
+  &:not(:disabled):hover {
+    transform: rotate(-8deg);
+  }
+}
+
+

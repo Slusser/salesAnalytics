@@ -1,0 +1,29 @@
+.customers-table {
+  width: 100%;
+
+  &__row--deleted {
+    opacity: 0.75;
+  }
+
+  &__name {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  &__actions {
+    width: 15%;
+  }
+
+  &__actions-buttons {
+    display: inline-flex;
+    gap: 0.5rem;
+  }
+
+  &__empty {
+    text-align: center;
+    color: var(--color-text-secondary, #8c8c8c);
+  }
+}
+
+

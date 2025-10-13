@@ -1,0 +1,12 @@
+<div class="empty-state">
+  <div class="empty-state__icon" aria-hidden="true">😕</div>
+  <h3 nz-typography>{{ title() }}</h3>
+  <p nz-typography nzType="secondary">{{ description() }}</p>
+
+  @if (hasCta()) {
+    <button nz-button nzType="default" (click)="onClear()">Wyczyść filtr</button>
+  }
+</div>
+
+
+

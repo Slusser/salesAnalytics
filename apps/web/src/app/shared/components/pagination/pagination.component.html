@@ -1,0 +1,15 @@
+@if (canPaginate()) {
+  <div class="pagination">
+    <nz-pagination
+      [nzPageIndex]="page()"
+      [nzPageSize]="limit()"
+      [nzTotal]="total()"
+      [nzPageSizeOptions]="limitOptions()"
+      [nzShowSizeChanger]="true"
+      [nzDisabled]="disabled()"
+      (nzPageIndexChange)="handlePageChange($event)"
+      (nzPageSizeChange)="handleLimitChange($event)"
+    ></nz-pagination>
+  </div>
+}
+

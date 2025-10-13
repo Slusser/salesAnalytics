@@ -17,7 +17,7 @@ export type UserRoleValue = Extract<UserRoleRow["role"], AppRole>
  */
 export interface UserRoleAssignmentDto {
   userId: UserRoleRow["user_id"]
-  role: UserRoleValue
+  role: string;
   grantedAt: UserRoleRow["granted_at"]
 }
 

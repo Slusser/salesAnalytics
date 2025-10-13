@@ -1,0 +1,67 @@
+<section class="customers-page">
+  <header class="page-header">
+    <h2>Kontrahenci</h2>
+    <app-manual-refresh-button
+      [disabled]="loading()"
+      (onClick)="onManualRefresh()"
+    />
+  </header>
+
+  <app-filter-bar
+    [value]="filters()"
+    [role]="roles()"
+    (onChange)="onFilterChange($event)"
+  />
+
+  @if (showError()) {
+    <nz-alert
+      nzType="error"
+      nzMessage="Nie udało się pobrać listy kontrahentów"
+      nzDescription="Spróbuj odświeżyć stronę lub zmień filtry."
+      [nzShowIcon]="true"
+    >
+      <ng-template #nzAction>
+        <button nz-button nzType="primary" (click)="onRetry()">Spróbuj ponownie</button>
+      </ng-template>
+    </nz-alert>
+  }
+
+  @if (showEmpty()) {
+    <app-empty-state
+      title="Brak kontrahentów"
+      description="Nie znaleziono kontrahentów dla podanych filtrów."
+      [hasCta]="true"
+      (onClear)="onClearFilters()"
+    />
+  } @else {
+    <app-customers-table
+      [items]="items()"
+      [role]="roles()"
+      [loading]="loading()"
+      (onEdit)="onEdit($event)"
+      (onSoftDelete)="onSoftDelete($event)"
+      (onRestore)="onRestore($event)"
+    />
+
+    <app-pagination
+      [page]="params().page"
+      [limit]="params().limit"
+      [total]="total()"
+      [disabled]="loading()"
+      (onPageChange)="onPageChange($event)"
+      (onLimitChange)="onLimitChange($event)"
+    />
+  }
+
+  <app-confirm-dialog
+    [open]="confirmDialogOpen()"
+    [title]="confirmDialogTitle()"
+    [description]="confirmDialogDescription()"
+    confirmLabel="Potwierdź"
+    cancelLabel="Anuluj"
+    (onConfirm)="onConfirmDialogConfirm()"
+    (onClose)="onConfirmDialogClose()"
+  />
+</section>
+
+
