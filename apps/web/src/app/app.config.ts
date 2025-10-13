@@ -1,5 +1,6 @@
 import {
   ApplicationConfig,
+  LOCALE_ID,
   importProvidersFrom,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
@@ -21,6 +22,8 @@ import {
   DeleteOutline,
   PlusOutline
 } from '@ant-design/icons-angular/icons';
+import { NZ_DATE_LOCALE, pl_PL, provideNzI18n } from 'ng-zorro-antd/i18n';
+import dfnsPl from 'date-fns/locale/pl';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -29,6 +32,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimations(),
     provideRouter(appRoutes),
+    provideNzI18n(pl_PL),
+    { provide: LOCALE_ID, useValue: 'pl' },
+    { provide: NZ_DATE_LOCALE, useValue: dfnsPl },
     provideNzIcons([
       ReloadOutline,
       SearchOutline,
@@ -37,7 +43,6 @@ export const appConfig: ApplicationConfig = {
       EditOutline,
       DeleteOutline,
       PlusOutline,
-      
     ]),
   ],
 };
