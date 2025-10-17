@@ -1,0 +1,53 @@
+<app-auth-card title="Logowanie" icon="login">
+  <app-auth-error [message]="errorMessage() ?? undefined" class="mb-16"></app-auth-error>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div nz-row [nzGutter]="16">
+      <div nz-col nzSpan="24">
+        <label nz-form-item nzFor="email">Email</label>
+        <input
+          nz-input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="email@firma.pl"
+          autocomplete="email"
+        />
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+          <p class="field-error">Podaj poprawny adres email.</p>
+        }
+      </div>
+      <div nz-col nzSpan="24">
+        <label nz-form-item nzFor="password">Hasło</label>
+        <input
+          nz-input
+          id="password"
+          type="password"
+          formControlName="password"
+          placeholder="min. 8 znaków"
+          autocomplete="current-password"
+        />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <p class="field-error">Hasło jest wymagane (min. 8 znaków).</p>
+        }
+      </div>
+    </div>
+
+    <div class="actions">
+      <button nz-button nzType="primary" [disabled]="!canSubmit()" [nzLoading]="loading()">
+        Zaloguj się
+      </button>
+      <span class="hint">Reset haseł: skontaktuj się z administratorem.</span>
+    </div>
+  </form>
+
+  @if (loading()) {
+    <app-auth-spinner class="mt-16"></app-auth-spinner>
+  }
+
+  <div class="meta-links">
+    <a routerLink="/auth/register">Rejestracja (dla administratora)</a>
+  </div>
+</app-auth-card>
+
+

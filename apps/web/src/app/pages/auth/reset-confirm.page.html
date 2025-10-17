@@ -1,0 +1,37 @@
+<div class="auth-page">
+  <nz-card nzTitle="Ustaw nowe hasło" class="auth-card">
+    <p class="hint">Reset haseł jest poza zakresem MVP. Ekran demonstracyjny.</p>
+
+    @if (infoMessage()) {
+      <nz-alert nzType="info" [nzMessage]="infoMessage()" nzShowIcon class="mb-16" />
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div nz-row [nzGutter]="16">
+        <div nz-col nzSpan="24">
+          <label nz-form-item nzFor="password">Nowe hasło</label>
+          <input nz-input id="password" type="password" formControlName="password" placeholder="min. 8 znaków" />
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <div class="field-error">Hasło jest wymagane (min. 8 znaków).</div>
+          }
+        </div>
+        <div nz-col nzSpan="24">
+          <label nz-form-item nzFor="confirmPassword">Powtórz hasło</label>
+          <input nz-input id="confirmPassword" type="password" formControlName="confirmPassword" />
+          @if (form.controls.confirmPassword.touched && !passwordsMatch()) {
+            <div class="field-error">Hasła muszą być identyczne.</div>
+          }
+        </div>
+      </div>
+
+      <div class="actions">
+        <button nz-button nzType="primary" [disabled]="!canSubmit()" [nzLoading]="loading()">
+          Zapisz hasło
+        </button>
+        <a routerLink="/auth/login" class="link">Wróć do logowania</a>
+      </div>
+    </form>
+  </nz-card>
+</div>
+
+

@@ -1,0 +1,30 @@
+<div class="auth-page">
+  <nz-card nzTitle="Odzyskiwanie konta" class="auth-card">
+    <p class="hint">Reset haseł jest poza zakresem MVP. Ten ekran informuje użytkownika.</p>
+
+    @if (infoMessage()) {
+      <nz-alert nzType="info" [nzMessage]="infoMessage()" nzShowIcon class="mb-16" />
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+      <div nz-row [nzGutter]="16">
+        <div nz-col nzSpan="24">
+          <label nz-form-item nzFor="email">Email</label>
+          <input nz-input id="email" type="email" formControlName="email" placeholder="email@firma.pl" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <div class="field-error">Podaj poprawny adres email.</div>
+          }
+        </div>
+      </div>
+
+      <div class="actions">
+        <button nz-button nzType="primary" [disabled]="!canSubmit()" [nzLoading]="loading()">
+          Wyślij prośbę
+        </button>
+        <a routerLink="/auth/login" class="link">Wróć do logowania</a>
+      </div>
+    </form>
+  </nz-card>
+</div>
+
+

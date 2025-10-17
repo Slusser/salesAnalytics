@@ -1,0 +1,37 @@
+:host {
+  display: block;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.auth-card__header {
+  text-align: center;
+}
+
+.auth-card__icon {
+  font-size: 36px;
+  color: #1677ff;
+  margin-bottom: 12px;
+}
+
+.auth-card__title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: rgba(0, 0, 0, 0.88);
+}
+
+.auth-card__description {
+  color: rgba(0, 0, 0, 0.55);
+  margin-bottom: 24px;
+}
+
+.auth-card__content {
+  margin-top: 16px;
+}
+

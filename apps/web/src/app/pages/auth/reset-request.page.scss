@@ -1,0 +1,40 @@
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 520px;
+}
+
+.mb-16 {
+  margin-bottom: 16px;
+}
+
+.field-error {
+  color: #ff4d4f;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.hint {
+  margin-top: -8px;
+  margin-bottom: 12px;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.link {
+  margin-left: 8px;
+}
+
+
