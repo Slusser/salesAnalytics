@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core'
-import { Router } from '@angular/router'
+
+import { AuthSessionService } from '../../service/auth/auth-session.service'
 
 @Component({
   selector: 'app-logout-page',
@@ -8,11 +9,10 @@ import { Router } from '@angular/router'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LogoutPage {
-  private readonly router = inject(Router)
+  private readonly session = inject(AuthSessionService)
 
   constructor() {
-    // Docelowo: wywołanie AuthSessionService.clearSession()
-    queueMicrotask(() => this.router.navigateByUrl('/auth/login'))
+    queueMicrotask(() => this.session.logout())
   }
 }
 

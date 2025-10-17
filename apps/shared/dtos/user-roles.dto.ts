@@ -40,7 +40,7 @@ export interface AuthTokensDto {
 
 export interface AuthenticatedUserDto extends UserSummaryDto {
   email: string
-  roles: UserRoleValue[]
+  roles: AppRole[]
 }
 
 export interface AuthLoginResponse extends AuthTokensDto {

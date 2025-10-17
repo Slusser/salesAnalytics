@@ -9,6 +9,12 @@ import { AuthCardComponent } from '../../shared/components/auth/auth-card/auth-c
 import { AuthErrorComponent } from '../../shared/components/auth/auth-error/auth-error.component'
 import { AuthSpinnerComponent } from '../../shared/components/auth/auth-spinner/auth-spinner.component'
 import { NzTypographyModule } from 'ng-zorro-antd/typography'
+import { take } from 'rxjs'
+
+import { AuthApiService } from '../../service/auth/auth-api.service'
+import { AuthSessionService } from '../../service/auth/auth-session.service'
+import { AUTH_RETURN_URL_QUERY_PARAM } from '../../service/auth/auth.tokens'
+import { toSignal } from '@angular/core/rxjs-interop'
 
 @Component({
   selector: 'app-login-page',
@@ -33,6 +39,8 @@ export class LoginPage {
   private readonly fb = inject(FormBuilder)
   private readonly router = inject(Router)
   private readonly route = inject(ActivatedRoute)
+  private readonly authApi = inject(AuthApiService)
+  private readonly session = inject(AuthSessionService)
 
   protected readonly loading = signal(false)
   protected readonly errorMessage = signal<string | null>(null)
@@ -42,25 +50,44 @@ export class LoginPage {
     password: this.fb.nonNullable.control('', { validators: [Validators.required, Validators.minLength(8)] })
   })
 
-  protected readonly canSubmit = computed(() => this.form.valid && !this.loading())
+  private readonly formStatus = toSignal(this.form.statusChanges, { initialValue: this.form.status })
+
+  protected readonly canSubmit = computed(() => this.formStatus() === 'VALID' && !this.loading())
 
   protected onSubmit(): void {
     if (this.form.invalid || this.loading()) return
     this.loading.set(true)
     this.errorMessage.set(null)
-    // Backend zostanie podłączony później – tu symulujemy sukces/porazkę
-    setTimeout(() => {
-      this.loading.set(false)
-      // TODO: implementacja logiki logowania po stronie serwisu AuthApiService
-      const { email } = this.form.getRawValue()
-      if (!email.includes('@')) {
-        this.errorMessage.set('Nieprawidłowy email lub hasło.')
-        return
-      }
-      // Docelowo: po sukcesie przekierowanie na returnUrl lub /customers
-      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') ?? '/customers'
-      this.router.navigateByUrl(returnUrl)
-    }, 500)
+    const payload = this.form.getRawValue()
+    this.authApi
+      .login(payload)
+      .pipe(take(1))
+      .subscribe({
+        next: (response) => {
+          this.session.setSession(response)
+          this.loading.set(false)
+          const returnUrl = this.route.snapshot.queryParamMap.get(AUTH_RETURN_URL_QUERY_PARAM) ?? '/customers'
+          this.router.navigateByUrl(returnUrl)
+        },
+        error: (error) => {
+          this.loading.set(false)
+          const code = error?.error?.code ?? 'invalid_credentials'
+          const message = this.mapErrorCodeToMessage(code)
+          this.errorMessage.set(message)
+        }
+      })
+  }
+
+  private mapErrorCodeToMessage(code: string): string {
+    switch (code) {
+      case 'wrong_passoword':
+        return 'Nieprawidłowe hasło.'
+      case 'user_not_found':
+        return 'Użytkownik nie istnieje.'
+      case 'invalid_credentials':
+      default:
+        return 'Nieprawidłowy email lub hasło.'
+    }
   }
 }
 

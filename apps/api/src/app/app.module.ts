@@ -5,9 +5,10 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { CustomersModule } from '../customers/customers.module'
 import { SecurityModule } from '../security/security.module'
+import { AuthModule } from '../auth/auth.module'
 
 @Module({
-  imports: [CustomersModule, SecurityModule],
+  imports: [SecurityModule, AuthModule, CustomersModule],
   controllers: [AppController],
   providers: [AppService]
 })

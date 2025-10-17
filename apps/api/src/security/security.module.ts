@@ -14,7 +14,7 @@ import { SupabaseFactory } from '../supabase/supabase.factory'
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard }
   ],
-  exports: [RequestContextService]
+  exports: [RequestContextService, SupabaseFactory]
 })
 export class SecurityModule {}
 

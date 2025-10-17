@@ -52,10 +52,12 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "web:build:production"
+          "buildTarget": "web:build:production",
+          "proxyConfig": "apps/web/proxy.conf.json"
         },
         "development": {
-          "buildTarget": "web:build:development"
+          "buildTarget": "web:build:development",
+          "proxyConfig": "apps/web/proxy.conf.json"
         }
       },
       "defaultConfiguration": "development"
