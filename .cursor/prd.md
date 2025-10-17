@@ -6,7 +6,7 @@ SalesAnalysis (MVP) to webowa aplikacja do ewidencji i analizy zamówień B2B, i
 
 Zakres MVP koncentruje się na niezawodnym CRUD zamówień z audytem, imporcie danych zgodnym ze wzorcem, kalkulacjach netto→brutto z rabatami i VAT, podstawowych raportach w PLN oraz prostym RBAC opartym o Supabase.
 
-Kluczowi interesariusze: kierownicy sprzedaży (editor), analitycy/zarząd (viewer), administrator IT (admin).
+Kluczowi interesariusze: kierownicy sprzedaży (editor), analitycy/zarząd (viewer), administrator IT (owner).
 
 ## 2. Problem użytkownika
 
@@ -16,7 +16,7 @@ Organizacje śledzą zamówienia w wielu skoroszytach i plikach, co utrudnia sp�
 
 3.1 Uwierzytelnianie, role i zarządzanie użytkownikami
 
-1) RBAC: role viewer (podgląd), editor/kierownik (podgląd + dodawanie/edycja/usuwanie), admin (jak editor + zarządzanie użytkownikami). Brak ograniczeń per-kontrahent. Brak locków edycji.
+1) RBAC: role viewer (podgląd), editor/kierownik (podgląd + dodawanie/edycja/usuwanie), owner (jak editor + zarządzanie użytkownikami). Brak ograniczeń per-kontrahent. Brak locków edycji.
 2) Uwierzytelnianie i role przez Supabase. Admin tworzy konto i nadaje hasło (bez zaproszeń/resetu).
 3) Niewłaściwe uprawnienia blokują akcje modyfikujące. Ekrany i akcje są ukryte/wyłączone zgodnie z rolą.
 
@@ -43,7 +43,7 @@ Organizacje śledzą zamówienia w wielu skoroszytach i plikach, co utrudnia sp�
 
 3.5 Kursy walut i kalkulacje
 
-1) Waluta raportowa i agregacyjna: PLN. Kurs NBP z daty zamówienia; możliwość ręcznej zmiany kursu dla editor/admin.
+1) Waluta raportowa i agregacyjna: PLN. Kurs NBP z daty zamówienia; możliwość ręcznej zmiany kursu dla editor/owner.
 2) Dla waluty EUR kurs jest wymagany; po zmianie kursu przeliczenia i KPI automatycznie się aktualizują.
 
 3.6 Dashboard i analityka
@@ -104,7 +104,7 @@ Organizacje śledzą zamówienia w wielu skoroszytach i plikach, co utrudnia sp�
 
 US-001
 Tytuł: Logowanie i dostęp ról
-Opis: Jako zalogowany użytkownik chcę uzyskać dostęp zgodny z rolą (viewer/editor/admin), aby bezpiecznie przeglądać lub modyfikować dane.
+Opis: Jako zalogowany użytkownik chcę uzyskać dostęp zgodny z rolą (viewer/editor/owner), aby bezpiecznie przeglądać lub modyfikować dane.
 Kryteria akceptacji:
 - Próba dostępu bez logowania przekierowuje do logowania.
 - Po poprawnym logowaniu widok i akcje są zgodne z rolą.
@@ -113,9 +113,9 @@ Kryteria akceptacji:
 
 US-002
 Tytuł: Administracja użytkownikami (Supabase)
-Opis: Jako admin chcę tworzyć konta użytkowników i nadawać im role, aby kontrolować dostęp do aplikacji.
+Opis: Jako owner chcę tworzyć konta użytkowników i nadawać im role, aby kontrolować dostęp do aplikacji.
 Kryteria akceptacji:
-- Admin może utworzyć konto z rolą viewer/editor/admin i nadać hasło.
+- Admin może utworzyć konto z rolą viewer/editor/owner i nadać hasło.
 - Brak mechanizmu zaproszeń i resetu haseł w MVP.
 - Zmiana roli użytkownika natychmiast wpływa na uprawnienia w aplikacji.
 
@@ -133,7 +133,7 @@ US-004
 Tytuł: Edycja zamówienia
 Opis: Jako editor chcę edytować istniejące zamówienie, aby korygować dane (w tym kurs EUR).
 Kryteria akceptacji:
-- Edycja dostępna tylko dla editor/admin.
+- Edycja dostępna tylko dla editor/owner.
 - Możliwość zmiany kursu EUR; po zmianie przeliczenia aktualizują brutto i KPI.
 - Po zapisie walidacja jak przy dodaniu i wpis audytu z wartościami przed/po.
 
@@ -158,7 +158,7 @@ Tytuł: Szczegóły zamówienia
 Opis: Jako użytkownik chcę zobaczyć szczegóły pojedynczego zamówienia, w tym obliczenia i historię zmian.
 Kryteria akceptacji:
 - Widok detalu zawiera wszystkie pola zamówienia oraz link do audytu.
-- Dostępny dla viewer/editor/admin.
+- Dostępny dla viewer/editor/owner.
 
 US-008
 Tytuł: Eksport listy do XLSX
@@ -209,12 +209,12 @@ US-014
 Tytuł: Kurs NBP i przeliczenia do PLN
 Opis: Jako system chcę pobrać kurs NBP z daty zamówienia, aby agregować w PLN.
 Kryteria akceptacji:
-- Dla EUR pobierany jest kurs z daty zamówienia; przy braku kursu – komunikat i możliwość ręcznego wprowadzenia dla editor/admin.
+- Dla EUR pobierany jest kurs z daty zamówienia; przy braku kursu – komunikat i możliwość ręcznego wprowadzenia dla editor/owner.
 - Zmiana kursu wywołuje ponowne przeliczenia.
 
 US-015
 Tytuł: Audyt zmian
-Opis: Jako admin chcę przeglądać dziennik zmian, aby rozumieć kto i kiedy modyfikował dane.
+Opis: Jako owner chcę przeglądać dziennik zmian, aby rozumieć kto i kiedy modyfikował dane.
 Kryteria akceptacji:
 - Każda operacja modyfikująca generuje wpis (autor, timestamp, wartości przed/po w JSON).
 - Widok audytu pozwala filtrować po użytkowniku, dacie, numerze zamówienia.
@@ -269,7 +269,7 @@ Kryteria akceptacji:
 
 US-023
 Tytuł: Backup i odtworzenie
-Opis: Jako admin chcę mieć tygodniowy backup i potwierdzoną procedurę odtworzenia.
+Opis: Jako owner chcę mieć tygodniowy backup i potwierdzoną procedurę odtworzenia.
 Kryteria akceptacji:
 - Harmonogram backupu działa; kopie przechowywane 12 miesięcy.
 - Procedura odtworzenia przetestowana i udokumentowana.

@@ -1,0 +1,253 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Mermaid Diagram - UI Components
+
+Jesteś doświadczonym architektem oprogramowania, którego zadaniem jest utworzenie diagramu Mermaid w celu wizualizacji architektury stron Astro i komponentów React dla modułu logowania i rejestracji. Diagram powinien zostać utworzony w następującym pliku: DESTINATION
+
+Będziesz musiał odnieść się do następujących plików w celu poznania istniejących komponentów:
+
+<file_references>
+[project-prd.md](mdc:.ai/project-prd.md)
+</file_references>
+
+<destination>
+.ai/diagrams/ui.md
+</destination>
+
+Twoim zadaniem jest analiza specyfikacji modułu logowania i rejestracji oraz utworzenie kompleksowego diagramu Mermaid, który dokładnie przedstawia architekturę systemu. Diagram powinien być w języku polskim.
+
+Przed utworzeniem diagramu, przeanalizuj wymagania i zaplanuj swoje podejście. Umieść swoją analizę wewnątrz tagów <architecture_analysis>. W tej analizie:
+
+1. Wypisz wszystkie komponenty wymienione w plikach referencyjnych.
+2. Zidentyfikuj główne strony i ich odpowiadające komponenty.
+3. Określ przepływ danych między komponentami.
+4. Dostarcz krótki opis funkcjonalności każdego komponentu.
+
+Kiedy będziesz gotowy do utworzenia diagramu, postępuj zgodnie z poniższymi wytycznymi:
+
+1. Rozpocznij diagram od następującej składni:
+
+   ```mermaid
+   flowchart TD
+   ```
+
+2. Uwzględnij następujące elementy w swoim diagramie:
+
+   - Zaktualizowaną strukturę UI po wdrożeniu nowych wymagań
+   - Layouts, server pages i aktualizacje istniejących komponentów
+   - Grupowanie elementów według funkcjonalności
+   - Kierunek przepływu danych między komponentami
+   - Moduły odpowiedzialne za stan aplikacji
+   - Podział na komponenty współdzielone i komponenty specyficzne dla stron
+   - Zależności między komponentami związanymi z autentykacją a resztą aplikacji
+   - Wyróżnij komponenty, które wymagały aktualizacji ze względu na nowe wymagania
+
+3. Przestrzegaj tych zasad składni Mermaid:
+
+   - Używaj spójnego formatowania ID węzłów:
+     ```
+     A[Panel Główny] --> B[Formularz Logowania]
+     B --> C[Walidacja Danych]
+     ```
+   - Pamiętaj, że ID węzłów rozróżniają wielkość liter i muszą być unikalne
+   - Używaj poprawnych kształtów węzłów:
+     - `[Tekst]` dla prostokątów
+     - `(Tekst)` dla zaokrąglonych prostokątów
+     - `((Tekst))` dla okręgów
+     - `{Tekst}` dla rombów
+     - `>Tekst]` dla flag
+     - `[[Tekst]]` dla podprogramów
+   - Grupuj powiązane elementy za pomocą subgrafów:
+     ```
+     subgraph "Moduł Autentykacji"
+       A[Formularz Logowania]
+       B[Walidacja Danych]
+       C[Zarządzanie Sesją]
+     end
+     ```
+   - Używaj węzłów pośrednich dla złożonych relacji zamiast skomplikowanych połączeń
+   - Preferuj układ pionowy dla hierarchii i poziomy dla przepływu procesu
+   - Używaj poprawnych typów połączeń:
+     - `-->` dla standardowych strzałek
+     - `---` dla linii bez strzałek
+     - `-.->` dla linii kropkowanych ze strzałkami
+     - `==>` dla grubych linii ze strzałkami
+     - `--Tekst-->` dla strzałek z etykietami
+   - Unikaj używania adresów URL, adresów endpointów, nawiasów, długich nazw funkcji lub złożonych wyrażeń w nazwach węzłów
+   - Używaj spójnego nazewnictwa w całym dokumencie
+   - Unikaj długich etykiet, które mogą powodować problemy z renderowaniem
+   - Używaj cudzysłowów dla tekstu zawierającego spacje:
+     ```
+     A["Komponent Autentykacji"] --> B["Zarządzanie Stanem"]
+     ```
+   - Dla stylizacji węzłów, używaj poprawnej składni:
+     ```
+     A:::styleClass --> B
+     ```
+     z definicją klasy:
+     ```
+     classDef styleClass fill:#f96,stroke:#333,stroke-width:2px;
+     ```
+
+4. Unikaj tych typowych błędów:
+   - Brak deklaracji sekcji Mermaid i typu diagramu na początku
+   - Nieprawidłowe ID węzłów (zawierające niedozwolone znaki)
+   - Niezamknięte subgrafy (brakujący "end" dla rozpoczętego "subgraph")
+   - Niezamknięte nawiasy kwadratowe w opisach węzłów
+   - Niespójne kierunki przepływu (mieszanie TD i LR bez uzasadnienia)
+   - Zbyt złożone diagramy bez odpowiedniego grupowania
+   - Nakładające się etykiety i połączenia
+
+Po utworzeniu diagramu, przejrzyj go dokładnie, aby upewnić się, że nie ma błędów składniowych ani problemów z renderowaniem. Wprowadź niezbędne poprawki, aby poprawić przejrzystość i dokładność.
+
+Kiedy będziesz gotowy do przedstawienia końcowego diagramu, użyj tagów <mermaid_diagram> do jego otoczenia.
+
+<architecture_analysis>
+1) Komponenty i elementy (Frontend Angular 20)
+- Layouty: AuthLayout (public: logowanie/rejestracja), AppLayout (po zalogowaniu)
+- Strony: LoginPage, RegisterPage (opcjonalnie), LogoutPage, Dashboard, Orders (lista/nowe/detal), Customers (lista/nowy/detal), Admin Users (owner)
+- Wspólne komponenty auth: auth-card.component, auth-error.component, auth-spinner.component
+- Serwisy/guardy: AuthApiService, AuthSessionService (sygnały), AuthHttpInterceptor (Bearer), authGuard(), roleGuard(requiredRoles)
+
+2) Moduły backend (NestJS 11)
+- SecurityModule (global APP_GUARD): JwtAuthGuard, RolesGuard, RequestContextService, SupabaseFactory
+- Auth module (/auth): AuthController, AuthService, AuthMapper; endpointy: POST /auth/login, POST /auth/logout, GET /auth/me, POST /auth/register (owner), PATCH /auth/users/:id/role (owner)
+- Chronione kontrolery (przykłady): CustomersController, OrdersController, AnalyticsController
+
+3) Supabase
+- Auth: signInWithPassword (login), auth.getSession (walidacja JWT)
+- Tabela user_roles: mapowanie ról użytkownika (viewer/editor/owner)
+- SupabaseFactory.create(token): klient Supabase z nagłówkiem Authorization: Bearer <token>
+
+4) Przepływ danych (skrót)
+- Logowanie: LoginPage → AuthApiService.login → /auth/login → Supabase Auth (signIn) + user_roles → AuthLoginResponse { tokens, user{roles[]} } → AuthSessionService.setSession → AuthHttpInterceptor dokleja Bearer
+- Wywołania chronione: UI → Interceptor (Bearer) → JwtAuthGuard → RequestContextService (getSession + user_roles) → RolesGuard (sprawdza wymagane role) → Kontroler → Odpowiedź
+- Odtworzenie sesji: AuthApiService.me → /auth/me (JwtAuthGuard) → user
+- Błędy: 401 (brak/niepoprawny token) lub 403 (brak roli) → Interceptor → clearSession + redirect /auth/login?returnUrl
+
+5) Widoczność/ochrona UI
+- authGuard(): wymaga zalogowania dla tras aplikacji (Dashboard, Orders, Customers)
+- roleGuard(): dodatkowo wymaga ról (np. /owner/users tylko dla owner)
+</architecture_analysis>
+
+<mermaid_diagram>
+```mermaid
+flowchart TD
+
+  %% FRONTEND
+  subgraph FE["Frontend (Angular 20)"]
+    subgraph FE_Layouts["Layouty"]
+      FE_AuthLayout[AuthLayout]
+      FE_AppLayout[AppLayout]
+    end
+
+    subgraph FE_Pages["Strony"]
+      FE_Login[LoginPage]
+      FE_Register[RegisterPage (opcjonalnie)]
+      FE_Logout[LogoutPage]
+      FE_Dashboard[Dashboard]
+      FE_Orders[Orders (lista/nowe/detal)]
+      FE_Customers[Customers (lista/nowy/detal)]
+      FE_AdminUsers[Admin Users (owner)]
+    end
+
+    subgraph FE_AuthUI["Komponenty wspólne (auth)"]
+      FE_AuthCard[auth-card.component]
+      FE_AuthError[auth-error.component]
+      FE_AuthSpinner[auth-spinner.component]
+    end
+
+    subgraph FE_Services["Serwisy i Guardy"]
+      FE_AuthApi[AuthApiService]
+      FE_Session["AuthSessionService (sygnały)"]
+      FE_Interceptor[AuthHttpInterceptor]
+      FE_GuardAuth[authGuard()]
+      FE_GuardRole[roleGuard(requiredRoles)]
+    end
+  end
+
+  %% BACKEND
+  subgraph BE["Backend (NestJS 11)"]
+    subgraph BE_Sec["SecurityModule (global APP_GUARD)"]
+      BE_Jwt[JwtAuthGuard]
+      BE_Roles[RolesGuard]
+      BE_ReqCtx[RequestContextService]
+    end
+
+    subgraph BE_Auth["Auth module (/auth)"]
+      BE_AuthCtrl[AuthController]
+      BE_AuthSvc[AuthService]
+      BE_AuthMap[AuthMapper]
+    end
+
+    subgraph BE_Ctrls["Kontrolery chronione"]
+      BE_Customers[CustomersController]
+      BE_Orders[OrdersController]
+      BE_Analytics[AnalyticsController]
+    end
+  end
+
+  %% SUPABASE
+  subgraph SB["Supabase"]
+    SB_Factory["SupabaseFactory.create(token)"]
+    SB_Auth["Auth (signInWithPassword)"]
+    SB_GetSession[[auth.getSession]]
+    SB_UserRoles[(user_roles)]
+  end
+
+  %% PRZEPŁYW: LOGOWANIE
+  FE_Login --> FE_AuthApi
+  FE_AuthApi -- "POST /auth/login" --> BE_AuthCtrl
+  BE_AuthCtrl --> BE_AuthSvc
+  BE_AuthSvc -- signInWithPassword --> SB_Auth
+  BE_AuthSvc -- "SELECT role BY user_id" --> SB_UserRoles
+  BE_AuthSvc --> BE_AuthMap --> BE_AuthCtrl
+  BE_AuthCtrl -- "AuthLoginResponse { tokens, user }" --> FE_AuthApi --> FE_Session
+  FE_Session --> FE_Interceptor
+
+  %% PRZEPŁYW: TRASY CHRONIONE (UI)
+  FE_Dashboard --> FE_GuardAuth --> FE_GuardRole
+  FE_Orders --> FE_GuardAuth
+  FE_Customers --> FE_GuardAuth
+  FE_AdminUsers --> FE_GuardAuth --> FE_GuardRole
+
+  %% PRZEPŁYW: WYWOŁANIA API PO ZALOGOWANIU
+  FE_Dashboard -. żądania HTTP .-> FE_Interceptor
+  FE_Orders -. żądania HTTP .-> FE_Interceptor
+  FE_Customers -. żądania HTTP .-> FE_Interceptor
+  FE_AdminUsers -. żądania HTTP .-> FE_Interceptor
+  FE_Interceptor -- "Authorization: Bearer <token>" --> BE_Jwt
+  BE_Jwt --> BE_ReqCtx
+  BE_ReqCtx --> SB_Factory --> SB_GetSession --> BE_ReqCtx
+  BE_ReqCtx -- "roles[]" --> BE_Roles
+  BE_Roles --> BE_Customers
+  BE_Roles --> BE_Orders
+  BE_Roles --> BE_Analytics
+
+  %% /auth/me (odtworzenie sesji)
+  FE_Session -. restoreSession .-> FE_AuthApi
+  FE_AuthApi -- "GET /auth/me" --> BE_AuthCtrl
+  BE_AuthCtrl --> BE_Jwt --> BE_ReqCtx --> SB_Factory --> SB_GetSession --> BE_ReqCtx
+  BE_AuthCtrl -- user --> FE_AuthApi --> FE_Session
+
+  %% Rejestracja (owner-only)
+  FE_AuthApi -- "POST /auth/register (owner)" --> BE_AuthCtrl
+  BE_AuthCtrl --> BE_Roles
+
+  %% Obsługa błędów 401/403
+  BE_Jwt -- 401 --> FE_Interceptor
+  BE_Roles -- 403 --> FE_Interceptor
+  FE_Interceptor -. "clearSession() + redirect /auth/login?returnUrl" .-> FE_AuthLayout
+
+  %% Wylogowanie
+  FE_Logout --> FE_AuthApi -- "POST /auth/logout (opcjonalnie)" --> BE_AuthCtrl
+  FE_Logout --> FE_Session -. "clearSession() + redirect /auth/login" .-> FE_AuthLayout
+
+  %% STYLE (opcjonalne)
+  classDef guard fill:#eef,stroke:#447,stroke-width:1px;
+  class BE_Jwt,BE_Roles,FE_GuardAuth,FE_GuardRole guard;
+```
+</mermaid_diagram>

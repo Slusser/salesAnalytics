@@ -15,7 +15,7 @@
   - Bezpieczeństwo: 401 → `/login`, 403 → ekran „Brak uprawnień”; ukrywanie akcji `hasRole`; brak ekspozycji wersji API w UI.
 - **Integracja z API (zgodnie z planem)**:
   - Auth: `POST /auth/login`, `POST /auth/logout`.
-  - Users (owner): `GET/POST/PATCH/PUT/DELETE /admin/users`.
+  - Users (owner): `GET/POST/PATCH/PUT/DELETE /owner/users`.
   - Customers: `GET /customers`, `POST /customers`, `GET /customers/{id}`, `PUT /customers/{id}`, `DELETE /customers/{id}`.
   - Orders: `GET /orders`, `POST /orders`, `GET /orders/{id}`, `PUT /orders/{id}`, `DELETE /orders/{id}`.
   - Analytics: `GET /analytics/kpi`, `GET /analytics/trend`, `GET /analytics/orders`.
@@ -78,7 +78,7 @@
   - **UX/A11y/Bezpieczeństwo**: role: viewer (odczyt), editor/owner (edycja/przywrócenie).
 
 - **Admin – Użytkownicy**
-  - **Ścieżka**: `/admin/users`
+  - **Ścieżka**: `/owner/users`
   - **Cel**: Zarządzanie kontami i rolami (owner).
   - **Kluczowe informacje**: e-mail, displayName, role, status.
   - **Kluczowe komponenty**: `UsersTable`, `UserFormDialog`, `RoleMultiSelect`, `ConfirmDialog`, `LoaderButton`.
@@ -131,7 +131,7 @@ Uwaga: US-016 (telemetria zapisu) i US-023 (backup) realizowane poza UI; UI inic
   1. `/dashboard`: ustaw filtry → pobierz KPI i trend; opcjonalny deep-link `?year&month`.
 
 - **Administracja (US-002)**
-  1. `/admin/users` (owner): lista, tworzenie/edycja, role; 403 → `/forbidden`.
+  1. `/owner/users` (owner): lista, tworzenie/edycja, role; 403 → `/forbidden`.
 
 - **Stany błędów**
   - 401 → `/login`; 403 → `/forbidden`; 404 → fallback; 5xx/timeout → toast; krytyczne → `/error` z CTA do Dashboardu.
@@ -151,7 +151,7 @@ Uwaga: US-016 (telemetria zapisu) i US-023 (backup) realizowane poza UI; UI inic
   - `/customers` (Auth)
     - `/customers/new` (Role editor/owner)
     - `/customers/:id` (Auth)
-  - `/admin/users` (Role owner)
+  - `/owner/users` (Role owner)
   - `/forbidden`, `/error`, `**` (404)
 - **Guardy/dyrektywy**: `AuthGuard`, `RoleGuard`, `CanDeactivate`, `hasRole`.
 - **Synchronizacja URL**: listy przechowują `page`, `limit`, `sort`, filtry; inicjalizacja z URL; aktualizacja przy zmianach formularza.

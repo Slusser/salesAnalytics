@@ -57,8 +57,8 @@
   - Success: `200 OK`
   - Errors: `400 Bad Request` (missing token), `401 Unauthorized`
 
-### 2.2 Users & Roles (admin scope)
-- **POST /admin/users**
+### 2.2 Users & Roles (owner scope)
+- **POST /owner/users**
   - Description: Provision a Supabase user record and initial role assignment.
   - Request Body:
     ```json
@@ -72,13 +72,13 @@
   - Response Body: created `User` with roles.
   - Success: `201 Created`
   - Errors: `400 Bad Request` (validation), `409 Conflict` (email exists), `403 Forbidden` (non-owner)
-- **GET /admin/users**
+- **GET /owner/users**
   - Description: List users with assigned roles (owner only).
   - Query Params: `page`, `limit`, `search`
   - Response Body: paginated list with total count.
   - Success: `200 OK`
   - Errors: `403 Forbidden`
-- **PATCH /admin/users/{userId}**
+- **PATCH /owner/users/{userId}**
   - Description: Update display name or reset password (owner only).
   - Request Body (partial):
     ```json
@@ -89,7 +89,7 @@
     ```
   - Success: `200 OK`
   - Errors: `404 Not Found`, `403 Forbidden`
-- **PUT /admin/users/{userId}/roles**
+- **PUT /owner/users/{userId}/roles**
   - Description: Replace role set.
   - Request Body:
     ```json
@@ -99,7 +99,7 @@
     ```
   - Success: `200 OK`
   - Errors: `400 Bad Request`, `403 Forbidden`, `404 Not Found`
-- **DELETE /admin/users/{userId}**
+- **DELETE /owner/users/{userId}**
   - Description: Deactivate Supabase user and remove all roles (owner only).
   - Response Body:
     ```json
@@ -239,7 +239,7 @@
 
 ### 2.6 Audit Log
 - **GET /orders/{orderId}/audit**
-  - Description: Order-specific change history (viewer/editor/admin).
+  - Description: Order-specific change history (viewer/editor/owner).
   - Query Params: `page`, `limit`
   - Response Body: list of audit entries with `oldValue`, `newValue`, `changedBy`, `occurredAt`.
   - Success: `200 OK`
@@ -314,7 +314,7 @@
 - Role-based authorization:
   - `viewer`: read-only access to `/orders` (list/detail), `/customers` (GET), analytics GET endpoints, `/orders/{id}/audit`.
   - `editor`: viewer rights + create/update/delete orders, imports, rate overrides, customer mutations.
-  - `owner`: editor rights + `/admin/users`, global `/audit/logs`, includeDeleted filters, ability to restore records.
+  - `owner`: editor rights + `/owner/users`, global `/audit/logs`, includeDeleted filters, ability to restore records.
 - Row-Level Security mirrored in Supabase to ensure backend enforcement even if token is misused.
 - Use of API keys for internal services (e.g., telemetry sink) secured via environment-configured secrets.
 - All routes served over HTTPS; rate limiting via NestJS guard (e.g., 100 req/min per user) on write-heavy endpoints.

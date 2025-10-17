@@ -1,0 +1,128 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Supabase Auth Integration with Astro
+
+Use this guide to introduce authentication (sign-up & sign-in) in Angular applications with NestJS backend
+
+## Before we start
+
+VERY IMPORTANT: Ask me which pages or components should behave differently after introducing authentication. Adjust further steps accordingly.
+
+## Core Requirements
+
+1. Use `@supabase/ssr` package (NOT auth-helpers)
+2. Use ONLY `getAll` and `setAll` for cookie management
+3. NEVER use individual `get`, `set`, or `remove` cookie methods
+4. Implement proper session management with middleware based on JWT (Supabase Auth)
+
+## Installation
+
+```bash
+npm install @supabase/ssr @supabase/supabase-js
+```
+
+## Environment Variables
+
+Create `.env` file with required Supabase credentials (based on the snippet below or `.env.example` in project root)
+
+```env
+SUPABASE_URL=your_project_url
+SUPABASE_KEY=your_anon_key
+```
+
+For better TypeScript support, create or update `src/env.d.ts`:
+
+```typescript
+
+interface ImportMetaEnv {
+  readonly SUPABASE_URL: string;
+  readonly SUPABASE_KEY: string;
+}
+
+interface ImportMeta {
+  readonly env: ImportMetaEnv;
+}
+```
+When introducing new env variables , always update `src/env.d.ts` to reflect these changes.
+
+Make sure `.env.example` is updated with the correct environment variables.
+
+## Implementation Steps
+
+### 1. Create OR Extend Supabase Server Instance
+
+Update existing Supabase client or create one in `apps/api/src/supabase.factory.ts`:
+
+```typescript
+import { createServerClient, type CookieOptionsWithName } from '@supabase/ssr';
+import type { Database } from '../db/database.types.ts';
+
+export const cookieOptions: CookieOptionsWithName = {
+  path: '/',
+  secure: true,
+  httpOnly: true,
+  sameSite: 'lax',
+};
+
+function parseCookieHeader(cookieHeader: string): { name: string; value: string }[] {
+  return cookieHeader.split(';').map((cookie) => {
+    const [name, ...rest] = cookie.trim().split('=');
+    return { name, value: rest.join('=') };
+  });
+}
+
+export const createSupabaseServerInstance = (context: {
+  headers: Headers;
+  cookies: //place nestJS type here;
+}) => {
+  const supabase = createServerClient<Database>(
+    import.meta.env.SUPABASE_URL,
+    import.meta.env.SUPABASE_KEY,
+    {
+      cookieOptions,
+      cookies: {
+        getAll() {
+          return parseCookieHeader(context.headers.get('Cookie') ?? '');
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value, options }) =>
+            context.cookies.set(name, value, options),
+          );
+        },
+      },
+    },
+  );
+
+  return supabase;
+};
+```
+
+### 2. Implement OR Extend Authentication Middleware
+
+Update existing auth middleware or create one in `apss/middleware/index.ts`:
+
+
+### 3. Create Auth API Endpoints
+
+Create login, logout, register endpoints in `apps/api/src/app/auth/`:
+
+
+### 4. Protect Routes
+
+Adjust or create angular guards and apply them
+
+## Security Best Practices
+
+- Set proper cookie options (httpOnly, secure, sameSite)
+- Never expose Supabase integration & keys in client-side components
+- Validate all user input server-side
+- Use proper error handling and logging
+
+## Common Pitfalls
+
+1. DO NOT use individual cookie methods (get/set/remove)
+4. DO NOT modify cookie handling logic
+5. Always handle auth state changes properly
