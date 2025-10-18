@@ -1,0 +1,33 @@
+<nz-layout class="app-layout">
+  <nz-sider nzTheme="dark" nzWidth="220" class="app-layout__sider">
+    <div class="app-layout__brand">
+      <span class="app-layout__brand-title">SalesAnalysis</span>
+    </div>
+
+    <ul nz-menu nzMode="inline" class="app-layout__menu">
+      @for (item of navigation; track item.route) {
+        <li nz-menu-item [routerLink]="item.route" routerLinkActive="app-layout__menu-item--active" [routerLinkActiveOptions]="{ exact: item.exact ?? false }">
+          <span>{{ item.label }}</span>
+        </li>
+      }
+    </ul>
+  </nz-sider>
+
+  <nz-layout>
+    <nz-header class="app-layout__header">
+      <h1 class="app-layout__header-title">Panel analityczny</h1>
+    </nz-header>
+
+    <nz-content class="app-layout__content">
+      <div class="app-layout__content-wrapper">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+
+    <nz-footer class="app-layout__footer">
+      <span>&copy; {{ currentYear }} SalesAnalysis</span>
+    </nz-footer>
+  </nz-layout>
+</nz-layout>
+
+

@@ -37,19 +37,26 @@ export const appRoutes: Route[] = [
     ],
   },
   {
-    path: 'customers',
+    path: '',
     canActivate: [authGuard],
-    canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
     loadComponent: () =>
-      import('./pages/customers/customers.page').then((m) => m.CustomersPage),
-  },
-  {
-    path: '403',
-    loadComponent: () =>
-      import('./pages/error/forbidden.page').then((m) => m.ForbiddenPage),
-  },
-  {
-    path: '**',
-    redirectTo: 'auth/login',
+      import('./pages/main/main.layout').then((m) => m.MainLayoutComponent),
+    children: [
+      {
+        path: 'customers',
+        canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
+        loadComponent: () =>
+          import('./pages/customers/customers.page').then((m) => m.CustomersPage),
+      },
+      {
+        path: '403',
+        loadComponent: () =>
+          import('./pages/error/forbidden.page').then((m) => m.ForbiddenPage),
+      },
+      {
+        path: '**',
+        redirectTo: 'customers',
+      },
+    ],
   },
 ];

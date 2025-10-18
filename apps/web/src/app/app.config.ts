@@ -22,6 +22,8 @@ import {
 } from '@ant-design/icons-angular/icons';
 import { NZ_DATE_LOCALE, pl_PL, provideNzI18n } from 'ng-zorro-antd/i18n';
 import dfnsPl from 'date-fns/locale/pl';
+import { NzLayoutModule } from 'ng-zorro-antd/layout';
+import { NzMenuModule } from 'ng-zorro-antd/menu';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -30,6 +32,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimations(),
     provideRouter(appRoutes),
+    importProvidersFrom(NzLayoutModule, NzMenuModule),
     provideNzI18n(pl_PL),
     { provide: LOCALE_ID, useValue: 'pl' },
     { provide: NZ_DATE_LOCALE, useValue: dfnsPl },
