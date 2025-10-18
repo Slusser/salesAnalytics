@@ -58,6 +58,13 @@ export class AuthService {
       .select('role')
       .eq('user_id', userId)
 
+    if (error) {
+      this.logger.debug(
+        `[fetchUserRoles] Błąd podczas pobierania ról (pierwsza próba, accessToken usera) dla userId=${userId}:`,
+        error
+      )
+    }
+
     if (error?.code === '42P17') {
       this.logger.warn(
         `RLS dla user_roles utknęło w rekursji przy tokenie użytkownika ${userId}. Próbuję odczytu z kluczem serwisowym.`,
@@ -69,6 +76,13 @@ export class AuthService {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId))
+
+      if (error) {
+        this.logger.debug(
+          `[fetchUserRoles] Błąd podczas pobierania ról (druga próba, service token) dla userId=${userId}:`,
+          error
+        )
+      }
     }
 
     if (error) {

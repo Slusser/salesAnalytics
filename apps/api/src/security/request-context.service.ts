@@ -1,5 +1,4 @@
 import { Injectable, Logger } from '@nestjs/common'
-import type { Session } from '@supabase/supabase-js'
 
 import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
 import type { UserRoleValue } from 'apps/shared/dtos/user-roles.dto'
@@ -20,34 +19,36 @@ export class RequestContextService {
   async resolveCurrentUser(accessToken: string): Promise<CustomerMutatorContext | undefined> {
     const supabase = this.supabaseFactory.create(accessToken)
 
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    const { data: userData, error: userError } = await supabase.auth.getUser(accessToken)
 
-    if (sessionError || !sessionData?.session) {
-      this.logger.warn('Nie udało się pobrać sesji użytkownika', sessionError)
+    if (userError || !userData?.user) {
+      this.logger.warn('Nie udało się pobrać użytkownika z tokenu dostępowego', {
+        error: userError?.message
+      })
       return undefined
     }
 
-    const session = sessionData.session
+    const userId = userData.user.id
 
-    const userRoles = await this.fetchUserRoles(supabase, session)
+    const userRoles = await this.fetchUserRoles(supabase, userId)
     if (!userRoles) {
       return undefined
     }
 
     return {
-      actorId: session.user.id,
+      actorId: userId,
       actorRoles: userRoles
     }
   }
 
   private async fetchUserRoles(
     supabase: SupabaseClient,
-    session: Session
+    userId: string
   ): Promise<UserRoleValue[] | undefined> {
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', session.user.id)
+      .eq('user_id', userId)
 
     if (error) {
       this.logger.error('Błąd pobierania ról użytkownika', error)
@@ -57,7 +58,7 @@ export class RequestContextService {
     const roles = data?.map((row: UserRolesResponse) => row.role) ?? []
 
     if (roles.length === 0) {
-      this.logger.warn(`Użytkownik ${session.user.id} nie posiada przypisanych ról.`)
+      this.logger.warn(`Użytkownik ${userId} nie posiada przypisanych ról.`)
     }
 
     return roles
