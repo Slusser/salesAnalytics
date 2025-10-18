@@ -1,6 +1,7 @@
-import { Route } from '@angular/router'
+import { Route } from '@angular/router';
 
-import { authGuard } from './service/auth/auth.guard'
+import { authGuard } from './service/auth/auth.guard';
+import { roleGuard } from './service/auth/role.guard';
 
 export const appRoutes: Route[] = [
   {
@@ -38,8 +39,14 @@ export const appRoutes: Route[] = [
   {
     path: 'customers',
     canActivate: [authGuard],
+    canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
     loadComponent: () =>
       import('./pages/customers/customers.page').then((m) => m.CustomersPage),
+  },
+  {
+    path: '403',
+    loadComponent: () =>
+      import('./pages/error/forbidden.page').then((m) => m.ForbiddenPage),
   },
   {
     path: '**',

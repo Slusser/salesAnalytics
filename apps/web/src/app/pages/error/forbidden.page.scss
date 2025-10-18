@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  padding: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+nz-result {
+  max-width: 480px;
+}
+
