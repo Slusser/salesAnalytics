@@ -1,21 +1,24 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core'
 import { CommonModule } from '@angular/common'
+import { Router } from '@angular/router'
 
 import type { CustomerRowVm, CustomersQueryParamsVm } from '../../service/customers/customers-list.types'
-import { NzAlertModule } from 'ng-zorro-antd/alert';
+import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { NzButtonModule } from 'ng-zorro-antd/button'
 import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component'
 import { ManualRefreshButtonComponent } from '../../shared/components/manual-refresh-button/manual-refresh-button.component'
 import { CustomersTableComponent } from '../../shared/components/customers-table/customers-table.component'
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component'
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component'
 import { CustomersListService } from '../../service/customers/customers-list.service'
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { PaginationComponent } from '../../shared/components/pagination/pagination.component'
 
 @Component({
   selector: 'app-customers-page',
   standalone: true,
   imports: [
     CommonModule,
+    NzButtonModule,
     FilterBarComponent,
     ManualRefreshButtonComponent,
     CustomersTableComponent,
@@ -30,6 +33,7 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
 })
 export class CustomersPage {
   private readonly service = inject(CustomersListService)
+  private readonly router = inject(Router)
 
   protected readonly roles = this.service.roles
   protected readonly params = this.service.params
@@ -123,6 +127,14 @@ export class CustomersPage {
 
   protected canMutate(): boolean {
     return this.service.canMutate()
+  }
+
+  protected onCreate(): void {
+    if (!this.canMutate() || this.loading()) {
+      return
+    }
+
+    this.router.navigate(['/customers/new'])
   }
 }
 

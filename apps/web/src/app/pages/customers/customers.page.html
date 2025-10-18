@@ -1,10 +1,22 @@
 <section class="customers-page">
   <header class="page-header">
     <h2>Kontrahenci</h2>
-    <app-manual-refresh-button
-      [disabled]="loading()"
-      (onClick)="onManualRefresh()"
-    />
+    <div class="page-header__actions">
+      @if (canMutate()) {
+        <button
+          nz-button
+          nzType="primary"
+          [disabled]="loading()"
+          (click)="onCreate()"
+        >
+          Dodaj
+        </button>
+      }
+      <app-manual-refresh-button
+        [disabled]="loading()"
+        (onClick)="onManualRefresh()"
+      />
+    </div>
   </header>
 
   <app-filter-bar

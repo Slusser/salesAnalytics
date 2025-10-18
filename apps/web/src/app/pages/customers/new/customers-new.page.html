@@ -1,0 +1,17 @@
+<section class="customers-new">
+  <nz-typography>
+    <h1 nz-typography>Nowy kontrahent</h1>
+    <p nz-typography>Uzupełnij dane kontrahenta, aby dodać go do systemu.</p>
+  </nz-typography>
+
+  <nz-card nzTitle="Dane kontrahenta" class="customers-new__card">
+    <app-customer-form
+      [initialValue]="initialFormValue()"
+      [submitting]="submitting()"
+      [serverErrors]="serverErrors()"
+      (onSubmit)="onSubmit($event)"
+      (onCancel)="onCancel()"
+    ></app-customer-form>
+  </nz-card>
+</section>
+

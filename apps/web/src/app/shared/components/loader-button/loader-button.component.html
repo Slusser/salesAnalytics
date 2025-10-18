@@ -1,0 +1,14 @@
+<button
+  nz-button
+  [nzType]="nzType"
+  [disabled]="disabled || loading"
+  [attr.type]="htmlType"
+>
+  @if (loading) {
+    <span class="loader-button__spinner" aria-hidden="true">
+      <nz-spin nzSimple nzSize="small"></nz-spin>
+    </span>
+  }
+  <span class="loader-button__label">{{ label }}</span>
+</button>
+

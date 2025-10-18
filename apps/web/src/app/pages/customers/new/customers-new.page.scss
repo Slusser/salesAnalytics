@@ -1,0 +1,14 @@
+:host {
+  display: block;
+}
+
+.customers-new {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.customers-new__card {
+  max-width: 720px;
+}
+

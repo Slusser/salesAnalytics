@@ -1,0 +1,62 @@
+<form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" [nzNoColon]="true" novalidate>
+  @if (generalError()) {
+    <nz-alert nzType="error" [nzMessage]="generalError()" nzShowIcon class="customer-form__alert"></nz-alert>
+  }
+
+  <div nz-form-item nz-row class="customer-form__field">
+    <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+      <label for="customer-name">Nazwa kontrahenta</label>
+    </div>
+    <div nz-form-control nz-col [nzSm]="18" [nzXs]="24" nzHasFeedback>
+      <input
+        nz-input
+        id="customer-name"
+        [maxLength]="customerNameMaxLength"
+        formControlName="name"
+        autocomplete="off"
+        placeholder="Wpisz nazwę"
+        required
+      />
+      @if (nameError()) {
+        <div class="customer-form__error" nz-form-explain>{{ nameError() }}</div>
+      }
+    </div>
+  </div>
+
+  <div nz-form-item nz-row class="customer-form__field">
+    <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+      <label for="customer-active">Aktywny</label>
+    </div>
+    <div nz-form-control nz-col [nzSm]="18" [nzXs]="24">
+      <label nz-switch>
+        <input
+          id="customer-active"
+          type="checkbox"
+          nz-switch-input
+          formControlName="isActive"
+        />
+      </label>
+    </div>
+  </div>
+
+  <div class="customer-form__actions">
+    <app-loader-button
+      label="Zapisz"
+      [loading]="isSubmitting()"
+      [disabled]="form.invalid"
+      htmlType="submit"
+      nzType="primary"
+    ></app-loader-button>
+
+    <button
+      nz-button
+      type="button"
+      nzType="default"
+      (click)="onCancel()"
+      [disabled]="isSubmitting()"
+    >
+      Anuluj
+    </button>
+  </div>
+</form>
+

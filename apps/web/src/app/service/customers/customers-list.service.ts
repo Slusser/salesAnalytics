@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
-import { computed, inject, Injectable, signal } from '@angular/core'
+import { computed, effect, inject, Injectable, signal } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Params, Router } from '@angular/router'
 import { NzMessageService } from 'ng-zorro-antd/message'
@@ -7,6 +7,8 @@ import { catchError, distinctUntilChanged, map, of, shareReplay, switchMap, tap 
 
 import type { CustomerDto, ListCustomersQuery, ListCustomersResponse } from 'apps/shared/dtos/customers.dto'
 import type { AppRole, UserRoleValue } from 'apps/shared/dtos/user-roles.dto'
+
+import { AuthSessionService } from '../auth/auth-session.service'
 
 import {
   CUSTOMERS_DEFAULT_LIMIT,
@@ -28,6 +30,7 @@ interface ConfirmationState {
 @Injectable({ providedIn: 'root' })
 export class CustomersListService {
   private readonly http = inject(HttpClient)
+  private readonly session = inject(AuthSessionService)
   private readonly router = inject(Router)
   private readonly route = inject(ActivatedRoute)
   private readonly message = inject(NzMessageService)
@@ -50,7 +53,18 @@ export class CustomersListService {
   readonly confirmDialogDescription = computed(() => this.confirmation().description ?? '')
 
   constructor() {
+    this.initializeRoles()
     this.watchParams()
+  }
+
+  private initializeRoles(): void {
+    effect(
+      () => {
+        const user = this.session.user()
+        this.roles.set(user?.roles ?? ['viewer'])
+      },
+      { allowSignalWrites: true }
+    )
   }
 
   refetch(): void {

@@ -43,6 +43,12 @@ export const appRoutes: Route[] = [
       import('./pages/main/main.layout').then((m) => m.MainLayoutComponent),
     children: [
       {
+        path: 'customers/new',
+        canMatch: [roleGuard(['editor', 'owner'])],
+        loadComponent: () =>
+          import('./pages/customers/new/customers-new.page').then((m) => m.CustomersNewPageComponent),
+      },
+      {
         path: 'customers',
         canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
         loadComponent: () =>
