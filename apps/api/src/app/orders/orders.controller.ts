@@ -1,17 +1,19 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common'
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiExtraModels
 } from '@nestjs/swagger'
 
-import type { ListOrdersResponse } from 'apps/shared/dtos/orders.dto'
+import type { ListOrdersResponse, OrderResponse } from 'apps/shared/dtos/orders.dto'
 import { JwtAuthGuard } from '../../security/jwt-auth.guard'
 import { RolesGuard } from '../../security/roles.guard'
 import { CurrentUser } from '../../security/current-user.decorator'
@@ -19,9 +21,11 @@ import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
 import { ListOrdersQueryDto } from './dto/list-orders-query.dto'
 import { OrdersService } from './orders.service'
 import { ListOrdersResponseDto } from './dto/list-orders-response.dto'
+import { OrderIdParamDto } from './dto/order-id-param.dto'
+import { OrderDetailResponseDto } from './dto/order-detail-response.dto'
 
 @ApiTags('Orders')
-@ApiExtraModels(ListOrdersResponseDto)
+@ApiExtraModels(ListOrdersResponseDto, OrderDetailResponseDto)
 @ApiBearerAuth()
 @Controller('orders')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -135,6 +139,53 @@ export class OrdersController {
     @CurrentUser() currentUser: CustomerMutatorContext
   ): Promise<ListOrdersResponse> {
     return this.ordersService.list(query, currentUser)
+  }
+
+  @Get(':orderId')
+  @ApiOperation({ summary: 'Pobiera szczegóły pojedynczego zamówienia.' })
+  @ApiParam({
+    name: 'orderId',
+    description: 'Identyfikator zamówienia.',
+    format: 'uuid'
+  })
+  @ApiOkResponse({
+    description: 'Zwrócono szczegóły zamówienia.',
+    type: OrderDetailResponseDto,
+    headers: {
+      'Cache-Control': {
+        description: 'Zalecenie wyłączenia cache po stronie klienta.',
+        schema: { type: 'string', example: 'no-store' }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Nie znaleziono zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDER_NOT_FOUND' },
+        message: { type: 'string', example: 'Nie znaleziono zamówienia.' }
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak uprawnień do podglądu zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDER_VIEW_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak uprawnień do podglądu usuniętego zamówienia.'
+        }
+      }
+    }
+  })
+  async getOrder(
+    @Param() params: OrderIdParamDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<OrderResponse> {
+    return this.ordersService.getById(params.orderId, currentUser)
   }
 }
 

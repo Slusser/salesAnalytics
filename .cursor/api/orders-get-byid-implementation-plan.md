@@ -28,12 +28,12 @@
 2. `SupabaseAuthGuard` weryfikuje ważność JWT i osadza kontekst użytkownika (ID, role).
 3. `RolesGuard` dopuszcza rolę `viewer` i wyższe; weryfikuje dodatkowo flagi, jeżeli w przyszłości pojawią się rozszerzenia.
 4. `OrdersController.getOrder` odbiera `OrderIdParamDto`, loguje próbę (Logger debug) bez ujawniania pełnego numeru zamówienia.
-5. Kontroler deleguje do `OrdersQueryService.getById(orderId, actorContext)`.
+5. Kontroler deleguje do `OrdersService.getById(orderId, actorContext)`.
 6. Serwis:
-   - Sprawdza, czy `viewer` nie próbuje dostępu do rekordu z `deletedAt != null`; w razie potrzeby wywołuje dodatkowe zapytanie kontrolne lub polega na RLS.
+   - Sprawdza, czy `viewer` nie próbuje dostępu do rekordu z `deletedAt != null`; w razie potrzeby zwraca `Forbidden`.
    - Wywołuje `OrdersRepository.findById(orderId, { includeDeleted: role != 'viewer' })`, które korzysta z Supabase clienta (`from('orders').select(...).eq('id', orderId)`), dołącza relacje `customers`, `users`.
-   - Mapuje wynik na `OrderDetailDto` (formatter dat ISO, liczby `number` zamiast `string` – użycie `@Transform` lub mapowania manualnego).
-   - Opcjonalnie emituje telemetryczne zdarzenie `order.viewed` (asynchronicznie, aby nie blokować odpowiedzi).
+   - Mapuje wynik na `OrderDetailDto` z wykorzystaniem `OrderMapper.toDetailDto` (konwersja typów liczbowych i dat).
+   - Opcjonalnie (TODO) może emitować telemetryczne zdarzenie `order.viewed` (niezaimplementowane).
 7. Kontroler zwraca zmapowaną odpowiedź do klienta.
 
 ## 5. Względy bezpieczeństwa
@@ -58,8 +58,8 @@
 ## 8. Kroki implementacji
 1. Utworzyć `OrderIdParamDto` (`apps/api/src/app/orders/dto/order-id-param.dto.ts`) z dekoratorami `class-validator` oraz opisem Swagger (`@ApiParam`).
 2. Rozbudować `OrdersRepository` o metodę `findById` z konfiguracją `select` (`orders` + `customer:customers!inner` + `createdBy:users!inner`) oraz obsługą `includeDeleted`.
-3. Dodać w `OrdersQueryService` metodę `getById`, która zarządza uprawnieniami do rekordów miękko usuniętych, mapowaniem oraz obsługą `NotFound`/`Forbidden`.
-4. Zaktualizować `OrdersController` (lub utworzyć, jeśli brak) o handler `@Get(':orderId')`, wstrzykujący serwis zapytań, dekoratory Swagger (`@ApiOperation`, `@ApiOkResponse`, `@ApiNotFoundResponse`, `@ApiForbiddenResponse`).
-5. Utworzyć mapper (`OrderMapper.toDetailDto`) w module zamówień lub w bibliotece współdzielonej, dbając o konwersję typów (`numeric` → `number`).
-8. Uzupełnić dokumentację Swagger oraz, w razie zmian, pliki `.cursor/api-plan.md`.
+3. Dodać/rozszerzyć serwis (`OrdersService`) o metodę `getById`, która zarządza uprawnieniami do rekordów miękko usuniętych oraz obsługą `NotFound`/`Forbidden`. ✅
+4. Zaktualizować `OrdersController` o handler `@Get(':orderId')` z dekoratorami Swagger (`@ApiOperation`, `@ApiOkResponse`, `@ApiNotFoundResponse`, `@ApiForbiddenResponse`). ✅
+5. Utworzyć mapper (`OrderMapper.toDetailDto`), by zapewnić spójne mapowanie rekordów do `OrderDetailDto`. ✅
+6. Uzupełnić dokumentację Swagger (statusy błędów 403/404) i zaktualizować pliki planu (`.cursor/api/orders-get-byid-implementation-plan.md`). ✅
 

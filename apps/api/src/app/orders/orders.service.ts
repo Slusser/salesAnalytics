@@ -1,7 +1,17 @@
-import { ForbiddenException, Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  NotFoundException
+} from '@nestjs/common'
 
 import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
-import type { ListOrdersQuery, ListOrdersResponse } from 'apps/shared/dtos/orders.dto'
+import type {
+  ListOrdersQuery,
+  ListOrdersResponse,
+  OrderDetailDto
+} from 'apps/shared/dtos/orders.dto'
 import { OrdersRepository } from './orders.repository'
 
 const DEFAULT_PAGE = 1
@@ -82,6 +92,50 @@ export class OrdersService {
       throw new InternalServerErrorException({
         code: 'ORDERS_LIST_FAILED',
         message: 'Nie udało się pobrać listy zamówień.'
+      })
+    }
+  }
+
+  async getById(id: string, user: CustomerMutatorContext): Promise<OrderDetailDto> {
+    if (!user) {
+      throw new ForbiddenException('Brak uwierzytelnionego użytkownika.')
+    }
+
+    const roles = user.actorRoles ?? []
+    const isElevated = roles.some((role) => role === 'editor' || role === 'owner')
+
+    this.logger.debug(
+      `Pobieranie zamówienia: orderId=${id}, actor=${user.actorId}, roles=${roles.join(',')}`
+    )
+
+    try {
+      const order = await this.repository.findById(id, { includeDeleted: isElevated })
+
+      if (!order) {
+        throw new NotFoundException({
+          code: 'ORDER_NOT_FOUND',
+          message: 'Nie znaleziono zamówienia.'
+        })
+      }
+
+      if (order.deletedAt && !isElevated) {
+        throw new ForbiddenException({
+          code: 'ORDER_VIEW_FORBIDDEN',
+          message: 'Brak uprawnień do podglądu usuniętego zamówienia.'
+        })
+      }
+
+      return order
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof ForbiddenException) {
+        throw error
+      }
+
+      this.logger.error(`Nie udało się pobrać zamówienia ${id}`, error as Error)
+
+      throw new InternalServerErrorException({
+        code: 'ORDER_FETCH_FAILED',
+        message: 'Nie udało się pobrać zamówienia.'
       })
     }
   }
