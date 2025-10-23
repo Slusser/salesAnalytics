@@ -1,4 +1,5 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common'
+import { Response } from 'express'
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -10,7 +11,8 @@ import {
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
-  ApiExtraModels
+  ApiExtraModels,
+  ApiResponse
 } from '@nestjs/swagger'
 
 import type { ListOrdersResponse, OrderResponse } from 'apps/shared/dtos/orders.dto'
@@ -23,6 +25,8 @@ import { OrdersService } from './orders.service'
 import { ListOrdersResponseDto } from './dto/list-orders-response.dto'
 import { OrderIdParamDto } from './dto/order-id-param.dto'
 import { OrderDetailResponseDto } from './dto/order-detail-response.dto'
+import { CreateOrderDto } from './dto/create-order.dto'
+import { Roles } from '../../security/roles.decorator'
 
 @ApiTags('Orders')
 @ApiExtraModels(ListOrdersResponseDto, OrderDetailResponseDto)
@@ -139,6 +143,82 @@ export class OrdersController {
     @CurrentUser() currentUser: CustomerMutatorContext
   ): Promise<ListOrdersResponse> {
     return this.ordersService.list(query, currentUser)
+  }
+
+  @Post()
+  @Roles('editor', 'owner')
+  @ApiOperation({ summary: 'Tworzy nowe zamówienie.' })
+  @ApiResponse({
+    status: 201,
+    description: 'Zamówienie zostało utworzone.',
+    type: OrderDetailResponseDto,
+    headers: {
+      Location: {
+        description: 'Adres zasobu reprezentującego utworzone zamówienie.',
+        schema: { type: 'string', example: '/orders/3fa85f64-5717-4562-b3fc-2c963f66afa6' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Niepoprawne dane wejściowe.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_CREATE_VALIDATION' },
+        message: { type: 'string', example: 'Niepoprawne dane zamówienia.' },
+        details: {
+          type: 'array',
+          items: { type: 'string', example: 'Pole orderNo jest wymagane.' }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Brak wymaganych ról.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_CREATE_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do utworzenia zamówienia.'
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Konflikt danych (np. zduplikowany numer zamówienia).',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_CREATE_CONFLICT' },
+        message: { type: 'string', example: 'Zamówienie o podanym numerze już istnieje.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 500,
+    description: 'Wystąpił błąd podczas tworzenia zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_CREATE_FAILED' },
+        message: { type: 'string', example: 'Nie udało się utworzyć zamówienia.' }
+      }
+    }
+  })
+  async createOrder(
+    @Body() dto: CreateOrderDto,
+    @CurrentUser() currentUser: CustomerMutatorContext,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<OrderResponse> {
+    const result = await this.ordersService.create(dto, currentUser)
+    res.status(201)
+    res.setHeader('Location', `/orders/${result.id}`)
+    return result
   }
 
   @Get(':orderId')

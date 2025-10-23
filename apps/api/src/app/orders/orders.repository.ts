@@ -1,9 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { ConflictException, Injectable, Logger } from '@nestjs/common'
 import type { SupabaseClient } from 'apps/db/supabase.client'
 import { supabaseClient } from 'apps/db/supabase.client'
 import type { Tables } from 'apps/db/database.types'
-import type { ListOrdersResponse, OrderDetailDto } from 'apps/shared/dtos/orders.dto'
+import type {
+  CreateOrderCommand,
+  ListOrdersResponse,
+  OrderDetailDto
+} from 'apps/shared/dtos/orders.dto'
 import { OrderMapper, type OrderDetailRow, type OrderListRow } from './order.mapper'
+import { PostgrestError } from '@supabase/supabase-js'
 
 interface ListParams {
   page: number
@@ -18,6 +23,11 @@ interface ListParams {
 
 interface FindByIdOptions {
   includeDeleted: boolean
+}
+
+interface CreateParams {
+  command: CreateOrderCommand
+  actorId: string
 }
 
 const SORT_FIELD_MAP: Record<ListParams['sortField'], string> = {
@@ -106,6 +116,59 @@ export class OrdersRepository {
     }
 
     return OrderMapper.toDetailDto(data as OrderDetailRow)
+  }
+
+  async create(params: CreateParams): Promise<OrderDetailDto> {
+    const { command, actorId } = params
+
+    const payload: Partial<Tables<'orders'>> = {
+      order_no: command.orderNo,
+      customer_id: command.customerId,
+      order_date: command.orderDate,
+      item_name: command.itemName,
+      quantity: command.quantity,
+      is_eur: command.isEur,
+      eur_rate: command.eurRate ?? null,
+      producer_discount_pct: command.producerDiscountPct,
+      distributor_discount_pct: command.distributorDiscountPct,
+      vat_rate_pct: command.vatRatePct,
+      total_net_pln: command.totalNetPln,
+      total_gross_pln: command.totalGrossPln,
+      total_gross_eur: command.totalGrossEur ?? null,
+      comment: command.comment ?? null,
+      created_by: actorId
+    }
+
+    const { data, error } = await this.client
+      .from('orders')
+      .insert(payload)
+      .select(
+        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at, customers:customers!inner(id, name), created_by_user:created_by!inner(id, display_name)` as const
+      )
+      .single()
+
+    if (error) {
+      this.handleCreateError(error)
+    }
+
+    if (!data) {
+      throw new Error('Brak danych utworzonego zamówienia.')
+    }
+
+    return OrderMapper.toDetailDto(data as OrderDetailRow)
+  }
+
+  private handleCreateError(error: PostgrestError): never {
+    if (error.code === '23505') {
+      throw new ConflictException({
+        code: 'ORDERS_CREATE_CONFLICT',
+        message: 'Zamówienie o podanym numerze już istnieje.'
+      })
+    }
+
+    this.logger.error('Nie udało się utworzyć zamówienia', error)
+
+    throw error
   }
 }
 

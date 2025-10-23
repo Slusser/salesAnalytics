@@ -1,4 +1,6 @@
 import {
+  BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   InternalServerErrorException,
@@ -8,6 +10,7 @@ import {
 
 import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
 import type {
+  CreateOrderCommand,
   ListOrdersQuery,
   ListOrdersResponse,
   OrderDetailDto
@@ -17,6 +20,8 @@ import { OrdersRepository } from './orders.repository'
 const DEFAULT_PAGE = 1
 const DEFAULT_LIMIT = 25
 const DEFAULT_SORT_FIELD: ListOrdersQuery['sort'] = 'createdAt:desc'
+
+const AMOUNT_TOLERANCE = 0.01
 
 const SORT_PARSER: Record<string, { field: ListOrdersQuery['sort']; direction: 'asc' | 'desc' }> = {
   'createdat:asc': { field: 'createdAt:asc', direction: 'asc' },
@@ -138,6 +143,112 @@ export class OrdersService {
         message: 'Nie udało się pobrać zamówienia.'
       })
     }
+  }
+
+  async create(command: CreateOrderCommand, user: CustomerMutatorContext): Promise<OrderDetailDto> {
+    if (!user) {
+      throw new ForbiddenException('Brak uwierzytelnionego użytkownika.')
+    }
+
+    const roles = user.actorRoles ?? []
+    const hasMutationRole = roles.some((role) => role === 'editor' || role === 'owner')
+
+    if (!hasMutationRole) {
+      throw new ForbiddenException({
+        code: 'ORDERS_CREATE_FORBIDDEN',
+        message: 'Brak wymaganych ról do utworzenia zamówienia.'
+      })
+    }
+
+    this.logger.debug(`Rozpoczynam tworzenie zamówienia ${command.orderNo} przez użytkownika ${user.actorId}.`)
+
+    const normalizedCommand = this.normalizeCommand(command)
+
+    this.validateCommand(normalizedCommand)
+
+    try {
+      const created = await this.repository.create({
+        command: normalizedCommand,
+        actorId: user.actorId
+      })
+
+      return created
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw error
+      }
+
+      if (error instanceof BadRequestException) {
+        throw error
+      }
+
+      this.logger.error('Nie udało się utworzyć zamówienia.', error as Error)
+
+      throw new InternalServerErrorException({
+        code: 'ORDERS_CREATE_FAILED',
+        message: 'Nie udało się utworzyć zamówienia.'
+      })
+    }
+  }
+
+  private normalizeCommand(command: CreateOrderCommand): CreateOrderCommand {
+    const trimmedComment = command.comment?.trim() || undefined
+    const normalizedOrderNo = command.orderNo.trim().toUpperCase()
+    const normalizedItemName = command.itemName.trim()
+
+    return {
+      ...command,
+      orderNo: normalizedOrderNo,
+      itemName: normalizedItemName,
+      comment: trimmedComment
+    }
+  }
+
+  private validateCommand(command: CreateOrderCommand): void {
+    if (command.isEur) {
+      if (command.eurRate === undefined) {
+        throw new BadRequestException({
+          code: 'ORDERS_CREATE_VALIDATION',
+          message: 'Pole eurRate jest wymagane, gdy zamówienie rozliczane jest w EUR.'
+        })
+      }
+
+      if (command.totalGrossEur === undefined) {
+        throw new BadRequestException({
+          code: 'ORDERS_CREATE_VALIDATION',
+          message: 'Pole totalGrossEur jest wymagane, gdy zamówienie rozliczane jest w EUR.'
+        })
+      }
+    } else {
+      if (command.eurRate !== undefined || command.totalGrossEur !== undefined) {
+        throw new BadRequestException({
+          code: 'ORDERS_CREATE_VALIDATION',
+          message: 'Pola eurRate i totalGrossEur są dozwolone tylko, gdy zamówienie rozliczane jest w EUR.'
+        })
+      }
+    }
+
+    if (!this.areAmountsConsistent(command.totalNetPln, command.totalGrossPln)) {
+      throw new BadRequestException({
+        code: 'ORDERS_CREATE_VALIDATION',
+        message: 'Suma brutto w PLN musi mieścić się w tolerancji względem sumy netto.'
+      })
+    }
+
+    if (command.isEur && command.totalGrossEur !== undefined) {
+      const expectedGrossEur = command.totalGrossPln / command.eurRate!
+
+      if (!this.areAmountsConsistent(expectedGrossEur, command.totalGrossEur)) {
+        throw new BadRequestException({
+          code: 'ORDERS_CREATE_VALIDATION',
+          message: 'Suma brutto w EUR niezgodna z wartością przeliczoną z PLN.'
+        })
+      }
+    }
+  }
+
+  private areAmountsConsistent(a: number, b: number): boolean {
+    return Math.abs(a - b) <= AMOUNT_TOLERANCE
   }
 }
 
