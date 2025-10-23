@@ -24,6 +24,7 @@ import { NZ_DATE_LOCALE, pl_PL, provideNzI18n } from 'ng-zorro-antd/i18n';
 import dfnsPl from 'date-fns/locale/pl';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import '@angular/common/locales/global/pl';
 
 export const appConfig: ApplicationConfig = {
   providers: [

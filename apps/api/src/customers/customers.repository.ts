@@ -55,8 +55,7 @@ export class CustomersRepository {
   async insert(customer: InsertCustomerParams): Promise<{ data?: CustomerDto; error?: PostgrestError }> {
     const payload: TablesInsert<'customers'> = {
       name: customer.name,
-      is_active: customer.isActive,
-      deleted_at: customer.isActive ? null : new Date().toISOString()
+      is_active: customer.isActive
     }
 
     const { data, error } = await this.client
@@ -64,8 +63,9 @@ export class CustomersRepository {
       .insert(payload)
       .select()
       .maybeSingle()
-
+    this.logger.debug(`Data: ${JSON.stringify(data)}`)
     if (error) {
+      this.logger.error(`Błąd podczas tworzenia klienta`, error)
       return { error }
     }
 

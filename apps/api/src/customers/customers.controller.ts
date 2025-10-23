@@ -6,6 +6,7 @@ import {
   Header,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Post,
   Put,
@@ -50,6 +51,8 @@ import { UpdateCustomerDto } from './dto/update-customer.dto'
 @Controller('customers')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CustomersController {
+  private readonly logger = new Logger(CustomersController.name)
+
   constructor(private readonly customersService: CustomersService) {}
 
   @Delete(':customerId')
@@ -408,15 +411,64 @@ export class CustomersController {
     @CurrentUser() currentUser: CustomerMutatorContext,
     @Res({ passthrough: true }) res: Response
   ): Promise<CustomerDto> {
+    const context = 'CustomersController#create'
     const { name, isActive = true } = createCustomerDto
+    const actorRoles = currentUser.actorRoles?.join(', ') ?? 'n/a'
 
-    const result = await this.customersService.create(
-      { name, isActive },
-      currentUser
+    this.logger.debug(
+      `Rozpoczynam tworzenie klienta dla aktora ${currentUser.actorId} (role: ${actorRoles}) z payloadem ${JSON.stringify({ name, isActive })}.`,
+      context
     )
 
-    res.location(`/customers/${result.id}`)
-    return result
+    try {
+      const result = await this.customersService.create(
+        { name, isActive },
+        currentUser
+      )
+
+      this.logger.debug(
+        `Pomyślnie utworzono klienta ${result.id} przez aktora ${currentUser.actorId}.`,
+        context
+      )
+
+      res.location(`/customers/${result.id}`)
+      return result
+    } catch (error) {
+      const serialized = this.serializeUnknownError(error)
+
+      this.logger.error(
+        `Błąd podczas tworzenia klienta przez aktora ${currentUser.actorId}: ${serialized.message}.`,
+        serialized.stack,
+        context
+      )
+
+      throw error
+    }
+  }
+
+  private serializeUnknownError(error: unknown): { message: string; stack?: string } {
+    if (error instanceof Error) {
+      return {
+        message: `${error.name}: ${error.message}`,
+        stack: error.stack
+      }
+    }
+
+    if (error === undefined) {
+      return { message: 'undefined' }
+    }
+
+    if (error === null) {
+      return { message: 'null' }
+    }
+
+    try {
+      return { message: JSON.stringify(error) }
+    } catch (serializationError) {
+      return {
+        message: `Nieznany obiekt błędu, nie udało się zserializować: ${serializationError}`
+      }
+    }
   }
 }
 

@@ -105,26 +105,45 @@ export class CustomersService {
 
     const isActive = command.isActive ?? true
 
-    const exists = await this.repository.isActiveNameTaken(trimmedName)
-    if (exists) {
-      throw new CustomerDuplicateNameError()
+    try {
+      const exists = await this.repository.isActiveNameTaken(trimmedName)
+      if (exists) {
+        throw new CustomerDuplicateNameError()
+      }
+
+      this.logger.debug(`Klient o nazwie "${trimmedName}" już istnieje.`)
+      this.logger.debug(`Rozpoczynam tworzenie klienta o nazwie "${trimmedName}" przez aktora ${context.actorId}.`)
+      this.logger.debug(`Actor roles: ${context.actorRoles?.join(', ')}`)
+      this.logger.debug(`Is active: ${isActive}`)
+      this.logger.debug(`Command: ${JSON.stringify(command)}`)
+      this.logger.debug(`Context: ${JSON.stringify(context)}`)
+
+
+      const result = await this.repository.insert({
+        name: trimmedName,
+        isActive,
+        actorId: context.actorId
+      })
+
+      this.logger.debug(`Result: ${JSON.stringify(result)}`)
+
+      if (result.error) {
+        this.handleInsertError(result.error)
+      }
+
+      if (!result.data) {
+        throw new CustomerCreateFailedError()
+      }
+
+      return result.data
+    } catch (error) {
+      this.logger.error(
+        `Nie udało się utworzyć klienta o nazwie "${trimmedName}" przez aktora ${context.actorId}.`,
+        error instanceof Error ? error : undefined
+      )
+
+      throw error
     }
-
-    const result = await this.repository.insert({
-      name: trimmedName,
-      isActive,
-      actorId: context.actorId
-    })
-
-    if (result.error) {
-      this.handleInsertError(result.error)
-    }
-
-    if (!result.data) {
-      throw new CustomerCreateFailedError()
-    }
-
-    return result.data
   }
 
   async delete(command: DeleteCustomerCommand): Promise<CustomerDetailResponse> {
