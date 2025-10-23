@@ -4,6 +4,7 @@ import { supabaseClient } from 'apps/db/supabase.client'
 import type { Tables } from 'apps/db/database.types'
 import type {
   CreateOrderCommand,
+  DeleteOrderCommand,
   ListOrdersResponse,
   OrderDetailDto,
   UpdateOrderCommand
@@ -34,6 +35,11 @@ interface CreateParams {
 interface UpdateParams {
   orderId: string
   command: UpdateOrderCommand
+  actorId: string
+}
+
+interface SoftDeleteParams {
+  command: DeleteOrderCommand
   actorId: string
 }
 
@@ -115,6 +121,28 @@ export class OrdersRepository {
 
     if (error) {
       this.logger.error(`Nie udało się pobrać zamówienia ${id}`, error)
+      throw error
+    }
+
+    if (!data) {
+      return null
+    }
+
+    return OrderMapper.toDetailDto(data as OrderDetailRow)
+  }
+
+  async findActiveById(id: string): Promise<OrderDetailDto | null> {
+    const { data, error } = await this.client
+      .from('orders')
+      .select(
+        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at, customers:customers!inner(id, name), created_by_user:created_by!inner(id, display_name)` as const
+      )
+      .eq('id', id)
+      .is('deleted_at', null)
+      .maybeSingle()
+
+    if (error) {
+      this.logger.error(`Nie udało się pobrać aktywnego zamówienia ${id}`, error)
       throw error
     }
 
@@ -250,6 +278,26 @@ export class OrdersRepository {
     this.logger.error(`Nie udało się zaktualizować zamówienia ${orderId}`, error)
 
     throw error
+  }
+
+  async softDelete(params: SoftDeleteParams): Promise<void> {
+    const { command, actorId } = params
+
+    const payload: Partial<Tables<'orders'>> = {
+      deleted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+
+    const { error } = await this.client
+      .from('orders')
+      .update(payload)
+      .eq('id', command.orderId)
+      .is('deleted_at', null)
+
+    if (error) {
+      this.logger.error(`Nie udało się soft-delete zamówienia ${command.orderId}`, error)
+      throw error
+    }
   }
 }
 

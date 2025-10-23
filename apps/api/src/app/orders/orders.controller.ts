@@ -1,4 +1,17 @@
-import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Header,
+  HttpCode,
+  Param,
+  Post,
+  Put,
+  Query,
+  Res,
+  UseGuards
+} from '@nestjs/common'
 import { Response } from 'express'
 import {
   ApiBadRequestResponse,
@@ -8,6 +21,7 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiParam,
+  ApiNoContentResponse,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -337,6 +351,69 @@ export class OrdersController {
     @CurrentUser() currentUser: CustomerMutatorContext
   ): Promise<OrderResponse> {
     return this.ordersService.getById(params.orderId, currentUser)
+  }
+
+  @Delete(':orderId')
+  @Roles('editor', 'owner')
+  @ApiOperation({ summary: 'Usuwa zamówienie (soft-delete).' })
+  @ApiParam({
+    name: 'orderId',
+    description: 'Identyfikator zamówienia do usunięcia.',
+    format: 'uuid'
+  })
+  @ApiNoContentResponse({
+    description: 'Zamówienie zostało usunięte.',
+    headers: {
+      'Cache-Control': {
+        description: 'Zalecenie wyłączenia cache po stronie klienta.',
+        schema: { type: 'string', example: 'no-store' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Niepoprawny identyfikator zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        statusCode: { type: 'number', example: 400 },
+        message: { type: 'array', items: { type: 'string' } },
+        error: { type: 'string', example: 'Bad Request' }
+      }
+    }
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Brak tokenu lub token nieprawidłowy.'
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak wymaganych ról do usunięcia zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_DELETE_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do usunięcia zamówienia.'
+        }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Zamówienie nie zostało znalezione.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDER_NOT_FOUND' },
+        message: { type: 'string', example: 'Nie znaleziono zamówienia.' }
+      }
+    }
+  })
+  @HttpCode(204)
+  @Header('Cache-Control', 'no-store')
+  async deleteOrder(
+    @Param() params: OrderIdParamDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<void> {
+    await this.ordersService.delete(params.orderId, currentUser)
   }
 }
 
