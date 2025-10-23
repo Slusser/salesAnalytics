@@ -13,7 +13,8 @@ import type {
   CreateOrderCommand,
   ListOrdersQuery,
   ListOrdersResponse,
-  OrderDetailDto
+  OrderDetailDto,
+  UpdateOrderCommand
 } from 'apps/shared/dtos/orders.dto'
 import { OrdersRepository } from './orders.repository'
 

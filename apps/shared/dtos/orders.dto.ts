@@ -82,7 +82,7 @@ export interface BaseOrderCommand {
 
 export interface CreateOrderCommand extends BaseOrderCommand {}
 
-export interface UpdateOrderCommand extends Partial<BaseOrderCommand> {}
+export interface UpdateOrderCommand extends BaseOrderCommand {}
 
 export interface RestoreOrderCommand {
   orderId: OrderRow["id"]

@@ -1,11 +1,12 @@
-import { ConflictException, Injectable, Logger } from '@nestjs/common'
+import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import type { SupabaseClient } from 'apps/db/supabase.client'
 import { supabaseClient } from 'apps/db/supabase.client'
 import type { Tables } from 'apps/db/database.types'
 import type {
   CreateOrderCommand,
   ListOrdersResponse,
-  OrderDetailDto
+  OrderDetailDto,
+  UpdateOrderCommand
 } from 'apps/shared/dtos/orders.dto'
 import { OrderMapper, type OrderDetailRow, type OrderListRow } from './order.mapper'
 import { PostgrestError } from '@supabase/supabase-js'
@@ -27,6 +28,12 @@ interface FindByIdOptions {
 
 interface CreateParams {
   command: CreateOrderCommand
+  actorId: string
+}
+
+interface UpdateParams {
+  orderId: string
+  command: UpdateOrderCommand
   actorId: string
 }
 
@@ -167,6 +174,80 @@ export class OrdersRepository {
     }
 
     this.logger.error('Nie udało się utworzyć zamówienia', error)
+
+    throw error
+  }
+
+  async findByIdForUpdate(orderId: string): Promise<OrderDetailRow | null> {
+    const { data, error } = await this.client
+      .from('orders')
+      .select(
+        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at, customers:customers!inner(id, name), created_by_user:created_by!inner(id, display_name)` as const
+      )
+      .eq('id', orderId)
+      .maybeSingle()
+
+    if (error) {
+      this.logger.error(`Nie udało się pobrać zamówienia ${orderId} do aktualizacji`, error)
+      throw error
+    }
+
+    return (data as OrderDetailRow | null) ?? null
+  }
+
+  async update(params: UpdateParams): Promise<OrderDetailDto> {
+    const { command, orderId, actorId } = params
+
+    const payload: Partial<Tables<'orders'>> = {
+      order_no: command.orderNo,
+      customer_id: command.customerId,
+      order_date: command.orderDate,
+      item_name: command.itemName,
+      quantity: command.quantity,
+      is_eur: command.isEur,
+      eur_rate: command.eurRate ?? null,
+      producer_discount_pct: command.producerDiscountPct,
+      distributor_discount_pct: command.distributorDiscountPct,
+      vat_rate_pct: command.vatRatePct,
+      total_net_pln: command.totalNetPln,
+      total_gross_pln: command.totalGrossPln,
+      total_gross_eur: command.totalGrossEur ?? null,
+      comment: command.comment ?? null,
+      updated_at: new Date().toISOString()
+    }
+
+    const { data, error } = await this.client
+      .from('orders')
+      .update(payload)
+      .eq('id', orderId)
+      .select(
+        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at, customers:customers!inner(id, name), created_by_user:created_by!inner(id, display_name)` as const
+      )
+      .maybeSingle()
+
+    if (error) {
+      this.handleUpdateError(error, orderId)
+    }
+
+    if (!data) {
+      throw new NotFoundException({
+        code: 'ORDER_NOT_FOUND',
+        message: 'Nie znaleziono zamówienia.'
+      })
+    }
+
+    return OrderMapper.toDetailDto(data as OrderDetailRow)
+  }
+
+  private handleUpdateError(error: PostgrestError, orderId: string): never {
+    if (error.code === '23505') {
+      throw new ConflictException({
+        code: 'ORDERS_UPDATE_CONFLICT',
+        message: 'Zamówienie o podanym numerze już istnieje.'
+      })
+    }
+
+    this.logger.error(`Nie udało się zaktualizować zamówienia ${orderId}`, error)
 
     throw error
   }

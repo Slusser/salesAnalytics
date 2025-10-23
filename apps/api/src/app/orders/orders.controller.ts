@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Param, Post, Put, Query, Res, UseGuards } from '@nestjs/common'
 import { Response } from 'express'
 import {
   ApiBadRequestResponse,
@@ -26,6 +26,7 @@ import { ListOrdersResponseDto } from './dto/list-orders-response.dto'
 import { OrderIdParamDto } from './dto/order-id-param.dto'
 import { OrderDetailResponseDto } from './dto/order-detail-response.dto'
 import { CreateOrderDto } from './dto/create-order.dto'
+import { UpdateOrderDto } from './dto/update-order.dto'
 import { Roles } from '../../security/roles.decorator'
 
 @ApiTags('Orders')
@@ -219,6 +220,76 @@ export class OrdersController {
     res.status(201)
     res.setHeader('Location', `/orders/${result.id}`)
     return result
+  }
+
+  @Put(':orderId')
+  @Roles('editor', 'owner')
+  @ApiOperation({ summary: 'Aktualizuje istniejące zamówienie.' })
+  @ApiParam({
+    name: 'orderId',
+    description: 'Identyfikator zamówienia do aktualizacji.',
+    format: 'uuid'
+  })
+  @ApiOkResponse({
+    description: 'Zamówienie zostało zaktualizowane.',
+    type: OrderDetailResponseDto,
+    headers: {
+      'Cache-Control': {
+        description: 'Zalecenie wyłączenia cache po stronie klienta.',
+        schema: { type: 'string', example: 'no-store' }
+      }
+    }
+  })
+  @ApiBadRequestResponse({
+    description: 'Niepoprawne dane wejściowe.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_UPDATE_VALIDATION' },
+        message: { type: 'string', example: 'Niepoprawne dane zamówienia.' }
+      }
+    }
+  })
+  @ApiForbiddenResponse({
+    description: 'Brak wymaganych ról.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_UPDATE_FORBIDDEN' },
+        message: {
+          type: 'string',
+          example: 'Brak wymaganych ról do aktualizacji zamówienia.'
+        }
+      }
+    }
+  })
+  @ApiNotFoundResponse({
+    description: 'Nie znaleziono zamówienia.',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDER_NOT_FOUND' },
+        message: { type: 'string', example: 'Nie znaleziono zamówienia.' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 409,
+    description: 'Konflikt danych (np. zduplikowany numer zamówienia).',
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string', example: 'ORDERS_UPDATE_CONFLICT' },
+        message: { type: 'string', example: 'Zamówienie o podanym numerze już istnieje.' }
+      }
+    }
+  })
+  async updateOrder(
+    @Param() params: OrderIdParamDto,
+    @Body() dto: UpdateOrderDto,
+    @CurrentUser() currentUser: CustomerMutatorContext
+  ): Promise<OrderResponse> {
+    return this.ordersService.update(params.orderId, dto, currentUser)
   }
 
   @Get(':orderId')
