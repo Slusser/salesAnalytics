@@ -37,13 +37,14 @@ export class CustomersRepository {
   private readonly logger = new Logger(CustomersRepository.name)
 
   async isActiveNameTaken(name: string): Promise<boolean> {
-    const normalized = name.trim().toLowerCase()
+    const normalized = name.trim()
+    const pattern = normalized.replace(/[%_]/g, '\\$&')
 
     const { count, error } = await this.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
-      .filter('deleted_at', 'is', null)
-      .filter('lower(name)', 'eq', normalized)
+      .is('deleted_at', null)
+      .ilike('name', pattern)
 
     if (error) {
       throw error
@@ -63,9 +64,8 @@ export class CustomersRepository {
       .insert(payload)
       .select()
       .maybeSingle()
-    this.logger.debug(`Data: ${JSON.stringify(data)}`)
+
     if (error) {
-      this.logger.error(`Błąd podczas tworzenia klienta`, error)
       return { error }
     }
 
@@ -91,13 +91,14 @@ export class CustomersRepository {
   }
 
   async isActiveNameTakenByOther(name: string, excludingCustomerId: string): Promise<boolean> {
-    const normalized = name.trim().toLowerCase()
+    const normalized = name.trim()
+    const pattern = normalized.replace(/[%_]/g, '\\$&')
 
     const { count, error } = await this.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
-      .filter('deleted_at', 'is', null)
-      .filter('lower(name)', 'eq', normalized)
+      .is('deleted_at', null)
+      .ilike('name', pattern)
       .neq('id', excludingCustomerId)
 
     if (error) {

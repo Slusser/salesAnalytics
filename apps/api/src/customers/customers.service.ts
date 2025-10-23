@@ -111,7 +111,7 @@ export class CustomersService {
         throw new CustomerDuplicateNameError()
       }
 
-      this.logger.debug(`Klient o nazwie "${trimmedName}" już istnieje.`)
+      this.logger.debug(`Nazwa klienta "${trimmedName}" jest dostępna.`)
       this.logger.debug(`Rozpoczynam tworzenie klienta o nazwie "${trimmedName}" przez aktora ${context.actorId}.`)
       this.logger.debug(`Actor roles: ${context.actorRoles?.join(', ')}`)
       this.logger.debug(`Is active: ${isActive}`)
