@@ -67,6 +67,7 @@ export class CustomersListService {
   readonly confirmDialogOpen = computed(() => this.confirmation().open)
   readonly confirmDialogTitle = computed(() => this.confirmation().title)
   readonly confirmDialogDescription = computed(() => this.confirmation().description ?? '')
+  readonly confirmDialogCustomerName = computed(() => this.confirmation().customer?.name ?? '')
   readonly confirmDialogLoading = computed(() => this.mutationInProgress())
 
   constructor() {

@@ -75,7 +75,7 @@
         [readonly]="!canEdit()"
         [showRestore]="canRestore() && isSoftDeleted()"
         [showSoftDelete]="canEdit()"
-        [showActiveToggle]="false"
+        [showActiveToggle]="canEdit()"
         [showComment]="false"
         [showCancel]="true"
         [serverErrors]="formErrors()"

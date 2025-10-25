@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core'
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core'
 import { NzTableModule } from 'ng-zorro-antd/table'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzTagModule } from 'ng-zorro-antd/tag'
@@ -7,11 +7,12 @@ import { CommonModule, DatePipe } from '@angular/common'
 
 import type { CustomerRowVm } from '../../../service/customers/customers-list.types'
 import type { AppRole } from 'apps/shared/dtos/user-roles.dto'
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'
 
 @Component({
   selector: 'app-customers-table',
   standalone: true,
-  imports: [CommonModule, NzTableModule, NzButtonModule, NzTagModule, NzIconModule, DatePipe],
+  imports: [CommonModule, NzTableModule, NzButtonModule, NzTagModule, NzIconModule, DatePipe, NzTooltipModule],
   templateUrl: './customers-table.component.html',
   styleUrl: './customers-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush

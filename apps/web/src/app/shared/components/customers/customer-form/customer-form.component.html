@@ -29,15 +29,17 @@
         <label for="customer-active">Aktywny</label>
       </div>
       <div nz-form-control nz-col [nzSm]="18" [nzXs]="24">
-        <label nz-switch>
-          <input
-            id="customer-active"
-            type="checkbox"
-            nz-switch-input
-            formControlName="isActive"
-            [disabled]="isReadonly()"
-          />
+        <label
+          nz-checkbox
+          formControlName="isActive"
+          [nzId]="'customer-active'"
+          [nzDisabled]="isReadonly()"
+        >
+          <span>Tak</span>
         </label>
+        @if (isActiveError()) {
+          <div class="customer-form__error" nz-form-explain>{{ isActiveError() }}</div>
+        }
       </div>
     </div>
   }

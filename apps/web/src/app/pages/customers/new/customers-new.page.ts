@@ -72,7 +72,7 @@ export class CustomersNewPageComponent {
       next: (customer) => {
         this.submitting.set(false)
         this.message.success(`Kontrahent "${customer.name}" został utworzony.`)
-        this.router.navigate(['/customers', customer.id])
+        this.navigateToList()
       },
       error: (error) => {
         this.submitting.set(false)
@@ -90,7 +90,7 @@ export class CustomersNewPageComponent {
       return
     }
 
-    this.router.navigate(['/customers'])
+    this.navigateToList()
   }
 
   private mapErrorToForm(error: any): ServerValidationErrors {
@@ -132,6 +132,10 @@ export class CustomersNewPageComponent {
     }
 
     return { generalError: 'Nie udało się utworzyć kontrahenta. Spróbuj ponownie.' }
+  }
+
+  private navigateToList(): void {
+    this.router.navigate(['/customers'], { state: { refresh: true } })
   }
 }
 

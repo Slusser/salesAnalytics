@@ -1,6 +1,6 @@
 <nz-modal
   [nzVisible]="open()"
-  [nzTitle]="title()"
+  [nzTitle]="displayTitle()"
   [nzOkText]="confirmLabel()"
   [nzCancelText]="cancelLabel()"
   [nzOkLoading]="loading()"
@@ -8,6 +8,11 @@
   (nzOnOk)="onOk()"
 >
   <p>{{ description() }}</p>
+  @if (hasCustomerName()) {
+    <p>
+      <strong>{{ displayCustomerName() }}</strong>
+    </p>
+  }
 </nz-modal>
 
 

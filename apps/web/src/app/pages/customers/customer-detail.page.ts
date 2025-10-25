@@ -121,12 +121,19 @@ export class CustomerDetailPage {
       return
     }
 
-    if (trimmedName === this.customer()!.name) {
+    const currentIsActive = this.customer()!.isActive
+    const shouldUpdateName = trimmedName !== this.customer()!.name
+    const shouldUpdateIsActive = payload.isActive !== currentIsActive
+
+    if (!shouldUpdateName && !shouldUpdateIsActive) {
       this.message.info('Brak zmian do zapisania.')
       return
     }
 
-    const command: UpdateCustomerCommand = { name: trimmedName }
+    const command: UpdateCustomerCommand = {
+      ...(shouldUpdateName ? { name: trimmedName } : {}),
+      ...(shouldUpdateIsActive ? { isActive: payload.isActive } : {})
+    }
     this.patchState({ saving: true, error: null, formErrors: null })
 
     this.service
@@ -134,7 +141,7 @@ export class CustomerDetailPage {
       .pipe(finalize(() => this.patchState({ saving: false })))
       .subscribe({
         next: (response) => {
-          this.handleSuccess(response, 'Dane kontrahenta zostały zaktualizowane.')
+          this.handleSuccess(response, 'Dane kontrahenta zostały zaktualizowane.', { redirectToList: true })
         },
         error: (err) => {
           this.handleMutationError(err, 'Aktualizacja kontrahenta nie powiodła się.', 'update')
@@ -183,7 +190,9 @@ export class CustomerDetailPage {
       .pipe(finalize(() => this.patchState({ deleting: false, showDeleteDialog: false })))
       .subscribe({
         next: (response) => {
-          this.handleSuccess(response, 'Kontrahent został oznaczony jako usunięty.')
+          this.handleSuccess(response, 'Kontrahent został oznaczony jako usunięty.', {
+            redirectToList: true
+          })
         },
         error: (err) => {
           this.handleMutationError(err, 'Nie udało się usunąć kontrahenta.', 'delete')
@@ -239,10 +248,17 @@ export class CustomerDetailPage {
     this.state.update((prev) => ({ ...prev, ...patch }))
   }
 
-  private handleSuccess(response: any, message: string): void {
+  private handleSuccess(response: any, message: string, options?: { redirectToList?: boolean }): void {
     const vm = mapToViewModel(response, { roles: this.currentRoles() })
     this.patchState({ customer: vm, error: null, formErrors: null })
     this.message.success(message)
+    if (options?.redirectToList) {
+      this.redirectToList()
+    }
+  }
+
+  private redirectToList(): void {
+    void this.router.navigate(['/customers'], { state: { refresh: true } })
   }
 
   private handleMutationError(error: unknown, fallbackMessage: string, context: 'update' | 'restore' | 'delete'): void {
@@ -273,6 +289,12 @@ export class CustomerDetailPage {
 
     if (apiError.code === 'CUSTOMERS_NAME_TAKEN') {
       this.message.error('Nazwa kontrahenta już istnieje.')
+      return
+    }
+
+    if (apiError.code === 'CUSTOMERS_UPDATE_INVALID_STATUS') {
+      this.message.error('Nie można zaktualizować statusu kontrahenta.')
+      this.loadCustomer()
       return
     }
 
@@ -307,6 +329,9 @@ export class CustomerDetailPage {
         const normalized = detail.toLowerCase()
         if (normalized.includes('name')) {
           fieldErrors['name'] = detail
+        }
+        if (normalized.includes('active')) {
+          fieldErrors['isActive'] = detail
         }
       })
 

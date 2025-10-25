@@ -18,7 +18,7 @@ import {
 } from '@angular/forms'
 import { NzFormModule } from 'ng-zorro-antd/form'
 import { NzInputModule } from 'ng-zorro-antd/input'
-import { NzSwitchModule } from 'ng-zorro-antd/switch'
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox'
 import { NzAlertModule } from 'ng-zorro-antd/alert'
 import { NzButtonModule } from 'ng-zorro-antd/button'
 import { NzGridModule } from 'ng-zorro-antd/grid'
@@ -37,7 +37,7 @@ const CUSTOMER_NAME_MAX_LENGTH = 120
     ReactiveFormsModule,
     NzFormModule,
     NzInputModule,
-    NzSwitchModule,
+    NzCheckboxModule,
     NzAlertModule,
     NzButtonModule,
     NzGridModule,
@@ -109,6 +109,16 @@ export class CustomerFormComponent {
     }
 
     return ''
+  })
+  protected readonly isActiveError = computed(() => {
+    const control = this.form.controls.isActive
+    const serverError = control.getError('server')
+
+    if (!serverError) {
+      return ''
+    }
+
+    return serverError
   })
   protected readonly isSubmitting = computed(() => this.submittingSignal())
   protected readonly isReadonly = computed(() => this.readonlySignal())
@@ -201,6 +211,7 @@ export class CustomerFormComponent {
       .subscribe((errors) => {
         this.form.setErrors(null)
         this.form.controls.name.setErrors(null)
+        this.form.controls.isActive.setErrors(null)
 
         if (!errors) {
           return
@@ -209,6 +220,12 @@ export class CustomerFormComponent {
         if (errors.fieldErrors?.name) {
           this.form.controls.name.setErrors({
             server: errors.fieldErrors.name
+          })
+        }
+
+        if (errors.fieldErrors?.isActive) {
+          this.form.controls.isActive.setErrors({
+            server: errors.fieldErrors.isActive
           })
         }
 
@@ -262,6 +279,21 @@ export class CustomerFormComponent {
         if (formErrors['server']) {
           const { server, ...rest } = formErrors
           this.form.setErrors(Object.keys(rest).length ? rest : null)
+        }
+
+        this.serverErrorsSignal.set(null)
+      })
+    this.form.controls.isActive.valueChanges
+      .pipe(
+        filter(() => !!this.serverErrorsSignal()),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        const control = this.form.controls.isActive
+        const currentErrors = control.errors ?? {}
+        if (currentErrors['server']) {
+          const { server, ...rest } = currentErrors
+          control.setErrors(Object.keys(rest).length ? rest : null)
         }
 
         this.serverErrorsSignal.set(null)

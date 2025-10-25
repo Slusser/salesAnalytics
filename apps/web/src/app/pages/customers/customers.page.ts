@@ -70,9 +70,15 @@ export class CustomersPage {
   protected readonly confirmDialogOpen = this.service.confirmDialogOpen
   protected readonly confirmDialogTitle = this.service.confirmDialogTitle
   protected readonly confirmDialogDescription = this.service.confirmDialogDescription
+  protected readonly confirmDialogCustomerName = this.service.confirmDialogCustomerName
   protected readonly confirmDialogLoading = this.service.confirmDialogLoading
 
   constructor() {
+    const navigation = this.router.getCurrentNavigation()
+    if (navigation?.extras.state?.['refresh']) {
+      queueMicrotask(() => this.service.refetch())
+    }
+
     effect(() => {
       if (this.showError()) {
         console.error('Customers list error', this.error())

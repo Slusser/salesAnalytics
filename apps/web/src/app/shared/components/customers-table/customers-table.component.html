@@ -47,7 +47,9 @@
                   nz-button
                   nzType="link"
                   nzDanger
+                  nz-tooltip
                   (click)="onSoftDelete(item)"
+                  [nzTooltipTitle]="'Usuń ' + item.name"
                 >
                   <span nz-icon nzType="delete"></span>
                   Usuń

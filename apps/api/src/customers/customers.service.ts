@@ -333,10 +333,10 @@ export class CustomersService {
       })
     }
 
-    if (nextDeletedAtCandidate !== null && nextIsActive !== false) {
+    if (nextDeletedAtCandidate !== null && nextIsActive === false) {
       throw new BadRequestException({
         code: 'CUSTOMERS_UPDATE_VALIDATION',
-        message: 'deletedAt może być ustawione tylko, gdy isActive=false.'
+        message: 'deletedAt może być ustawione tylko, gdy isActive==false.'
       })
     }
 
