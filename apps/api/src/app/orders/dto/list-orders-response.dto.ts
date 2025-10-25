@@ -2,24 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 
 import type { ListOrdersResponse, OrderListItemDto } from 'apps/shared/dtos/orders.dto'
-import type { CustomerDto } from 'apps/shared/dtos/customers.dto'
-import type { UserSummaryDto } from 'apps/shared/dtos/user-roles.dto'
-
-class OrderCustomerDto implements Pick<CustomerDto, 'id' | 'name'> {
-  @ApiProperty({ description: 'Identyfikator klienta', format: 'uuid' })
-  id!: string
-
-  @ApiProperty({ description: 'Nazwa klienta' })
-  name!: string
-}
-
-class OrderCreatedByDto implements UserSummaryDto {
-  @ApiProperty({ description: 'Identyfikator użytkownika', format: 'uuid' })
-  id!: string
-
-  @ApiProperty({ description: 'Wyświetlana nazwa użytkownika' })
-  displayName!: string
-}
 
 export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiProperty({ description: 'Identyfikator zamówienia', format: 'uuid' })
@@ -28,8 +10,8 @@ export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiProperty({ description: 'Numer zamówienia' })
   orderNo!: string
 
-  @ApiProperty({ description: 'Klient powiązany z zamówieniem', type: OrderCustomerDto })
-  customer!: OrderCustomerDto
+  @ApiProperty({ description: 'Identyfikator klienta powiązanego z zamówieniem', format: 'uuid' })
+  customerId!: string
 
   @ApiProperty({ description: 'Data zamówienia', format: 'date' })
   orderDate!: string
@@ -64,8 +46,8 @@ export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiPropertyOptional({ description: 'Suma brutto w EUR (jeśli dotyczy)', type: Number })
   totalGrossEur!: number | null
 
-  @ApiProperty({ description: 'Użytkownik tworzący zamówienie', type: OrderCreatedByDto })
-  createdBy!: OrderCreatedByDto
+  @ApiProperty({ description: 'Identyfikator użytkownika tworzącego zamówienie', format: 'uuid' })
+  createdBy!: string
 
   @ApiProperty({ description: 'Data utworzenia rekordu', format: 'date-time' })
   createdAt!: string

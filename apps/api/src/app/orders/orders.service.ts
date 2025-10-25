@@ -10,6 +10,7 @@ import {
 
 import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
 import type {
+  BaseOrderCommand,
   CreateOrderCommand,
   DeleteOrderCommand,
   ListOrdersQuery,
@@ -193,7 +194,93 @@ export class OrdersService {
     }
   }
 
-  private normalizeCommand(command: CreateOrderCommand): CreateOrderCommand {
+  async update(
+    orderId: string,
+    command: UpdateOrderCommand,
+    user: CustomerMutatorContext
+  ): Promise<OrderDetailDto> {
+    if (!user) {
+      throw new ForbiddenException('Brak uwierzytelnionego użytkownika.')
+    }
+
+    const roles = user.actorRoles ?? []
+    const hasMutationRole = roles.some((role) => role === 'editor' || role === 'owner')
+
+    if (!hasMutationRole) {
+      throw new ForbiddenException({
+        code: 'ORDERS_UPDATE_FORBIDDEN',
+        message: 'Brak wymaganych ról do aktualizacji zamówienia.'
+      })
+    }
+
+    const actorId = user.actorId
+
+    if (!actorId) {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_UPDATE_FAILED',
+        message: 'Brak identyfikatora użytkownika wykonującego operację.'
+      })
+    }
+
+    this.logger.debug(
+      `Rozpoczynam aktualizację zamówienia ${this.maskOrderId(orderId)} przez użytkownika ${actorId}.`
+    )
+
+    const existing = await this.repository.findByIdForUpdate(orderId).catch((error) => {
+      this.logger.error(
+        `Błąd pobierania zamówienia ${orderId} przed aktualizacją`,
+        error as Error
+      )
+
+      throw new InternalServerErrorException({
+        code: 'ORDERS_UPDATE_FAILED',
+        message: 'Nie udało się przygotować aktualizacji zamówienia.'
+      })
+    })
+
+    if (!existing) {
+      throw new NotFoundException({
+        code: 'ORDER_NOT_FOUND',
+        message: 'Nie znaleziono zamówienia.'
+      })
+    }
+
+    if (existing.deleted_at) {
+      throw new ForbiddenException({
+        code: 'ORDERS_UPDATE_FORBIDDEN',
+        message: 'Nie można aktualizować usuniętego zamówienia.'
+      })
+    }
+
+    const normalizedCommand = this.normalizeCommand(command)
+
+    this.validateCommand(normalizedCommand)
+
+    try {
+      return await this.repository.update({
+        orderId,
+        command: normalizedCommand,
+        actorId
+      })
+    } catch (error) {
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error
+      }
+
+      this.logger.error(`Nie udało się zaktualizować zamówienia ${orderId}`, error as Error)
+
+      throw new InternalServerErrorException({
+        code: 'ORDERS_UPDATE_FAILED',
+        message: 'Nie udało się zaktualizować zamówienia.'
+      })
+    }
+  }
+
+  private normalizeCommand<T extends BaseOrderCommand>(command: T): T {
     const trimmedComment = command.comment?.trim() || undefined
     const normalizedOrderNo = command.orderNo.trim().toUpperCase()
     const normalizedItemName = command.itemName.trim()
@@ -203,10 +290,10 @@ export class OrdersService {
       orderNo: normalizedOrderNo,
       itemName: normalizedItemName,
       comment: trimmedComment
-    }
+    } as T
   }
 
-  private validateCommand(command: CreateOrderCommand): void {
+  private validateCommand(command: BaseOrderCommand): void {
     if (command.isEur) {
       if (command.eurRate === undefined) {
         throw new BadRequestException({

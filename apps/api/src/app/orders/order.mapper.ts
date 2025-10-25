@@ -45,7 +45,7 @@ export class OrderMapper {
     return {
       id: row.id,
       orderNo: row.order_no,
-      customer_id: row.customer_id,
+      customerId: row.customer_id,
       orderDate: row.order_date,
       itemName: row.item_name,
       quantity: row.quantity,

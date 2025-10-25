@@ -1,9 +1,7 @@
 import type { Tables } from "../../db/database.types"
 
 import type { PaginatedResponse, UUID } from "./common.dto"
-import type { CustomerDto } from "./customers.dto"
 import type { UserSummaryDto } from "./user-roles.dto"
-
 type OrderRow = Tables<"orders">
 
 /**
@@ -12,7 +10,7 @@ type OrderRow = Tables<"orders">
 export interface OrderListItemDto {
   id: OrderRow["id"]
   orderNo: OrderRow["order_no"]
-  customer_id: OrderRow["customer_id"]
+  customerId: OrderRow["customer_id"]
   orderDate: OrderRow["order_date"]
   itemName: OrderRow["item_name"]
   quantity: OrderRow["quantity"]
