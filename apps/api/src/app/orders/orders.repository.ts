@@ -1,6 +1,6 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
 import { supabaseClient } from 'apps/db/supabase.client'
-import type { Tables } from 'apps/db/database.types'
+import type { TablesInsert, TablesUpdate } from 'apps/db/database.types'
 import type {
   CreateOrderCommand,
   DeleteOrderCommand,
@@ -60,7 +60,7 @@ export class OrdersRepository {
     const baseQuery = this.client
       .from('orders')
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const,
+        `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const,
         { count: 'exact' }
       )
       .order(SORT_FIELD_MAP[params.sortField], { ascending: params.sortDirection === 'asc' })
@@ -104,19 +104,16 @@ export class OrdersRepository {
   async findById(id: string, options: FindByIdOptions): Promise<OrderDetailDto | null> {
     const { includeDeleted } = options
 
-    let query = this.client
+    const baseQuery = this.client
       .from('orders')
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
       )
       .eq('id', id)
-      .maybeSingle()
 
-    if (!includeDeleted) {
-      query = query.is('deleted_at', null)
-    }
+    const filteredQuery = includeDeleted ? baseQuery : baseQuery.is('deleted_at', null)
 
-    const { data, error } = await query
+    const { data, error } = await filteredQuery.maybeSingle()
 
     if (error) {
       this.logger.error(`Nie udało się pobrać zamówienia ${id}`, error)
@@ -155,7 +152,7 @@ export class OrdersRepository {
   async create(params: CreateParams): Promise<OrderDetailDto> {
     const { command, actorId } = params
 
-    const payload: Partial<Tables<'orders'>> = {
+    const payload: TablesInsert<'orders'> = {
       order_no: command.orderNo,
       customer_id: command.customerId,
       order_date: command.orderDate,
@@ -225,7 +222,7 @@ export class OrdersRepository {
   async update(params: UpdateParams): Promise<OrderDetailDto> {
     const { command, orderId, actorId } = params
 
-    const payload: Partial<Tables<'orders'>> = {
+    const payload: TablesUpdate<'orders'> = {
       order_no: command.orderNo,
       customer_id: command.customerId,
       order_date: command.orderDate,
@@ -282,7 +279,7 @@ export class OrdersRepository {
   async softDelete(params: SoftDeleteParams): Promise<void> {
     const { command, actorId } = params
 
-    const payload: Partial<Tables<'orders'>> = {
+    const payload: TablesUpdate<'orders'> = {
       deleted_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }
