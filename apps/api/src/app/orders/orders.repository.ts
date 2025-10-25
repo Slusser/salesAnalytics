@@ -1,5 +1,4 @@
 import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
-import type { SupabaseClient } from 'apps/db/supabase.client'
 import { supabaseClient } from 'apps/db/supabase.client'
 import type { Tables } from 'apps/db/database.types'
 import type {
@@ -53,7 +52,7 @@ const SORT_FIELD_MAP: Record<ListParams['sortField'], string> = {
 
 @Injectable()
 export class OrdersRepository {
-  private readonly client: SupabaseClient = supabaseClient
+  private readonly client = supabaseClient
   private readonly logger = new Logger(OrdersRepository.name)
 
   async list(params: ListParams): Promise<ListOrdersResponse> {
