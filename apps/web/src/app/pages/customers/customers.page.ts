@@ -70,6 +70,7 @@ export class CustomersPage {
   protected readonly confirmDialogOpen = this.service.confirmDialogOpen
   protected readonly confirmDialogTitle = this.service.confirmDialogTitle
   protected readonly confirmDialogDescription = this.service.confirmDialogDescription
+  protected readonly confirmDialogLoading = this.service.confirmDialogLoading
 
   constructor() {
     effect(() => {

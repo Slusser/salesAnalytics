@@ -15,6 +15,7 @@ export class ConfirmDialogComponent {
   readonly description = input<string>('Czy na pewno chcesz kontynuować?')
   readonly confirmLabel = input<string>('Potwierdź')
   readonly cancelLabel = input<string>('Anuluj')
+  readonly loading = input<boolean>(false)
 
   readonly confirm = output<void>({ alias: 'onConfirm' })
   readonly close = output<void>({ alias: 'onClose' })

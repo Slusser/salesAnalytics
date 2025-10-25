@@ -3,10 +3,25 @@ import { computed, effect, inject, Injectable, signal } from '@angular/core'
 import { toSignal } from '@angular/core/rxjs-interop'
 import { ActivatedRoute, Params, Router } from '@angular/router'
 import { NzMessageService } from 'ng-zorro-antd/message'
-import { catchError, distinctUntilChanged, map, of, shareReplay, switchMap, tap } from 'rxjs'
+import {
+  EMPTY,
+  Observable,
+  catchError,
+  distinctUntilChanged,
+  finalize,
+  map,
+  of,
+  shareReplay,
+  tap
+} from 'rxjs'
 
-import type { CustomerDto, ListCustomersQuery, ListCustomersResponse } from 'apps/shared/dtos/customers.dto'
-import type { AppRole, UserRoleValue } from 'apps/shared/dtos/user-roles.dto'
+import type {
+  CustomerDetailResponse,
+  CustomerDto,
+  ListCustomersQuery,
+  ListCustomersResponse
+} from 'apps/shared/dtos/customers.dto'
+import type { AppRole } from 'apps/shared/dtos/user-roles.dto'
 
 import { AuthSessionService } from '../auth/auth-session.service'
 
@@ -47,10 +62,12 @@ export class CustomersListService {
   readonly data = signal<ListCustomersResponse | null>(null)
 
   private readonly confirmation = signal<ConfirmationState>({ open: false, title: '' })
+  private readonly mutationInProgress = signal(false)
 
   readonly confirmDialogOpen = computed(() => this.confirmation().open)
   readonly confirmDialogTitle = computed(() => this.confirmation().title)
   readonly confirmDialogDescription = computed(() => this.confirmation().description ?? '')
+  readonly confirmDialogLoading = computed(() => this.mutationInProgress())
 
   constructor() {
     this.initializeRoles()
@@ -97,6 +114,10 @@ export class CustomersListService {
   }
 
   askSoftDelete(customer: CustomerRowVm): void {
+    if (this.mutationInProgress()) {
+      return
+    }
+
     this.confirmation.set({
       open: true,
       action: 'soft-delete',
@@ -107,6 +128,10 @@ export class CustomersListService {
   }
 
   askRestore(customer: CustomerRowVm): void {
+    if (this.mutationInProgress()) {
+      return
+    }
+
     this.confirmation.set({
       open: true,
       action: 'restore',
@@ -119,16 +144,19 @@ export class CustomersListService {
   confirmDialogConfirm(): void {
     const state = this.confirmation()
     if (!state.open || !state.customer || !state.action) {
-      this.confirmation.set({ open: false, title: '' })
+      this.resetConfirmation()
       return
     }
 
-    this.confirmation.set({ open: false, title: '' })
-    this.message.info('Akcja wykracza poza zakres implementacji listy.')
+    this.performAction(state.customer, state.action)
   }
 
   confirmDialogClose(): void {
-    this.confirmation.set({ open: false, title: '' })
+    if (this.mutationInProgress()) {
+      return
+    }
+
+    this.resetConfirmation()
   }
 
   canMutate(): boolean {
@@ -171,6 +199,99 @@ export class CustomersListService {
     const dtoParams = this.toDtoParams(params)
     const httpParams = new HttpParams({ fromObject: this.toHttpParams(dtoParams) })
     return this.http.get<ListCustomersResponse>('/api/customers', { params: httpParams }).pipe(shareReplay(1))
+  }
+
+  private performAction(customer: CustomerRowVm, action: 'soft-delete' | 'restore'): void {
+    if (this.mutationInProgress()) {
+      return
+    }
+
+    this.mutationInProgress.set(true)
+
+    let request$: Observable<CustomerDetailResponse>
+
+    if (action === 'soft-delete') {
+      request$ = this.deleteCustomer(customer.id)
+    } else {
+      request$ = this.restoreCustomer(customer.id)
+    }
+
+    request$
+      .pipe(
+        tap((response) => {
+          this.message.success(
+            action === 'soft-delete'
+              ? `Kontrahent "${response.name}" został oznaczony jako usunięty.`
+              : `Kontrahent "${response.name}" został przywrócony.`
+          )
+
+          this.resetConfirmation()
+          this.refetch()
+        }),
+        catchError((error) => this.handleMutationError(error, action)),
+        finalize(() => {
+          this.mutationInProgress.set(false)
+        })
+      )
+      .subscribe({ next: () => {}, error: () => {} })
+  }
+
+  private deleteCustomer(customerId: string): Observable<CustomerDetailResponse> {
+    return this.http.delete<CustomerDetailResponse>(`/api/customers/${customerId}`)
+  }
+
+  private restoreCustomer(customerId: string): Observable<CustomerDetailResponse> {
+    const payload = {
+      isActive: true,
+      deletedAt: null
+    }
+    return this.http.put<CustomerDetailResponse>(`/api/customers/${customerId}`, payload)
+  }
+
+  private handleMutationError(error: unknown, action: 'soft-delete' | 'restore'): Observable<never> {
+    const defaultMessage =
+      action === 'soft-delete'
+        ? 'Nie udało się usunąć kontrahenta. Spróbuj ponownie później.'
+        : 'Nie udało się przywrócić kontrahenta. Spróbuj ponownie później.'
+
+    const message = this.extractErrorMessage(error) ?? defaultMessage
+
+    this.message.error(message)
+    this.resetConfirmation()
+
+    return EMPTY
+  }
+
+  private extractErrorMessage(error: unknown): string | null {
+    if (!error) {
+      return null
+    }
+
+    if (typeof error === 'string') {
+      return error
+    }
+
+    if (error instanceof Error) {
+      return error.message
+    }
+
+    if (typeof error === 'object') {
+      const maybeMessage = (error as { message?: string }).message
+      if (maybeMessage) {
+        return maybeMessage
+      }
+
+      const maybeNestedMessage = (error as { error?: { message?: string } }).error?.message
+      if (maybeNestedMessage) {
+        return maybeNestedMessage
+      }
+    }
+
+    return null
+  }
+
+  private resetConfirmation(): void {
+    this.confirmation.set({ open: false, title: '' })
   }
 
   private navigateWithParams(vm: CustomersQueryParamsVm): void {
