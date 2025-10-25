@@ -19,14 +19,7 @@ export interface OrderListRow {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  customers: {
-    id: string
-    name: string
-  }
-  created_by_user: {
-    id: string
-    display_name: string | null
-  } | null
+  customer_id: string
   created_by: string
 }
 
@@ -43,7 +36,7 @@ const logger = new Logger('OrderMapper')
  */
 export class OrderMapper {
   static toListDto(row: OrderListRow): OrderListItemDto {
-    const createdBy = row.created_by_user
+    const createdBy = row.created_by
 
     if (!createdBy) {
       logger.warn(`Rekord zamówienia ${row.id} nie zawiera danych o użytkowniku tworzącym.`)
@@ -52,10 +45,7 @@ export class OrderMapper {
     return {
       id: row.id,
       orderNo: row.order_no,
-      customer: {
-        id: row.customers.id,
-        name: row.customers.name
-      },
+      customer_id: row.customer_id,
       orderDate: row.order_date,
       itemName: row.item_name,
       quantity: row.quantity,
@@ -67,10 +57,7 @@ export class OrderMapper {
       totalNetPln: row.total_net_pln,
       totalGrossPln: row.total_gross_pln,
       totalGrossEur: row.total_gross_eur,
-      createdBy: {
-        id: createdBy?.id ?? row.created_by,
-        displayName: createdBy?.display_name ?? 'Nieznany użytkownik'
-      },
+      createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       deletedAt: row.deleted_at

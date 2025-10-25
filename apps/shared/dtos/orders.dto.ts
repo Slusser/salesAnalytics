@@ -12,7 +12,7 @@ type OrderRow = Tables<"orders">
 export interface OrderListItemDto {
   id: OrderRow["id"]
   orderNo: OrderRow["order_no"]
-  customer: Pick<CustomerDto, "id" | "name">
+  customer_id: OrderRow["customer_id"]
   orderDate: OrderRow["order_date"]
   itemName: OrderRow["item_name"]
   quantity: OrderRow["quantity"]
@@ -24,7 +24,7 @@ export interface OrderListItemDto {
   totalNetPln: OrderRow["total_net_pln"]
   totalGrossPln: OrderRow["total_gross_pln"]
   totalGrossEur: OrderRow["total_gross_eur"]
-  createdBy: UserSummaryDto
+  createdBy: OrderRow["created_by"]
   createdAt: OrderRow["created_at"]
   updatedAt: OrderRow["updated_at"]
   deletedAt: OrderRow["deleted_at"]
