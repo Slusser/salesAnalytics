@@ -23,40 +23,88 @@
     </div>
   </div>
 
-  <div nz-form-item nz-row class="customer-form__field">
-    <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
-      <label for="customer-active">Aktywny</label>
+  @if (showActiveToggle()) {
+    <div nz-form-item nz-row class="customer-form__field">
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="customer-active">Aktywny</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="18" [nzXs]="24">
+        <label nz-switch>
+          <input
+            id="customer-active"
+            type="checkbox"
+            nz-switch-input
+            formControlName="isActive"
+            [disabled]="isReadonly()"
+          />
+        </label>
+      </div>
     </div>
-    <div nz-form-control nz-col [nzSm]="18" [nzXs]="24">
-      <label nz-switch>
-        <input
-          id="customer-active"
-          type="checkbox"
-          nz-switch-input
-          formControlName="isActive"
-        />
-      </label>
+  }
+
+  @if (showCommentField()) {
+    <div nz-form-item nz-row class="customer-form__field">
+      <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+        <label for="customer-comment">Komentarz</label>
+      </div>
+      <div nz-form-control nz-col [nzSm]="18" [nzXs]="24">
+        <textarea
+          nz-input
+          id="customer-comment"
+          formControlName="comment"
+          rows="3"
+          placeholder="Dodaj komentarz"
+          [disabled]="isReadonly()"
+        ></textarea>
+      </div>
     </div>
-  </div>
+  }
 
   <div class="customer-form__actions">
     <app-loader-button
       label="Zapisz"
       [loading]="isSubmitting()"
-      [disabled]="form.invalid"
+      [disabled]="form.invalid || isReadonly()"
       htmlType="submit"
       nzType="primary"
     ></app-loader-button>
 
-    <button
-      nz-button
-      type="button"
-      nzType="default"
-      (click)="onCancel()"
-      [disabled]="isSubmitting()"
-    >
-      Anuluj
-    </button>
+    @if (showRestoreButton()) {
+      <button
+        nz-button
+        type="button"
+        nzType="default"
+        (click)="onRestore()"
+        [disabled]="isSubmitting()"
+      >
+        Przywróć
+      </button>
+    }
+
+    @if (showSoftDeleteButton()) {
+      <button
+        nz-button
+        type="button"
+        nzType="default"
+        nzDanger
+        (click)="onSoftDelete()"
+        [disabled]="isSubmitting()"
+      >
+        Usuń
+      </button>
+    }
+
+    @if (showCancelButton()) {
+      <button
+        nz-button
+        type="button"
+        nzType="default"
+        (click)="onCancel()"
+        [disabled]="isSubmitting()"
+      >
+        Anuluj
+      </button>
+    }
   </div>
 </form>
 

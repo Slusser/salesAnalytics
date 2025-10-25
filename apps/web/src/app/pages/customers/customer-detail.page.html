@@ -1,0 +1,102 @@
+<section class="customer-detail" [class.customer-detail--loading]="loading()">
+  @if (loading()) {
+    <div class="customer-detail__loading">Ładowanie danych kontrahenta...</div>
+  }
+
+  @if (notFound()) {
+    <nz-alert
+      nzType="warning"
+      nzMessage="Kontrahent nie został znaleziony."
+      nzShowIcon
+      class="customer-detail__alert"
+    ></nz-alert>
+    <button nz-button nzType="default" (click)="onBack()">Wróć do listy</button>
+  }
+
+  @if (!loading() && customer()) {
+    <nz-card class="customer-detail__card" [nzTitle]="customer()?.name">
+      <div class="customer-detail__header">
+        <div class="customer-detail__meta">
+          <div class="customer-detail__badge-group">
+          @if (isSoftDeleted()) {
+            <nz-tag nzColor="volcano">Oznaczony jako usunięty</nz-tag>
+          } @else if (!customer()?.isActive) {
+            <nz-tag nzColor="default">Nieaktywny</nz-tag>
+          } @else {
+            <nz-tag nzColor="green">Aktywny</nz-tag>
+          }
+          </div>
+          <div class="customer-detail__meta-item">
+            <span class="customer-detail__meta-label">ID:</span>
+            <span>{{ customer()?.id }}</span>
+          </div>
+          <div class="customer-detail__meta-item">
+            <span class="customer-detail__meta-label">Utworzono:</span>
+            <span>{{ customer()?.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </div>
+          <div class="customer-detail__meta-item">
+            <span class="customer-detail__meta-label">Ostatnia aktualizacja:</span>
+            <span>{{ customer()?.updatedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </div>
+          @if (customer()?.deletedAt) {
+            <div class="customer-detail__meta-item">
+              <span class="customer-detail__meta-label">Usunięto:</span>
+              <span>{{ customer()?.deletedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="customer-detail__actions">
+          <button nz-button nzType="default" (click)="onBack()">Wróć</button>
+        </div>
+      </div>
+
+      @if (isSoftDeleted()) {
+        <nz-alert
+          nzType="warning"
+          nzMessage="Ten kontrahent jest oznaczony jako usunięty. Nie będzie widoczny dla użytkowników z rolą viewer."
+          nzShowIcon
+          class="customer-detail__alert"
+        ></nz-alert>
+      }
+
+      @if (error()) {
+        <nz-alert
+          nzType="error"
+          [nzMessage]="error()?.message ?? ''"
+          nzShowIcon
+          class="customer-detail__alert customer-detail__error-alert"
+        ></nz-alert>
+      }
+
+      <app-customer-form
+        [initialValue]="formInitialValue()"
+        [submitting]="saving()"
+        [readonly]="!canEdit()"
+        [showRestore]="canRestore() && isSoftDeleted()"
+        [showSoftDelete]="canEdit()"
+        [showActiveToggle]="false"
+        [showComment]="false"
+        [showCancel]="true"
+        [serverErrors]="formErrors()"
+        (onSubmit)="onSubmit($event)"
+        (onRestore)="onRestore()"
+        (onSoftDelete)="onSoftDelete()"
+        (onCancel)="onBack()"
+      ></app-customer-form>
+    </nz-card>
+  }
+
+  <app-confirm-dialog
+    [open]="showDeleteDialog()"
+    title="Usuń kontrahenta"
+    description="Czy na pewno chcesz oznaczyć tego kontrahenta jako usuniętego?"
+    confirmLabel="Usuń"
+    cancelLabel="Anuluj"
+    [loading]="deleting()"
+    (onConfirm)="onConfirmDelete()"
+    (onClose)="onCancelDelete()"
+  ></app-confirm-dialog>
+</section>
+
+

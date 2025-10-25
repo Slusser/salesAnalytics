@@ -55,6 +55,13 @@ export const appRoutes: Route[] = [
           import('./pages/customers/customers.page').then((m) => m.CustomersPage),
       },
       {
+        path: 'customers/:id',
+        canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
+        data: { title: 'Kontrahent — Detal' },
+        loadComponent: () =>
+          import('./pages/customers/customer-detail.page').then((m) => m.CustomerDetailPage),
+      },
+      {
         path: '403',
         loadComponent: () =>
           import('./pages/error/forbidden.page').then((m) => m.ForbiddenPage),
