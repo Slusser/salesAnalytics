@@ -1,0 +1,89 @@
+<section class="orders-page">
+  <header class="page-header">
+    <h2>Zamówienia</h2>
+    <div class="page-header__actions">
+      <app-manual-refresh-button
+        [disabled]="loading()"
+        (onClick)="onManualRefresh()"
+      />
+      <button
+        nz-button
+        nzType="default"
+        nzShape="round"
+        [disabled]="loading() || exportInProgress()"
+        (click)="onExport()"
+      >
+        Eksportuj XLSX
+      </button>
+    </div>
+  </header>
+
+  <app-orders-toolbar
+    [filters]="params()"
+    [loading]="loading()"
+    [permissions]="permissions()"
+    (filtersChange)="onFiltersChange($event)"
+    (filtersReset)="onFiltersReset()"
+    (includeDeletedToggle)="onIncludeDeletedToggle($event)"
+  />
+
+  @if (showError()) {
+    <nz-alert
+      nzType="error"
+      nzMessage="Nie udało się pobrać listy zamówień"
+      nzDescription="Spróbuj odświeżyć stronę lub zmień filtry."
+      [nzShowIcon]="true"
+    >
+      <ng-template #nzAction>
+        <button nz-button nzType="primary" (click)="onRetry()">
+          Spróbuj ponownie
+        </button>
+      </ng-template>
+    </nz-alert>
+  }
+
+  @if (showEmpty()) {
+    <app-empty-state
+      title="Brak zamówień"
+      description="Nie znaleziono zamówień dla podanych filtrów."
+      [hasCta]="true"
+      (onClear)="onFiltersReset()"
+    />
+  } @else {
+    <app-orders-data-table
+      [rows]="items()"
+      [sort]="params().sort"
+      [loading]="loading()"
+      [permissions]="permissions()"
+      [expandedRowId]="expandedRowId()"
+      (sortChange)="onSortChange($event)"
+      (rowToggle)="onRowToggle($event)"
+      (view)="onView($event)"
+      (edit)="onEdit($event)"
+      (softDelete)="onSoftDelete($event)"
+      (restore)="onRestore($event)"
+    />
+
+    <app-pagination
+      [page]="params().page"
+      [limit]="params().limit"
+      [total]="total()"
+      [disabled]="loading()"
+      [limitOptions]="[25, 50, 100]"
+      (onPageChange)="onPageChange($event)"
+      (onLimitChange)="onLimitChange($event)"
+    />
+  }
+
+  <app-confirm-dialog
+    [open]="confirmDialogOpen()"
+    [title]="confirmDialogTitle()"
+    [description]="confirmDialogDescription()"
+    [orderNo]="confirmDialogOrderNo()"
+    [loading]="confirmDialogLoading()"
+    confirmLabel="Potwierdź"
+    cancelLabel="Anuluj"
+    (onConfirm)="onConfirmDialogConfirm()"
+    (onClose)="onConfirmDialogClose()"
+  />
+</section>

@@ -1,0 +1,18 @@
+.orders-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__side {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__switch {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+}

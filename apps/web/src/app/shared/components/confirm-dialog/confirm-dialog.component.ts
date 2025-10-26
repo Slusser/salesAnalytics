@@ -15,6 +15,7 @@ export class ConfirmDialogComponent {
   readonly title = input<string>('Potwierdzenie')
   readonly description = input<string>('Czy na pewno chcesz kontynuować?')
   readonly customerName = input<string>('')
+  readonly orderNo = input<string>('')
   readonly confirmLabel = input<string>('Potwierdź')
   readonly cancelLabel = input<string>('Anuluj')
   readonly loading = input<boolean>(false)
@@ -35,13 +36,30 @@ export class ConfirmDialogComponent {
     return name.trim()
   })
 
+  protected readonly hasOrderNo = computed(() => {
+    const value = this.orderNo()
+    return Boolean(value && value.trim())
+  })
+
+  protected readonly displayOrderNo = computed(() => {
+    const value = this.orderNo()
+    return value ? value.trim() : ''
+  })
+
   protected readonly displayTitle = computed(() => {
     const baseTitle = this.title()
     const name = this.displayCustomerName()
-    if (!name) {
-      return baseTitle
+    const orderNo = this.displayOrderNo()
+
+    if (orderNo) {
+      return `${baseTitle} – ${orderNo}`
     }
-    return `${baseTitle} – ${name}`
+
+    if (name) {
+      return `${baseTitle} – ${name}`
+    }
+
+    return baseTitle
   })
 
   readonly confirm = output<void>({ alias: 'onConfirm' })

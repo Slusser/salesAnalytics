@@ -26,6 +26,11 @@ export class MainLayoutComponent {
       route: '/customers',
       exact: true,
     },
+    {
+      label: 'Zamówienia',
+      route: '/orders',
+      exact: true,
+    },
   ];
 }
 

@@ -1,0 +1,136 @@
+<nz-table
+  nzBordered
+  nzSize="middle"
+  [nzData]="rows"
+  [nzLoading]="loading"
+  nzShowPagination="false"
+>
+  <thead>
+    <tr>
+      <th>
+        <button nz-button nzType="link" (click)="onHeaderSort('orderNo')">
+          Numer zamówienia
+          @if (isSorted('orderNo', 'asc')) {
+            <span nz-icon nzType="arrow-up" ></span>
+          } @else if (isSorted('orderNo', 'desc')) {
+            <span nz-icon nzType="arrow-down" ></span>
+          }
+        </button>
+      </th>
+      <th>
+        <button nz-button nzType="link" (click)="onHeaderSort('customerName')">
+          Kontrahent
+          @if (isSorted('customerName', 'asc')) {
+            <span nz-icon nzType="arrow-up" ></span>
+          } @else if (isSorted('customerName', 'desc')) {
+            <span nz-icon nzType="arrow-down" ></span>
+          }
+        </button>
+      </th>
+      <th>
+        <button nz-button nzType="link" (click)="onHeaderSort('orderDate')">
+          Data zamówienia
+          @if (isSorted('orderDate', 'asc')) {
+            <span nz-icon nzType="arrow-up" ></span>
+          } @else if (isSorted('orderDate', 'desc')) {
+            <span nz-icon nzType="arrow-down" ></span>
+          }
+        </button>
+      </th>
+      <th>
+        <button nz-button nzType="link" (click)="onHeaderSort('totalNetPln')">
+          Wartość netto (PLN)
+          @if (isSorted('totalNetPln', 'asc')) {
+            <span nz-icon nzType="arrow-up" ></span>
+          } @else if (isSorted('totalNetPln', 'desc')) {
+            <span nz-icon nzType="arrow-down" ></span>
+          }
+        </button>
+      </th>
+      <th>
+        <button nz-button nzType="link" (click)="onHeaderSort('createdAt')">
+          Utworzono
+          @if (isSorted('createdAt', 'asc')) {
+            <span nz-icon nzType="arrow-up" ></span>
+          } @else if (isSorted('createdAt', 'desc')) {
+            <span nz-icon nzType="arrow-down" ></span>
+          }
+        </button>
+      </th>
+      <th>Status</th>
+      <th class="actions-column">Akcje</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (order of rows; track order.id) {
+      <tr [class.row-deleted]="order.deleted">
+        <td>
+          <span class="order-no">{{ order.orderNo }}</span>
+        </td>
+        <td>
+          <span>{{ order.customerName }}</span>
+        </td>
+        <td>{{ order.orderDate | date : 'yyyy-MM-dd' }}</td>
+        <td>{{ order.netFormatted }}</td>
+        <td>{{ order.createdAt | date : 'yyyy-MM-dd HH:mm' }}</td>
+        <td>
+          @if (order.deleted) {
+            <nz-tag nzColor="volcano">Usunięte</nz-tag>
+          } @else {
+            <nz-tag nzColor="green">Aktywne</nz-tag>
+          }
+        </td>
+        <td class="actions-column">
+          <button nz-button nzType="link" (click)="onRowToggle(order.id)">
+            @if (isExpanded(order.id)) {
+              <span nz-icon nzType="up" ></span>
+            } @else {
+              <span nz-icon nzType="down" ></span>
+            }
+            Szczegóły
+          </button>
+          <button nz-button nzType="link" (click)="onView(order.id)">
+            Podgląd
+          </button>
+          @if (permissions.canMutate) {
+            <button
+              nz-button
+              nzType="link"
+              [disabled]="loading || order.rowDisabled"
+              (click)="onEdit(order.id)"
+            >
+              Edytuj
+            </button>
+            @if (!order.deleted) {
+              <button
+                nz-button
+                nzType="link"
+                nzDanger
+                [disabled]="loading || order.rowDisabled"
+                (click)="onSoftDelete(order.id)"
+              >
+                Usuń
+              </button>
+            } @else {
+              <button
+                nz-button
+                nzType="link"
+                [disabled]="loading"
+                (click)="onRestore(order.id)"
+              >
+                Przywróć
+              </button>
+            }
+          }
+        </td>
+      </tr>
+      @if (isExpanded(order.id)) {
+        <tr class="details-row">
+          <td colspan="7">
+            <app-orders-row-details-panel [order]="order" />
+          </td>
+        </tr>
+      }
+    }
+  </tbody>
+</nz-table>

@@ -1,0 +1,26 @@
+<!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
+<div class="orders-toolbar">
+  <app-orders-filter-bar
+    [value]="filterFormValue()"
+    [disabled]="loading"
+    (filtersChange)="onFiltersChange($event)"
+    (resetRequested)="onReset()"
+  />
+
+  <div class="orders-toolbar__side">
+    <button nz-button nzType="default" type="button" (click)="onReset()">
+      Resetuj filtry
+    </button>
+
+    @if (includeDeletedAllowed()) {
+      <label class="orders-toolbar__switch">
+        <span>Uwzględnij usunięte</span>
+        <nz-switch
+          [ngModel]="includeDeleted()"
+          [disabled]="loading"
+          (ngModelChange)="onIncludeDeletedChange($any($event))"
+        />
+      </label>
+    }
+  </div>
+</div>

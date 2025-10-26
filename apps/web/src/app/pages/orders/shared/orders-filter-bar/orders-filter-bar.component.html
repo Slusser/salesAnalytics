@@ -1,0 +1,31 @@
+@if (form(); as formGroup) {
+  <form class="orders-filter-bar" [formGroup]="formGroup" nz-form nzLayout="inline">
+    <nz-form-item>
+      <nz-form-label for="orderNo">Numer zamówienia</nz-form-label>
+      <nz-form-control nzErrorTip="Maksymalnie {{ orderNoMaxLength }} znaków">
+        <input
+          id="orderNo"
+          nz-input
+          formControlName="orderNo"
+          [maxlength]="orderNoMaxLength"
+          placeholder="np. ORD-2024-001"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label for="dateRange">Zakres dat</nz-form-label>
+      <nz-form-control>
+        <nz-range-picker
+          id="dateRange"
+          formControlName="dateRange"
+          nzFormat="yyyy-MM-dd"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <button nz-button nzType="default" type="button" (click)="onReset()">
+      Wyczyść
+    </button>
+  </form>
+}

@@ -1,0 +1,14 @@
+.orders-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+
+  nz-form-item {
+    min-width: 220px;
+  }
+
+  button[nz-button] {
+    align-self: center;
+  }
+}
