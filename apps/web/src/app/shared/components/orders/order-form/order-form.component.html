@@ -1,0 +1,206 @@
+<form nz-form [formGroup]="form" class="order-form" (ngSubmit)="onSubmit()">
+  <nz-alert
+    *ngIf="generalError"
+    nzType="error"
+    [nzMessage]="generalError()"
+    nzShowIcon
+    class="order-form__alert"
+  />
+
+  <div class="order-form__grid">
+    <nz-form-item>
+      <nz-form-label nzRequired for="orderNo">Numer zamówienia</nz-form-label>
+      <nz-form-control [nzErrorTip]="orderNoError()">
+        <input
+          nz-input
+          id="orderNo"
+          formControlName="orderNo"
+          maxlength="64"
+          autocomplete="off"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="customerId">Kontrahent</nz-form-label>
+      <nz-form-control [nzErrorTip]="customerError()">
+        <nz-select
+          id="customerId"
+          formControlName="customerId"
+          nzShowSearch
+          nzPlaceHolder="Wybierz kontrahenta"
+        >
+          <nz-option
+            *ngFor="let option of customersOptions()"
+            [nzLabel]="option.label"
+            [nzValue]="option.value"
+          />
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="orderDate">Data zamówienia</nz-form-label>
+      <nz-form-control [nzErrorTip]="orderDateError()">
+        <nz-date-picker
+          id="orderDate"
+          formControlName="orderDate"
+          nzFormat="yyyy-MM-dd"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="itemName">Nazwa produktu</nz-form-label>
+      <nz-form-control [nzErrorTip]="itemNameError()">
+        <input nz-input id="itemName" formControlName="itemName" maxlength="120" />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="quantity">Ilość</nz-form-label>
+      <nz-form-control [nzErrorTip]="quantityError()">
+        <nz-input-number
+          id="quantity"
+          formControlName="quantity"
+          [nzMin]="0.01"
+          [nzStep]="1"
+          [nzPrecision]="2"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="currencyCode">Waluta</nz-form-label>
+      <nz-form-control [nzErrorTip]="currencyError()">
+        <nz-select id="currencyCode" formControlName="currencyCode">
+          <nz-option nzLabel="PLN" nzValue="PLN" />
+          <nz-option nzLabel="EUR" nzValue="EUR" />
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <ng-container *ngIf="canShowEurFields()">
+      <nz-form-item>
+        <nz-form-label nzRequired for="eurRate">Kurs EUR</nz-form-label>
+        <nz-form-control [nzErrorTip]="eurRateError()">
+        <nz-input-number
+          id="eurRate"
+          formControlName="eurRate"
+          [nzMin]="0.0001"
+          [nzStep]="0.0001"
+          [nzPrecision]="4"
+        />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="totalGrossEur">Brutto EUR</nz-form-label>
+        <nz-form-control [nzErrorTip]="totalGrossEurError()">
+          <nz-input-number
+            id="totalGrossEur"
+            formControlName="totalGrossEur"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    </ng-container>
+
+    <nz-form-item>
+      <nz-form-label for="producerDiscountPct">Rabat producenta (%)</nz-form-label>
+      <nz-form-control>
+        <nz-input-number
+          id="producerDiscountPct"
+          formControlName="producerDiscountPct"
+          [nzMin]="0"
+          [nzMax]="100"
+          [nzStep]="0.1"
+          [nzPrecision]="1"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label for="distributorDiscountPct">Rabat dystrybutora (%)</nz-form-label>
+      <nz-form-control>
+        <nz-input-number
+          id="distributorDiscountPct"
+          formControlName="distributorDiscountPct"
+          [nzMin]="0"
+          [nzMax]="100"
+          [nzStep]="0.1"
+          [nzPrecision]="1"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="vatRatePct">VAT (%)</nz-form-label>
+      <nz-form-control>
+        <nz-input-number
+          id="vatRatePct"
+          formControlName="vatRatePct"
+          [nzMin]="0"
+          [nzMax]="100"
+          [nzStep]="0.1"
+          [nzPrecision]="1"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="totalNetPln">Netto PLN</nz-form-label>
+      <nz-form-control [nzErrorTip]="totalNetError()">
+        <nz-input-number
+          id="totalNetPln"
+          formControlName="totalNetPln"
+          [nzMin]="0"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="totalGrossPln">Brutto PLN</nz-form-label>
+      <nz-form-control [nzErrorTip]="totalGrossPlnError()">
+        <nz-input-number
+          id="totalGrossPln"
+          formControlName="totalGrossPln"
+          [nzMin]="0"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <nz-form-item>
+    <nz-form-label for="comment">Komentarz</nz-form-label>
+    <nz-form-control>
+      <textarea
+        nz-input
+        id="comment"
+        formControlName="comment"
+        rows="3"
+        maxlength="1000"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="order-form__actions">
+    <app-loader-button
+      type="submit"
+      [loading]="submitting()"
+      [disabled]="submitting()"
+    >
+      Zapisz zamówienie
+    </app-loader-button>
+    <button nz-button nzType="default" type="button" (click)="onCancel()" [disabled]="submitting()">
+      Anuluj
+    </button>
+  </div>
+</form>
+

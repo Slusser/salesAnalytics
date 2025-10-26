@@ -1,0 +1,43 @@
+<nz-card class="order-calculation-preview">
+  <div class="order-calculation-preview__header">
+    <h3>Podgląd kalkulacji</h3>
+    <nz-tag [nzColor]="statusTag().type === 'success' ? 'green' : 'volcano'">
+      {{ statusTag().label }}
+    </nz-tag>
+  </div>
+
+  <div class="order-calculation-preview__grid">
+    <div class="order-calculation-preview__item">
+      <span>Netto po rabacie producenta</span>
+      <strong>{{ calculation().netAfterProducer | number : '1.2-2' }} PLN</strong>
+    </div>
+    <div class="order-calculation-preview__item">
+      <span>Netto po rabacie dystrybutora</span>
+      <strong>{{ calculation().netAfterDistributor | number : '1.2-2' }} PLN</strong>
+    </div>
+    <div class="order-calculation-preview__item">
+      <span>Kwota VAT</span>
+      <strong>{{ calculation().vatAmount | number : '1.2-2' }} PLN</strong>
+    </div>
+    <div class="order-calculation-preview__item">
+      <span>Brutto PLN</span>
+      <strong>{{ calculation().grossPln | number : '1.2-2' }} PLN</strong>
+    </div>
+
+    <div class="order-calculation-preview__item" *ngIf="calculation().grossEur != null">
+      <span>Brutto EUR</span>
+      <strong>{{ calculation().grossEur | number : '1.2-2' }} EUR</strong>
+    </div>
+
+    <div class="order-calculation-preview__item">
+      <span>Różnica PLN</span>
+      <strong>{{ calculation().differencePln | number : '1.2-2' }} PLN</strong>
+    </div>
+
+    <div class="order-calculation-preview__item" *ngIf="calculation().differenceEur != null">
+      <span>Różnica EUR</span>
+      <strong>{{ calculation().differenceEur | number : '1.2-2' }} EUR</strong>
+    </div>
+  </div>
+</nz-card>
+

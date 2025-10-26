@@ -1,0 +1,43 @@
+<section class="orders-new-page">
+  <header class="orders-new-page__header">
+    <h1 class="orders-new-page__title">Nowe zamówienie</h1>
+    <p class="orders-new-page__subtitle">
+      Wprowadź dane zamówienia, uzupełnij kurs EUR i zastosuj import z pliku XLSX.
+    </p>
+  </header>
+
+  <app-fx-rate-banner
+    [state]="state().fxRate"
+    [currency]="state().formModel.currencyCode"
+    [disabled]="state().submitting"
+    (refresh)="onFxRefresh()"
+    (overrideToggled)="onFxOverrideToggle($event)"
+    (overrideChanged)="onFxOverrideChange($event)"
+  />
+
+  <div class="orders-new-page__content">
+    <nz-card class="orders-new-page__form-card">
+      <app-order-form
+        [model]="state().formModel"
+        [calculation]="state().calculation"
+        [submitting]="state().submitting"
+        [serverErrors]="state().serverErrors"
+        [customers]="customers()"
+        (onSubmit)="onFormSubmit($event)"
+        (onCancel)="onCancel()"
+        (onDirtyChange)="onDirtyChange($event)"
+        (onRecalculate)="onRecalculate($event)"
+      />
+    </nz-card>
+
+    <aside class="orders-new-page__sidebar">
+      <app-order-calculation-preview
+        *ngIf="state().calculation"
+        [calculation]="state().calculation!"
+        [currency]="state().formModel.currencyCode"
+      />
+
+    </aside>
+  </div>
+</section>
+

@@ -1,0 +1,43 @@
+.orders-new-page {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 24px;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: var(--nz-text-secondary-color, #596882);
+  }
+
+  &__content {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: 3fr 2fr;
+
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__form-card {
+    width: 100%;
+  }
+
+  &__sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+

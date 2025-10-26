@@ -1,0 +1,22 @@
+.order-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__alert {
+    margin-bottom: 16px;
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px 24px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+  }
+}
+

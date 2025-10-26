@@ -1,0 +1,47 @@
+<ng-container *ngIf="showBanner()">
+  <nz-alert
+    nzBanner
+    [nzType]="currentState().status === 'error' ? 'error' : 'info'"
+    nzShowIcon
+    class="fx-rate-banner"
+  >
+    <div class="fx-rate-banner__content">
+      <div class="fx-rate-banner__info">
+        <strong>Kurs EUR</strong>
+        <ng-container *ngIf="currentState().status === 'loading'">Pobieranie kursu...</ng-container>
+        <ng-container *ngIf="currentState().status === 'loaded'">
+          <span>
+            {{ currentState().rate | number : '1.4-4' }} ({{ currentState().sourceDate ?? '---' }})
+          </span>
+        </ng-container>
+        <ng-container *ngIf="currentState().status === 'error'">
+          <span>{{ currentState().message ?? 'Nie udało się pobrać kursu.' }}</span>
+        </ng-container>
+      </div>
+
+      <div class="fx-rate-banner__actions">
+        <button nz-button nzType="default" (click)="onRefresh()" [disabled]="disabled()">
+          Odśwież kurs NBP
+        </button>
+
+        <button nz-button nzType="link" (click)="onToggleManual()">
+          {{ state().manualOverride ? 'Wyłącz ręczny kurs' : 'Ustaw ręcznie' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="fx-rate-banner__manual" *ngIf="state().manualOverride">
+      <label for="manualRate">Ręczny kurs EUR</label>
+      <nz-input-number
+        id="manualRate"
+        [nzMin]="0.0001"
+        [nzStep]="0.0001"
+        [nzPrecision]="4"
+        [nzDisabled]="disabled()"
+        [ngModel]="manualRate() ?? state().rate ?? null"
+        (ngModelChange)="onRateChange($any($event))"
+      />
+    </div>
+  </nz-alert>
+</ng-container>
+
