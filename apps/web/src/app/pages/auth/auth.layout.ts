@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core'
-import { RouterOutlet } from '@angular/router'
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-auth-layout',
@@ -10,4 +10,3 @@ import { RouterOutlet } from '@angular/router'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthLayoutComponent {}
-

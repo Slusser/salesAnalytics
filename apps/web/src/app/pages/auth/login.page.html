@@ -1,5 +1,9 @@
+<!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
 <app-auth-card title="Logowanie" icon="login">
-  <app-auth-error [message]="errorMessage() ?? undefined" class="mb-16"></app-auth-error>
+  <app-auth-error
+    [message]="errorMessage() ?? undefined"
+    class="mb-16"
+  ></app-auth-error>
 
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
     <div nz-row [nzGutter]="16">
@@ -14,7 +18,7 @@
           autocomplete="email"
         />
         @if (form.controls.email.touched && form.controls.email.invalid) {
-          <p class="field-error">Podaj poprawny adres email.</p>
+        <p class="field-error">Podaj poprawny adres email.</p>
         }
       </div>
       <div nz-col nzSpan="24">
@@ -28,13 +32,18 @@
           autocomplete="current-password"
         />
         @if (form.controls.password.touched && form.controls.password.invalid) {
-          <p class="field-error">Hasło jest wymagane (min. 8 znaków).</p>
+        <p class="field-error">Hasło jest wymagane (min. 8 znaków).</p>
         }
       </div>
     </div>
 
     <div class="actions">
-      <button nz-button nzType="primary" [disabled]="!canSubmit()" [nzLoading]="loading()">
+      <button
+        nz-button
+        nzType="primary"
+        [disabled]="!canSubmit()"
+        [nzLoading]="loading()"
+      >
         Zaloguj się
       </button>
       <span class="hint">Reset haseł: skontaktuj się z administratorem.</span>
@@ -42,12 +51,10 @@
   </form>
 
   @if (loading()) {
-    <app-auth-spinner class="mt-16"></app-auth-spinner>
+  <app-auth-spinner class="mt-16"></app-auth-spinner>
   }
 
   <div class="meta-links">
     <a routerLink="/auth/register">Rejestracja (dla administratora)</a>
   </div>
 </app-auth-card>
-
-

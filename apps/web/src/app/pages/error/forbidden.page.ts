@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core'
-import { RouterLink } from '@angular/router'
-import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzResultModule } from 'ng-zorro-antd/result'
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzResultModule } from 'ng-zorro-antd/result';
 
 @Component({
   selector: 'app-forbidden-page',
@@ -12,5 +12,3 @@ import { NzResultModule } from 'ng-zorro-antd/result'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ForbiddenPage {}
-
-
