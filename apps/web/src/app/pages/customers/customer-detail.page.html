@@ -79,10 +79,10 @@
         [showComment]="false"
         [showCancel]="true"
         [serverErrors]="formErrors()"
-        (submit)="onSubmit($event)"
-        (restore)="onRestore()"
-        (softDelete)="onSoftDelete()"
-        (cancel)="onBack()"
+        (submitted)="onSubmit($event)"
+        (restored)="onRestore()"
+        (softDeleted)="onSoftDelete()"
+        (cancelled)="onBack()"
       ></app-customer-form>
     </nz-card>
   }
@@ -94,8 +94,8 @@
     confirmLabel="Usuń"
     cancelLabel="Anuluj"
     [loading]="deleting()"
-    (confirm)="onConfirmDelete()"
-    (close)="onCancelDelete()"
+    (confirmed)="onConfirmDelete()"
+    (closed)="onCancelDelete()"
   ></app-confirm-dialog>
 </section>
 

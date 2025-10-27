@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  inject,
   input,
   output,
 } from '@angular/core';
@@ -13,7 +12,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import type { CustomerRowVm } from '../../../service/customers/customers-list.types';
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({

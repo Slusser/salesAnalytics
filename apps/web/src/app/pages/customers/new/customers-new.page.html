@@ -9,8 +9,8 @@
       [initialValue]="initialFormValue()"
       [submitting]="submitting()"
       [serverErrors]="serverErrors()"
-      (submit)="onSubmit($event)"
-      (cancel)="onCancel()"
+      (submitted)="onSubmit($event)"
+      (cancelled)="onCancel()"
     ></app-customer-form>
   </nz-card>
 </section>

@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   computed,
   effect,
   inject,
@@ -97,7 +96,7 @@ export class OrdersNewPageComponent {
     this.store.resetDirty();
   }
 
-  protected onRecalculate(input: any): void {
+  protected onRecalculate(_input: any): void {
     this.store.updateCalculationFromForm();
   }
 

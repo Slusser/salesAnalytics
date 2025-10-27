@@ -6,7 +6,7 @@ import {
 } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, tap } from 'rxjs';
+import { Observable, catchError } from 'rxjs';
 
 import { AUTH_RETURN_URL_QUERY_PARAM } from './auth.tokens';
 import { AuthSessionService } from './auth-session.service';

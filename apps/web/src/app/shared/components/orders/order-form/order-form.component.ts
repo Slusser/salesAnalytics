@@ -89,8 +89,8 @@ export class OrderFormComponent {
 
   readonly customersOptions = input<{ label: string; value: string }[]>([]);
 
-  readonly submit = output<OrderFormModel>();
-  readonly cancel = output<void>();
+  readonly submitted = output<OrderFormModel>();
+  readonly cancelled = output<void>();
   readonly dirtyChange = output<boolean>();
   readonly recalculate = output<OrderCalculationInput>();
 
@@ -161,7 +161,7 @@ export class OrderFormComponent {
     }
 
     const value = this.toFormModel();
-    this.submit.emit(value);
+    this.submitted.emit(value);
   }
 
   protected onCancel(): void {
@@ -169,7 +169,7 @@ export class OrderFormComponent {
       return;
     }
 
-    this.cancel.emit();
+    this.cancelled.emit();
   }
 
   private buildForm(): OrderFormGroup {
@@ -319,11 +319,13 @@ export class OrderFormComponent {
         return;
       }
 
-      const { server, ...rest } = control.errors;
+      const rest = { ...control.errors };
+      delete rest['server'];
       control.setErrors(Object.keys(rest).length ? rest : null);
     });
     if (this.form.errors?.['server']) {
-      const { server, ...rest } = this.form.errors;
+      const rest = { ...this.form.errors };
+      delete rest['server'];
       this.form.setErrors(Object.keys(rest).length ? rest : null);
     }
   }

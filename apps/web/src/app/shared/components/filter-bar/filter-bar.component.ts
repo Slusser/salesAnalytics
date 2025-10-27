@@ -17,7 +17,7 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 import { FormsModule } from '@angular/forms';
 
 export interface CustomersFilterValue {
@@ -49,7 +49,7 @@ export class FilterBarComponent {
   readonly value = input<CustomersFilterValue>({});
   readonly role = input<AppRole[]>([]);
 
-  readonly change = output<Partial<CustomersFilterValue>>();
+  readonly changed = output<Partial<CustomersFilterValue>>();
 
   protected readonly search = signal('');
   protected readonly includeInactive = signal(false);
@@ -75,7 +75,7 @@ export class FilterBarComponent {
     }
 
     this.includeInactive.set(checked);
-    this.change.emit({ includeInactive: checked });
+    this.changed.emit({ includeInactive: checked });
   }
 
   protected clearSearch(): void {
@@ -84,7 +84,7 @@ export class FilterBarComponent {
     }
 
     this.search.set('');
-    this.change.emit({ search: undefined });
+    this.changed.emit({ search: undefined });
   }
 
   private setupInputSync(): void {
@@ -117,7 +117,7 @@ export class FilterBarComponent {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((search) => {
-        this.change.emit({ search: search || undefined });
+        this.changed.emit({ search: search || undefined });
       });
   }
 
@@ -130,7 +130,7 @@ export class FilterBarComponent {
 
         if (this.includeInactive()) {
           this.includeInactive.set(false);
-          this.change.emit({ includeInactive: undefined });
+          this.changed.emit({ includeInactive: undefined });
         }
       },
       { allowSignalWrites: true }

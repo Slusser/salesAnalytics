@@ -4,7 +4,7 @@
     <div class="page-header__actions">
       <app-manual-refresh-button
         [disabled]="loading()"
-        (click)="onManualRefresh()"
+        (clicked)="onManualRefresh()"
       />
       <button
         nz-button
@@ -83,7 +83,7 @@
     [loading]="confirmDialogLoading()"
     confirmLabel="Potwierdź"
     cancelLabel="Anuluj"
-    (confirm)="onConfirmDialogConfirm()"
-    (close)="onConfirmDialogClose()"
+    (confirmed)="onConfirmDialogConfirm()"
+    (closed)="onConfirmDialogClose()"
   />
 </section>

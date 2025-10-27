@@ -44,12 +44,12 @@ export class ConfirmDialogComponent {
 
   protected readonly hasOrderNo = computed(() => {
     const value = this.orderNo();
-    return Boolean(value && value.trim());
+    return Boolean(value?.trim());
   });
 
   protected readonly displayOrderNo = computed(() => {
     const value = this.orderNo();
-    return value ? value.trim() : '';
+    return value?.trim();
   });
 
   protected readonly displayTitle = computed(() => {
@@ -68,14 +68,14 @@ export class ConfirmDialogComponent {
     return baseTitle;
   });
 
-  readonly confirm = output<void>();
-  readonly close = output<void>();
+  readonly confirmed = output<void>();
+  readonly closed = output<void>();
 
   protected onCancel(): void {
-    this.close.emit();
+    this.closed.emit();
   }
 
   protected onOk(): void {
-    this.confirm.emit();
+    this.confirmed.emit();
   }
 }

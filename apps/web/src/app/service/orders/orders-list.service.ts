@@ -680,7 +680,7 @@ export class OrdersListService {
     dateFrom?: string;
     dateTo?: string;
   } {
-    if (!range || range.length !== 2) {
+    if (range?.length !== 2) {
       return {};
     }
 

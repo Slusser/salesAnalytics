@@ -261,7 +261,7 @@ export class CustomersListService {
           this.mutationInProgress.set(false);
         })
       )
-      .subscribe({ next: () => {}, error: () => {} });
+      .subscribe();
   }
 
   private deleteCustomer(

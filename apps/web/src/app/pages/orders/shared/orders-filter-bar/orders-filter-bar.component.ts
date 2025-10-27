@@ -140,7 +140,7 @@ export class OrdersFilterBarComponent implements OnInit, OnDestroy {
   private toDateRange(
     range: OrdersFilterFormState['dateRange']
   ): [Date | null, Date | null] | null {
-    if (!range || range.length !== 2) {
+    if (range?.length !== 2) {
       return null;
     }
 
@@ -151,7 +151,7 @@ export class OrdersFilterBarComponent implements OnInit, OnDestroy {
   private normalizeDateRange(
     range: [Date | null, Date | null] | null
   ): [string, string] | undefined {
-    if (!range || range.length !== 2) {
+    if (range?.length !== 2) {
       return undefined;
     }
 

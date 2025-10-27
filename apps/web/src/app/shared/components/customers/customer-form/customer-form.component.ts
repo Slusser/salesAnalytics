@@ -80,10 +80,10 @@ export class CustomerFormComponent {
   private readonly showActiveToggleSignal = signal(this.showActiveToggle());
   private readonly showCommentSignal = signal(this.showComment());
 
-  readonly submit = output<CustomerFormModel>();
-  readonly cancel = output<void>();
-  readonly restore = output<void>();
-  readonly softDelete = output<void>();
+  readonly submitted = output<CustomerFormModel>();
+  readonly cancelled = output<void>();
+  readonly restored = output<void>();
+  readonly softDeleted = output<void>();
 
   protected readonly generalError = computed(
     () => this.serverErrorsSignal()?.generalError ?? ''
@@ -175,7 +175,7 @@ export class CustomerFormComponent {
       comment: this.form.controls.comment.value,
     };
 
-    this.submit.emit(value);
+    this.submitted.emit(value);
   }
 
   protected onCancel(): void {
@@ -183,7 +183,7 @@ export class CustomerFormComponent {
       return;
     }
 
-    this.cancel.emit();
+    this.cancelled.emit();
   }
 
   protected onRestore(): void {
@@ -191,7 +191,7 @@ export class CustomerFormComponent {
       return;
     }
 
-    this.restore.emit();
+    this.restored.emit();
   }
 
   protected onSoftDelete(): void {
@@ -199,7 +199,7 @@ export class CustomerFormComponent {
       return;
     }
 
-    this.softDelete.emit();
+    this.softDeleted.emit();
   }
 
   private setupInitialSync(): void {
@@ -280,13 +280,15 @@ export class CustomerFormComponent {
         const control = this.form.controls.name;
         const currentErrors = control.errors ?? {};
         if (currentErrors['server']) {
-          const { server, ...rest } = currentErrors;
+          const rest = { ...this.form.errors };
+          delete rest['server'];
           control.setErrors(Object.keys(rest).length ? rest : null);
         }
 
         const formErrors = this.form.errors ?? {};
         if (formErrors['server']) {
-          const { server, ...rest } = formErrors;
+          const rest = { ...this.form.errors };
+          delete rest['server'];
           this.form.setErrors(Object.keys(rest).length ? rest : null);
         }
 
@@ -301,7 +303,8 @@ export class CustomerFormComponent {
         const control = this.form.controls.isActive;
         const currentErrors = control.errors ?? {};
         if (currentErrors['server']) {
-          const { server, ...rest } = currentErrors;
+          const rest = { ...this.form.errors };
+          delete rest['server'];
           control.setErrors(Object.keys(rest).length ? rest : null);
         }
 

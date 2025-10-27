@@ -14,7 +14,7 @@
       }
       <app-manual-refresh-button
         [disabled]="loading()"
-        (click)="onManualRefresh()"
+        (clicked)="onManualRefresh()"
       />
     </div>
   </header>
@@ -22,7 +22,7 @@
   <app-filter-bar
     [value]="filters()"
     [role]="roles()"
-    (change)="onFilterChange($event)"
+    (changed)="onFilterChange($event)"
   />
 
   @if (showError()) {
@@ -73,8 +73,8 @@
     [loading]="confirmDialogLoading()"
     confirmLabel="Potwierdź"
     cancelLabel="Anuluj"
-    (confirm)="onConfirmDialogConfirm()"
-    (close)="onConfirmDialogClose()"
+    (confirmed)="onConfirmDialogConfirm()"
+    (closed)="onConfirmDialogClose()"
   />
 </section>
 
