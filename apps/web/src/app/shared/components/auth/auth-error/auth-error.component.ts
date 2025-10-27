@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { NzAlertModule } from 'ng-zorro-antd/alert'
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 
 @Component({
   selector: 'app-auth-error',
@@ -11,6 +11,5 @@ import { NzAlertModule } from 'ng-zorro-antd/alert'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthErrorComponent {
-  @Input() message?: string
+  @Input() message?: string;
 }
-

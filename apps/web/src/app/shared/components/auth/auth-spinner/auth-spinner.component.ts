@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
-import { CommonModule } from '@angular/common'
-import { NzSpinModule } from 'ng-zorro-antd/spin'
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 
 @Component({
   selector: 'app-auth-spinner',
@@ -11,6 +11,5 @@ import { NzSpinModule } from 'ng-zorro-antd/spin'
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AuthSpinnerComponent {
-  @Input() tip = 'Przetwarzanie...'
+  @Input() tip = 'Przetwarzanie...';
 }
-

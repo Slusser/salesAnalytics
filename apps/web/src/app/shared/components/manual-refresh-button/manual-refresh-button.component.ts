@@ -1,6 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core'
-import { NzButtonModule } from 'ng-zorro-antd/button'
-import { NzIconModule } from 'ng-zorro-antd/icon'
+import {
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+} from '@angular/core';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-manual-refresh-button',
@@ -8,22 +13,19 @@ import { NzIconModule } from 'ng-zorro-antd/icon'
   imports: [NzButtonModule, NzIconModule],
   templateUrl: './manual-refresh-button.component.html',
   styleUrl: './manual-refresh-button.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ManualRefreshButtonComponent {
-  readonly disabled = input<boolean>(false)
-  readonly refreshing = input<boolean>(false)
+  readonly disabled = input<boolean>(false);
+  readonly refreshing = input<boolean>(false);
 
-  readonly click = output<void>({ alias: 'onClick' })
+  readonly click = output<void>({ alias: 'onClick' });
 
   protected onClick(): void {
     if (this.disabled()) {
-      return
+      return;
     }
 
-    this.click.emit()
+    this.click.emit();
   }
 }
-
-
-

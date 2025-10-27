@@ -24,7 +24,7 @@
       <strong>{{ calculation().grossPln | number : '1.2-2' }} PLN</strong>
     </div>
 
-    <div class="order-calculation-preview__item" *ngIf="calculation().grossEur != null">
+    <div class="order-calculation-preview__item" *ngIf="calculation().grossEur !== null">
       <span>Brutto EUR</span>
       <strong>{{ calculation().grossEur | number : '1.2-2' }} EUR</strong>
     </div>
@@ -34,7 +34,7 @@
       <strong>{{ calculation().differencePln | number : '1.2-2' }} PLN</strong>
     </div>
 
-    <div class="order-calculation-preview__item" *ngIf="calculation().differenceEur != null">
+    <div class="order-calculation-preview__item" *ngIf="calculation().differenceEur !== null">
       <span>Różnica EUR</span>
       <strong>{{ calculation().differenceEur | number : '1.2-2' }} EUR</strong>
     </div>

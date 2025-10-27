@@ -1,3 +1,4 @@
+<!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
 <form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" [nzNoColon]="true" novalidate>
   @if (generalError()) {
     <nz-alert nzType="error" [nzMessage]="generalError()" nzShowIcon class="customer-form__alert"></nz-alert>
