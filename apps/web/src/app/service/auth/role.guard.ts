@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { CanMatchFn, Route, Router, UrlSegment } from '@angular/router';
 
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 
 import { AuthSessionService } from './auth-session.service';
 

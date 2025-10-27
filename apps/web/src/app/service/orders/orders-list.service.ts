@@ -19,8 +19,8 @@ import type {
   ListOrdersQuery,
   ListOrdersResponse,
   OrderListItemDto,
-} from 'apps/shared/dtos/orders.dto';
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+} from '@shared/dtos/orders.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 
 import { AuthSessionService } from '../auth/auth-session.service';
 import {

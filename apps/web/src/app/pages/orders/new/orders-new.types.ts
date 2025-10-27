@@ -1,4 +1,4 @@
-import type { OrderResponse } from 'apps/shared/dtos/orders.dto';
+import type { OrderResponse } from '@shared/dtos/orders.dto';
 
 export type CurrencyCode = 'PLN' | 'EUR';
 

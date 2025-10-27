@@ -18,7 +18,7 @@ import { OrderFormComponent } from '../../../shared/components/orders/order-form
 import { OrderCalculationPreviewComponent } from '../../../shared/components/orders/order-calculation-preview/order-calculation-preview.component';
 import { FxRateBannerComponent } from '../../../shared/components/orders/fx-rate-banner/fx-rate-banner.component';
 import type { OrderFormModel } from './orders-new.types';
-import type { OrderResponse } from 'apps/shared/dtos/orders.dto';
+import type { OrderResponse } from '@shared/dtos/orders.dto';
 import { OrdersCreateService } from '../../../service/orders/orders-create.service';
 import { FxRateService } from '../../../service/orders/fx-rate.service';
 

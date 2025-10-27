@@ -47,11 +47,9 @@ export class FilterBarComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly value = input<CustomersFilterValue>({});
-  readonly role = input<AppRole[]>([], { alias: 'role' });
+  readonly role = input<AppRole[]>([]);
 
-  readonly change = output<Partial<CustomersFilterValue>>({
-    alias: 'onChange',
-  });
+  readonly change = output<Partial<CustomersFilterValue>>();
 
   protected readonly search = signal('');
   protected readonly includeInactive = signal(false);

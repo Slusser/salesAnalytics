@@ -1,5 +1,5 @@
-import type { CustomerDetailResponse } from 'apps/shared/dtos/customers.dto';
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+import type { CustomerDetailResponse } from '@shared/dtos/customers.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 
 export interface CustomerViewModel {
   id: string;

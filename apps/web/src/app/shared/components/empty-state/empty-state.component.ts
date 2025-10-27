@@ -22,7 +22,7 @@ export class EmptyStateComponent {
   );
   readonly hasCta = input<boolean>(false);
 
-  readonly clear = output<void>({ alias: 'onClear' });
+  readonly clear = output<void>();
 
   protected onClear(): void {
     if (!this.hasCta()) return;

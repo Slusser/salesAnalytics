@@ -33,8 +33,8 @@ export class PaginationComponent {
   readonly disabled = input<boolean>(false);
   readonly limitOptions = input<number[]>(CUSTOMERS_LIMIT_OPTIONS);
 
-  readonly pageChange = output<number>({ alias: 'onPageChange' });
-  readonly limitChange = output<number>({ alias: 'onLimitChange' });
+  readonly pageChange = output<number>();
+  readonly limitChange = output<number>();
 
   protected readonly canPaginate = computed(() => this.total() > 0);
 

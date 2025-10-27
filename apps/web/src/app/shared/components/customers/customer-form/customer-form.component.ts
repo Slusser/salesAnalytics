@@ -59,35 +59,31 @@ export class CustomerFormComponent {
     isActive: true,
     comment: '',
   });
-  readonly submittingState = input(false, { alias: 'submitting' });
-  readonly readonlyState = input(false, { alias: 'readonly' });
-  readonly showRestoreState = input(false, { alias: 'showRestore' });
-  readonly showSoftDeleteState = input(false, { alias: 'showSoftDelete' });
-  readonly showCancelState = input(true, { alias: 'showCancel' });
-  readonly showActiveToggleState = input(true, { alias: 'showActiveToggle' });
-  readonly showCommentState = input(true, { alias: 'showComment' });
-  readonly serverErrorsState = input<ServerValidationErrors | null>(null, {
-    alias: 'serverErrors',
-  });
+  readonly submitting = input(false);
+  readonly isReadonly = input(false);
+  readonly showRestore = input(false);
+  readonly showSoftDelete = input(false);
+  readonly showCancel = input(true);
+  readonly showActiveToggle = input(true);
+  readonly showComment = input(true);
+  readonly serverErrors = input<ServerValidationErrors | null>(null);
 
   private readonly submittingSignal: WritableSignal<boolean> = signal(
-    this.submittingState()
+    this.submitting()
   );
   private readonly serverErrorsSignal: WritableSignal<ServerValidationErrors | null> =
-    signal(this.serverErrorsState());
-  private readonly readonlySignal = signal(this.readonlyState());
-  private readonly showRestoreSignal = signal(this.showRestoreState());
-  private readonly showSoftDeleteSignal = signal(this.showSoftDeleteState());
-  private readonly showCancelSignal = signal(this.showCancelState());
-  private readonly showActiveToggleSignal = signal(
-    this.showActiveToggleState()
-  );
-  private readonly showCommentSignal = signal(this.showCommentState());
+    signal(this.serverErrors());
+  private readonly readonlySignal = signal(this.isReadonly());
+  private readonly showRestoreSignal = signal(this.showRestore());
+  private readonly showSoftDeleteSignal = signal(this.showSoftDelete());
+  private readonly showCancelSignal = signal(this.showCancel());
+  private readonly showActiveToggleSignal = signal(this.showActiveToggle());
+  private readonly showCommentSignal = signal(this.showComment());
 
-  readonly submit = output<CustomerFormModel>({ alias: 'onSubmit' });
-  readonly cancel = output<void>({ alias: 'onCancel' });
-  readonly restore = output<void>({ alias: 'onRestore' });
-  readonly softDelete = output<void>({ alias: 'onSoftDelete' });
+  readonly submit = output<CustomerFormModel>();
+  readonly cancel = output<void>();
+  readonly restore = output<void>();
+  readonly softDelete = output<void>();
 
   protected readonly generalError = computed(
     () => this.serverErrorsSignal()?.generalError ?? ''
@@ -126,7 +122,7 @@ export class CustomerFormComponent {
     return serverError;
   });
   protected readonly isSubmitting = computed(() => this.submittingSignal());
-  protected readonly isReadonly = computed(() => this.readonlySignal());
+  protected readonly readonlyFlag = computed(() => this.readonlySignal());
   protected readonly customerNameMaxLength = CUSTOMER_NAME_MAX_LENGTH;
   protected readonly showRestoreButton = computed(() =>
     this.showRestoreSignal()
@@ -161,7 +157,7 @@ export class CustomerFormComponent {
   }
 
   protected onSubmit(): void {
-    if (this.isSubmitting() || this.isReadonly()) {
+    if (this.isSubmitting() || this.readonlyFlag()) {
       return;
     }
 
@@ -263,14 +259,14 @@ export class CustomerFormComponent {
 
   private watchInputs(): void {
     effect(() => {
-      this.submittingSignal.set(this.submittingState());
-      this.serverErrorsSignal.set(this.serverErrorsState());
-      this.readonlySignal.set(this.readonlyState());
-      this.showRestoreSignal.set(this.showRestoreState());
-      this.showSoftDeleteSignal.set(this.showSoftDeleteState());
-      this.showCancelSignal.set(this.showCancelState());
-      this.showActiveToggleSignal.set(this.showActiveToggleState());
-      this.showCommentSignal.set(this.showCommentState());
+      this.submittingSignal.set(this.submitting());
+      this.serverErrorsSignal.set(this.serverErrors());
+      this.readonlySignal.set(this.isReadonly());
+      this.showRestoreSignal.set(this.showRestore());
+      this.showSoftDeleteSignal.set(this.showSoftDelete());
+      this.showCancelSignal.set(this.showCancel());
+      this.showActiveToggleSignal.set(this.showActiveToggle());
+      this.showCommentSignal.set(this.showComment());
     });
   }
 

@@ -72,17 +72,17 @@
       <app-customer-form
         [initialValue]="formInitialValue()"
         [submitting]="saving()"
-        [readonly]="!canEdit()"
-        [showRestore]="canRestore() && isSoftDeleted()"
-        [showSoftDelete]="canEdit()"
-        [showActiveToggle]="canEdit()"
-        [showComment]="false"
-        [showCancel]="true"
-        [serverErrors]="formErrors()"
-        (onSubmit)="onSubmit($event)"
-        (onRestore)="onRestore()"
-        (onSoftDelete)="onSoftDelete()"
-        (onCancel)="onBack()"
+        [readonlyState]="!canEdit()"
+        [showRestoreState]="canRestore() && isSoftDeleted()"
+        [showSoftDeleteState]="canEdit()"
+        [showActiveToggleState]="canEdit()"
+        [showCommentState]="false"
+        [showCancelState]="true"
+        [serverErrorsState]="formErrors()"
+        (submit)="onSubmit($event)"
+        (restore)="onRestore()"
+        (softDelete)="onSoftDelete()"
+        (cancel)="onBack()"
       ></app-customer-form>
     </nz-card>
   }
@@ -94,8 +94,8 @@
     confirmLabel="Usuń"
     cancelLabel="Anuluj"
     [loading]="deleting()"
-    (onConfirm)="onConfirmDelete()"
-    (onClose)="onCancelDelete()"
+    (confirm)="onConfirmDelete()"
+    (close)="onCancelDelete()"
   ></app-confirm-dialog>
 </section>
 

@@ -19,7 +19,7 @@ export class ManualRefreshButtonComponent {
   readonly disabled = input<boolean>(false);
   readonly refreshing = input<boolean>(false);
 
-  readonly click = output<void>({ alias: 'onClick' });
+  readonly click = output<void>();
 
   protected onClick(): void {
     if (this.disabled()) {

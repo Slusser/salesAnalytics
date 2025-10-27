@@ -33,13 +33,13 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomersTableComponent {
-  readonly items = input<CustomerRowVm[]>([], { alias: 'items' });
-  readonly role = input<AppRole[]>([], { alias: 'role' });
+  readonly items = input<CustomerRowVm[]>([]);
+  readonly role = input<AppRole[]>([]);
   readonly loading = input<boolean>(false);
 
-  readonly edit = output<CustomerRowVm>({ alias: 'onEdit' });
-  readonly softDelete = output<CustomerRowVm>({ alias: 'onSoftDelete' });
-  readonly restore = output<CustomerRowVm>({ alias: 'onRestore' });
+  readonly edit = output<CustomerRowVm>();
+  readonly softDelete = output<CustomerRowVm>();
+  readonly restore = output<CustomerRowVm>();
 
   protected readonly canMutate = computed(() => {
     const roles: string[] = this.role();

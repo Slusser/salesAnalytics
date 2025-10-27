@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import type { CustomerDto } from 'apps/shared/dtos/customers.dto';
+import type { CustomerDto } from '@shared/dtos/customers.dto';
 
 export interface CreateCustomerRequest {
   name: string;

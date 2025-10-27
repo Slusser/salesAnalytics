@@ -4,7 +4,7 @@
     <div class="page-header__actions">
       <app-manual-refresh-button
         [disabled]="loading()"
-        (onClick)="onManualRefresh()"
+        (click)="onManualRefresh()"
       />
       <button
         nz-button
@@ -47,7 +47,7 @@
       title="Brak zamówień"
       description="Nie znaleziono zamówień dla podanych filtrów."
       [hasCta]="true"
-      (onClear)="onFiltersReset()"
+      (clear)="onFiltersReset()"
     />
   } @else {
     <app-orders-data-table
@@ -70,8 +70,8 @@
       [total]="total()"
       [disabled]="loading()"
       [limitOptions]="[25, 50, 100]"
-      (onPageChange)="onPageChange($event)"
-      (onLimitChange)="onLimitChange($event)"
+      (pageChange)="onPageChange($event)"
+      (limitChange)="onLimitChange($event)"
     />
   }
 
@@ -83,7 +83,7 @@
     [loading]="confirmDialogLoading()"
     confirmLabel="Potwierdź"
     cancelLabel="Anuluj"
-    (onConfirm)="onConfirmDialogConfirm()"
-    (onClose)="onConfirmDialogClose()"
+    (confirm)="onConfirmDialogConfirm()"
+    (close)="onConfirmDialogClose()"
   />
 </section>

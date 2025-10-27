@@ -8,7 +8,7 @@ import { throwError } from 'rxjs';
 import type {
   CreateOrderCommand,
   OrderResponse,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 
 export type CreateOrderPayload = CreateOrderCommand;
 

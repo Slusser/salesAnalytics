@@ -17,6 +17,7 @@
     "baseUrl": ".",
     "paths": {
       "@shared/types": ["apps/shared/types/src/index.ts"],
+      "@shared/dtos/*": ["apps/shared/dtos/*.ts"],
       "@db/*": ["apps/db/src/*"],
       "@api/*": ["apps/api/src/*"],
       "@web/*": ["apps/web/src/*"],

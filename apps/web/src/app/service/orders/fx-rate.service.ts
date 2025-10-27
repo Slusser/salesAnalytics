@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import type { FxRateDto, FxRateQuery } from 'apps/shared/dtos/fx-rates.dto';
+import type { FxRateDto, FxRateQuery } from '@shared/dtos/fx-rates.dto';
 
 @Injectable({ providedIn: 'root' })
 export class FxRateService {

@@ -87,16 +87,12 @@ export class OrderFormComponent {
   readonly serverErrors = input<OrderFormServerErrors | null>(null);
   readonly calculation = input<OrderCalculationResult | null>(null);
 
-  readonly customersOptions = input<{ label: string; value: string }[]>([], {
-    alias: 'customers',
-  });
+  readonly customersOptions = input<{ label: string; value: string }[]>([]);
 
-  readonly submit = output<OrderFormModel>({ alias: 'onSubmit' });
-  readonly cancel = output<void>({ alias: 'onCancel' });
-  readonly dirtyChange = output<boolean>({ alias: 'onDirtyChange' });
-  readonly recalculate = output<OrderCalculationInput>({
-    alias: 'onRecalculate',
-  });
+  readonly submit = output<OrderFormModel>();
+  readonly cancel = output<void>();
+  readonly dirtyChange = output<boolean>();
+  readonly recalculate = output<OrderCalculationInput>();
 
   private readonly submittingSignal = signal(this.submitting());
   private readonly serverErrorsSignal: WritableSignal<OrderFormServerErrors | null> =

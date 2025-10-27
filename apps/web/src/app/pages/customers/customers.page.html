@@ -14,7 +14,7 @@
       }
       <app-manual-refresh-button
         [disabled]="loading()"
-        (onClick)="onManualRefresh()"
+        (click)="onManualRefresh()"
       />
     </div>
   </header>
@@ -22,7 +22,7 @@
   <app-filter-bar
     [value]="filters()"
     [role]="roles()"
-    (onChange)="onFilterChange($event)"
+    (change)="onFilterChange($event)"
   />
 
   @if (showError()) {
@@ -43,16 +43,16 @@
       title="Brak kontrahentów"
       description="Nie znaleziono kontrahentów dla podanych filtrów."
       [hasCta]="true"
-      (onClear)="onClearFilters()"
+      (clear)="onClearFilters()"
     />
   } @else {
     <app-customers-table
       [items]="items()"
       [role]="roles()"
       [loading]="loading()"
-      (onEdit)="onEdit($event)"
-      (onSoftDelete)="onSoftDelete($event)"
-      (onRestore)="onRestore($event)"
+      (edit)="onEdit($event)"
+      (softDelete)="onSoftDelete($event)"
+      (restore)="onRestore($event)"
     />
 
     <app-pagination
@@ -60,8 +60,8 @@
       [limit]="params().limit"
       [total]="total()"
       [disabled]="loading()"
-      (onPageChange)="onPageChange($event)"
-      (onLimitChange)="onLimitChange($event)"
+      (pageChange)="onPageChange($event)"
+      (limitChange)="onLimitChange($event)"
     />
   }
 
@@ -73,8 +73,8 @@
     [loading]="confirmDialogLoading()"
     confirmLabel="Potwierdź"
     cancelLabel="Anuluj"
-    (onConfirm)="onConfirmDialogConfirm()"
-    (onClose)="onConfirmDialogClose()"
+    (confirm)="onConfirmDialogConfirm()"
+    (close)="onConfirmDialogClose()"
   />
 </section>
 

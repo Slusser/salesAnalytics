@@ -12,8 +12,8 @@ import type {
   AuthLoginResponse,
   AuthenticatedUserDto,
   AuthTokensDto,
-} from 'apps/shared/dtos/auth.dto';
-import { AppRole } from 'apps/shared/dtos/user-roles.dto';
+} from '@shared/dtos/auth.dto';
+import { AppRole } from '@shared/dtos/user-roles.dto';
 
 interface SessionState {
   tokens: AuthTokensDto | null;

@@ -68,8 +68,8 @@ export class ConfirmDialogComponent {
     return baseTitle;
   });
 
-  readonly confirm = output<void>({ alias: 'onConfirm' });
-  readonly close = output<void>({ alias: 'onClose' });
+  readonly confirm = output<void>();
+  readonly close = output<void>();
 
   protected onCancel(): void {
     this.close.emit();

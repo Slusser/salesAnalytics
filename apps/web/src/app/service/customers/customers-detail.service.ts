@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import type {
   CustomerDetailResponse,
   UpdateCustomerCommand,
-} from 'apps/shared/dtos/customers.dto';
+} from '@shared/dtos/customers.dto';
 
 @Injectable({ providedIn: 'root' })
 export class CustomersDetailService {

@@ -7,10 +7,10 @@
   <nz-card nzTitle="Dane kontrahenta" class="customers-new__card">
     <app-customer-form
       [initialValue]="initialFormValue()"
-      [submitting]="submitting()"
-      [serverErrors]="serverErrors()"
-      (onSubmit)="onSubmit($event)"
-      (onCancel)="onCancel()"
+      [submittingState]="submitting()"
+      [serverErrorsState]="serverErrors()"
+      (submit)="onSubmit($event)"
+      (cancel)="onCancel()"
     ></app-customer-form>
   </nz-card>
 </section>

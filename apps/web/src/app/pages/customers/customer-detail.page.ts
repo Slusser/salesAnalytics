@@ -8,7 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
@@ -18,8 +18,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 
-import type { UpdateCustomerCommand } from 'apps/shared/dtos/customers.dto';
-import type { AppRole } from 'apps/shared/dtos/user-roles.dto';
+import type { UpdateCustomerCommand } from '@shared/dtos/customers.dto';
+import type { AppRole } from '@shared/dtos/user-roles.dto';
 
 import { CustomersDetailService } from '../../service/customers/customers-detail.service';
 import { AuthSessionService } from '../../service/auth/auth-session.service';
@@ -54,7 +54,6 @@ interface PageState {
   standalone: true,
   imports: [
     CommonModule,
-    AsyncPipe,
     NzCardModule,
     NzAlertModule,
     NzTagModule,

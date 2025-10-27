@@ -6,7 +6,7 @@ import type {
   AuthLoginResponse,
   AuthLogoutCommand,
   AuthLogoutResponse,
-} from 'apps/shared/dtos/auth.dto';
+} from '@shared/dtos/auth.dto';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {

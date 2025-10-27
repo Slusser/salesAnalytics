@@ -22,11 +22,11 @@
         [calculation]="state().calculation"
         [submitting]="state().submitting"
         [serverErrors]="state().serverErrors"
-        [customers]="customers()"
-        (onSubmit)="onFormSubmit($event)"
-        (onCancel)="onCancel()"
-        (onDirtyChange)="onDirtyChange($event)"
-        (onRecalculate)="onRecalculate($event)"
+        [customersOptions]="customers()"
+        (submit)="onFormSubmit($event)"
+        (cancel)="onCancel()"
+        (dirtyChange)="onDirtyChange($event)"
+        (recalculate)="onRecalculate($event)"
       />
     </nz-card>
 

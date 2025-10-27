@@ -7,14 +7,10 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
-import { AuthCardComponent } from '../../shared/components/auth/auth-card/auth-card.component';
-import { AuthErrorComponent } from '../../shared/components/auth/auth-error/auth-error.component';
-import { AuthSpinnerComponent } from '../../shared/components/auth/auth-spinner/auth-spinner.component';
 
 @Component({
   selector: 'app-register-page',
@@ -22,14 +18,10 @@ import { AuthSpinnerComponent } from '../../shared/components/auth/auth-spinner/
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
     NzFormModule,
     NzInputModule,
     NzButtonModule,
     NzTypographyModule,
-    AuthCardComponent,
-    AuthErrorComponent,
-    AuthSpinnerComponent,
   ],
   templateUrl: './register.page.html',
   styleUrl: './register.page.scss',
@@ -37,7 +29,6 @@ import { AuthSpinnerComponent } from '../../shared/components/auth/auth-spinner/
 })
 export class RegisterPage {
   private readonly fb = inject(FormBuilder);
-  private readonly router = inject(Router);
 
   protected readonly loading = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
