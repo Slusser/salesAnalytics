@@ -12,7 +12,7 @@ import {
 
 const CUSTOMER_NAME_MAX_LENGTH = 120;
 
-const CUSTOMER_NAME_SAFE_PATTERN = /^[\p{L}\p{M}\p{N}\s\-_'.,&()\/]+$/u;
+const CUSTOMER_NAME_SAFE_PATTERN = /^[\p{L}\p{M}\p{N}\s\-_'.,&()/]+$/u;
 
 const transformOptionalString = ({
   value,
@@ -112,7 +112,7 @@ export class UpdateCustomerDto {
   })
   @Matches(CUSTOMER_NAME_SAFE_PATTERN, {
     message:
-      "Pole name zawiera niedozwolone znaki. Dozwolone są litery, cyfry, spacje oraz znaki - _ ' . , & ( ) /.",
+      'Pole name zawiera niedozwolone znaki. Dozwolone są litery, cyfry, spacje oraz znaki - _ \' . , & ( ) /.',
   })
   readonly name?: string;
 

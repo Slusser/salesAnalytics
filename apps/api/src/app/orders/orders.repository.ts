@@ -74,7 +74,7 @@ export class OrdersRepository {
     const baseQuery = this.client
       .from('orders')
       .select(
-        `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const,
+        'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const,
         { count: 'exact' }
       )
       .order(SORT_FIELD_MAP[params.sortField], {
@@ -128,7 +128,7 @@ export class OrdersRepository {
     const baseQuery = this.client
       .from('orders')
       .select(
-        `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', id);
 
@@ -154,7 +154,7 @@ export class OrdersRepository {
     const { data, error } = await this.client
       .from('orders')
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', id)
       .is('deleted_at', null)
@@ -200,7 +200,7 @@ export class OrdersRepository {
       .from('orders')
       .insert(payload)
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
       )
       .single();
 
@@ -232,7 +232,7 @@ export class OrdersRepository {
     const { data, error } = await this.client
       .from('orders')
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', orderId)
       .maybeSingle();
@@ -249,7 +249,7 @@ export class OrdersRepository {
   }
 
   async update(params: UpdateParams): Promise<OrderDetailDto> {
-    const { command, orderId, actorId } = params;
+    const { command, orderId } = params;
 
     const payload: TablesUpdate<'orders'> = {
       order_no: command.orderNo,
@@ -274,7 +274,7 @@ export class OrdersRepository {
       .update(payload)
       .eq('id', orderId)
       .select(
-        `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
+        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
       )
       .maybeSingle();
 
@@ -309,7 +309,7 @@ export class OrdersRepository {
   }
 
   async softDelete(params: SoftDeleteParams): Promise<void> {
-    const { command, actorId } = params;
+    const { command } = params;
 
     const payload: TablesUpdate<'orders'> = {
       deleted_at: new Date().toISOString(),

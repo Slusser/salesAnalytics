@@ -357,7 +357,7 @@ export class CustomersService {
     }
 
     const trimmedName = command.name?.trim();
-    const nextName = trimmedName === undefined ? undefined : trimmedName;
+    const nextName = trimmedName ?? undefined;
     const nextIsActive = command.isActive ?? currentCustomer.is_active;
     const requestedDeletedAt = command.deletedAt;
     const nextDeletedAtCandidate =
@@ -454,7 +454,7 @@ export class CustomersService {
   }
 
   private toDeleteException(
-    error: PostgrestError
+    _error: PostgrestError
   ): InternalServerErrorException {
     return new InternalServerErrorException({
       code: 'CUSTOMERS_DELETE_FAILED',

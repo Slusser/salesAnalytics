@@ -332,7 +332,7 @@ export class OrdersService {
   }
 
   private normalizeCommand<T extends BaseOrderCommand>(command: T): T {
-    const trimmedComment = command.comment?.trim() || undefined;
+    const trimmedComment = command.comment?.trim() ?? undefined;
     const normalizedOrderNo = command.orderNo.trim().toUpperCase();
     const normalizedItemName = command.itemName.trim();
 

@@ -8,7 +8,6 @@ import {
   IsString,
   IsUUID,
   Max,
-  MaxLength,
   Min,
   Validate,
   ValidatorConstraint,
@@ -21,7 +20,6 @@ import type { ListOrdersQuery } from '@shared/dtos/orders.dto';
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;
 const MAX_LIMIT = 100;
-const MAX_ORDER_NO_LENGTH = 64;
 
 const SORTABLE_FIELDS: Record<string, string> = {
   orderdate: 'orderDate',
@@ -96,26 +94,6 @@ const toBoolean = ({ value }: TransformFnParams): boolean | unknown => {
   }
 
   return value;
-};
-
-const normalizeOrderNo = ({
-  value,
-}: TransformFnParams): string | undefined | unknown => {
-  if (value === undefined || value === null) {
-    return undefined;
-  }
-
-  if (typeof value !== 'string') {
-    return value;
-  }
-
-  const normalized = value.trim().toLowerCase();
-
-  if (!normalized) {
-    return undefined;
-  }
-
-  return normalized;
 };
 
 const normalizeSort = ({

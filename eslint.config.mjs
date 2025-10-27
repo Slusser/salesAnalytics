@@ -65,6 +65,14 @@ export default [
     },
   },
   {
+    files: ['**/webpack.config.{js,cjs,mjs}'],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+  },
+  {
     files: ['**/*.spec.ts', '**/*.test.ts'],
     rules: {
       // Test files can be more lenient
