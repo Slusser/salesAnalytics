@@ -34,7 +34,7 @@ import type {
   CustomerDetailResponse,
   CustomerDto,
   CustomerMutatorContext,
-} from 'apps/shared/dtos/customers.dto';
+} from '@shared/dtos/customers.dto';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { CustomersService } from './customers.service';
 import { JwtAuthGuard } from '../security/jwt-auth.guard';

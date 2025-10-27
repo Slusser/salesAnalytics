@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-import type { Database } from 'apps/db/database.types';
+import type { Database } from '@db/database.types';
 
 const supabaseUrl = process.env.SUPABASE_URL ?? '';
 const supabaseAnonKey = process.env.SUPABASE_KEY ?? '';

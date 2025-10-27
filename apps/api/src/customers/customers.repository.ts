@@ -5,8 +5,8 @@ import type {
   Tables,
   TablesInsert,
   TablesUpdate,
-} from 'apps/db/database.types';
-import { supabaseClient } from 'apps/db/supabase.client';
+} from '@db/database.types';
+import { supabaseClient } from '@db/supabase.client';
 import { CustomerMapper } from './customers.mapper';
 import type {
   CustomerDto,
@@ -14,7 +14,7 @@ import type {
   ListCustomersQuery,
   ListCustomersResponse,
   UpdateCustomerCommand,
-} from 'apps/shared/dtos/customers.dto';
+} from '@shared/dtos/customers.dto';
 
 interface InsertCustomerParams {
   name: string;

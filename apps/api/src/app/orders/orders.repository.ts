@@ -4,15 +4,15 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { supabaseClient } from 'apps/db/supabase.client';
-import type { TablesInsert, TablesUpdate } from 'apps/db/database.types';
+import { supabaseClient } from '@db/supabase.client';
+import type { TablesInsert, TablesUpdate } from '@db/database.types';
 import type {
   CreateOrderCommand,
   DeleteOrderCommand,
   ListOrdersResponse,
   OrderDetailDto,
   UpdateOrderCommand,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 import {
   OrderMapper,
   type OrderDetailRow,

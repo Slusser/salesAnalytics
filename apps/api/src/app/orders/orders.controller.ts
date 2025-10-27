@@ -32,11 +32,11 @@ import {
 import type {
   ListOrdersResponse,
   OrderResponse,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 import { JwtAuthGuard } from '../../security/jwt-auth.guard';
 import { RolesGuard } from '../../security/roles.guard';
 import { CurrentUser } from '../../security/current-user.decorator';
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import { ListOrdersQueryDto } from './dto/list-orders-query.dto';
 import { OrdersService } from './orders.service';
 import { ListOrdersResponseDto } from './dto/list-orders-response.dto';

@@ -8,7 +8,7 @@ import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 
 import { ROLES_KEY } from './roles.decorator';
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import type { CurrentUserRequest } from './types';
 
 @Injectable()

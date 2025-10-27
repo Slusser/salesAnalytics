@@ -3,7 +3,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import type { CurrentUserRequest } from './types';
 
 export const CurrentUser = createParamDecorator(

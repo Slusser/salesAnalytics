@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import type {
   OrderDetailDto,
   OrderListItemDto,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 
 export interface OrderListRow {
   id: string;

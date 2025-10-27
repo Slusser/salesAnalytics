@@ -10,7 +10,7 @@ import {
   Min,
 } from 'class-validator';
 
-import type { ListCustomersQuery } from 'apps/shared/dtos/customers.dto';
+import type { ListCustomersQuery } from '@shared/dtos/customers.dto';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;

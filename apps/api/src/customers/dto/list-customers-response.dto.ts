@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import type {
   CustomerDto,
   ListCustomersResponse,
-} from 'apps/shared/dtos/customers.dto';
+} from '@shared/dtos/customers.dto';
 
 export class CustomerResponseDto implements CustomerDto {
   @ApiProperty({ description: 'Identyfikator klienta.', format: 'uuid' })

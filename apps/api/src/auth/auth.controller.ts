@@ -4,7 +4,7 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import type {
   AuthLoginResponse,
   AuthLogoutResponse,
-} from 'apps/shared/dtos/user-roles.dto';
+} from '@shared/dtos/user-roles.dto';
 
 import { Public } from '../security/public.decorator';
 import { AuthService } from './auth.service';

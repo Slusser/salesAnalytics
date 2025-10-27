@@ -16,7 +16,7 @@ import {
   type ValidationArguments,
 } from 'class-validator';
 
-import type { ListOrdersQuery } from 'apps/shared/dtos/orders.dto';
+import type { ListOrdersQuery } from '@shared/dtos/orders.dto';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;

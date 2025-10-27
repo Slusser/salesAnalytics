@@ -15,7 +15,7 @@ import {
   ValidateIf,
 } from 'class-validator';
 
-import type { CreateOrderCommand } from 'apps/shared/dtos/orders.dto';
+import type { CreateOrderCommand } from '@shared/dtos/orders.dto';
 
 const ORDER_NO_MAX_LENGTH = 64;
 const ITEM_NAME_MAX_LENGTH = 255;

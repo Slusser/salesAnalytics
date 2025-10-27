@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import type { UpdateOrderCommand } from 'apps/shared/dtos/orders.dto';
+import type { UpdateOrderCommand } from '@shared/dtos/orders.dto';
 import { CreateOrderDto } from './create-order.dto';
 
 /**

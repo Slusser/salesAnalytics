@@ -1,5 +1,5 @@
-import type { Tables } from 'apps/db/database.types';
-import type { CustomerDto } from 'apps/shared/dtos/customers.dto';
+import type { Tables } from '@db/database.types';
+import type { CustomerDto } from '@shared/dtos/customers.dto';
 
 type CustomerRow = Tables<'customers'>;
 

@@ -6,7 +6,7 @@ import type {
   AuthLogoutCommand,
   AuthLogoutResponse,
   UserRoleValue,
-} from 'apps/shared/dtos/user-roles.dto';
+} from '@shared/dtos/user-roles.dto';
 
 import { SupabaseFactory } from '../supabase/supabase.factory';
 import { AuthMapper } from './auth.mapper';

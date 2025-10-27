@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import { IS_PUBLIC_KEY } from './public.decorator';
 import type { CurrentUserRequest } from './types';
 import { RequestContextService } from './request-context.service';

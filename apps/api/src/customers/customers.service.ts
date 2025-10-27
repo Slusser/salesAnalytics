@@ -17,7 +17,7 @@ import type {
   ListCustomersQuery,
   ListCustomersResponse,
   UpdateCustomerCommand,
-} from 'apps/shared/dtos/customers.dto';
+} from '@shared/dtos/customers.dto';
 import { CustomersRepository } from './customers.repository';
 import { CustomerMapper } from './customers.mapper';
 

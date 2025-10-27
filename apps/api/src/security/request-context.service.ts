@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
-import type { UserRoleValue } from 'apps/shared/dtos/user-roles.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
+import type { UserRoleValue } from '@shared/dtos/user-roles.dto';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 import { SupabaseFactory } from '../supabase/supabase.factory';

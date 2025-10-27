@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type {
   ListOrdersResponse,
   OrderListItemDto,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 
 export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiProperty({ description: 'Identyfikator zamówienia', format: 'uuid' })

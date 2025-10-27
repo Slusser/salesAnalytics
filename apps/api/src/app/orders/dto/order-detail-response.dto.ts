@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import type { OrderDetailDto } from 'apps/shared/dtos/orders.dto';
+import type { OrderDetailDto } from '@shared/dtos/orders.dto';
 import { OrderListItemResponseDto } from './list-orders-response.dto';
 
 export class OrderDetailResponseDto

@@ -6,7 +6,7 @@ import type {
   AuthenticatedUserDto,
   AuthTokensDto,
   UserRoleValue,
-} from 'apps/shared/dtos/user-roles.dto';
+} from '@shared/dtos/user-roles.dto';
 
 @Injectable()
 export class AuthMapper {

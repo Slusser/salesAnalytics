@@ -18,7 +18,7 @@
     "paths": {
       "@shared/types": ["apps/shared/types/src/index.ts"],
       "@shared/dtos/*": ["apps/shared/dtos/*.ts"],
-      "@db/*": ["apps/db/src/*"],
+      "@db/*": ["apps/db/*"],
       "@api/*": ["apps/api/src/*"],
       "@web/*": ["apps/web/src/*"],
       "@middleware": ["apps/middleware/index.ts"],

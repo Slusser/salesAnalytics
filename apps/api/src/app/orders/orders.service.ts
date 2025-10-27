@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import type {
   BaseOrderCommand,
   CreateOrderCommand,
@@ -17,7 +17,7 @@ import type {
   ListOrdersResponse,
   OrderDetailDto,
   UpdateOrderCommand,
-} from 'apps/shared/dtos/orders.dto';
+} from '@shared/dtos/orders.dto';
 import { OrdersRepository } from './orders.repository';
 
 const DEFAULT_PAGE = 1;
