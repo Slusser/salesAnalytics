@@ -1,9 +1,9 @@
-import { CommonModule } from '@angular/common'
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
-import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions'
-import { NzTagModule } from 'ng-zorro-antd/tag'
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
-import { OrderRowVm } from '../../../../service/orders/orders-list.types'
+import { OrderRowVm } from '../../../../service/orders/orders-list.types';
 
 @Component({
   selector: 'app-orders-row-details-panel',
@@ -11,8 +11,8 @@ import { OrderRowVm } from '../../../../service/orders/orders-list.types'
   imports: [CommonModule, NzDescriptionsModule, NzTagModule],
   templateUrl: './orders-row-details-panel.component.html',
   styleUrl: './orders-row-details-panel.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrdersRowDetailsPanelComponent {
-  @Input({ required: true }) order!: OrderRowVm
+  @Input({ required: true }) order!: OrderRowVm;
 }
