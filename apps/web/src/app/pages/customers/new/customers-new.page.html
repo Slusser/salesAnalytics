@@ -7,8 +7,8 @@
   <nz-card nzTitle="Dane kontrahenta" class="customers-new__card">
     <app-customer-form
       [initialValue]="initialFormValue()"
-      [submittingState]="submitting()"
-      [serverErrorsState]="serverErrors()"
+      [submitting]="submitting()"
+      [serverErrors]="serverErrors()"
       (submit)="onSubmit($event)"
       (cancel)="onCancel()"
     ></app-customer-form>

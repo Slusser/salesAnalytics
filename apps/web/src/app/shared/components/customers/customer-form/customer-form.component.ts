@@ -131,7 +131,7 @@ export class CustomerFormComponent {
     this.showSoftDeleteSignal()
   );
   protected readonly showCancelButton = computed(() => this.showCancelSignal());
-  protected readonly showActiveToggle = computed(() =>
+  protected readonly showActiveToggleVisible = computed(() =>
     this.showActiveToggleSignal()
   );
   protected readonly showCommentField = computed(() =>
