@@ -25,7 +25,7 @@ export interface OrderListRow {
 
 export interface OrderDetailRow extends OrderListRow {
   comment: string | null
-  currency_code: string | null
+  currency_code: string
 }
 
 const logger = new Logger('OrderMapper')

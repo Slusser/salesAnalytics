@@ -1,4 +1,4 @@
-import { ApiPropertyOptional } from '@nestjs/swagger'
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger'
 
 import type { OrderDetailDto } from 'apps/shared/dtos/orders.dto'
 import { OrderListItemResponseDto } from './list-orders-response.dto'
@@ -10,8 +10,8 @@ export class OrderDetailResponseDto
   @ApiPropertyOptional({ description: 'Dodatkowy komentarz do zamówienia.' })
   comment!: string | null
 
-  @ApiPropertyOptional({ description: 'Kod waluty zastosowanej w zamówieniu.' })
-  currencyCode!: string | null
+  @ApiProperty({ description: 'Kod waluty zastosowanej w zamówieniu.' })
+  currencyCode!: string
 }
 
 

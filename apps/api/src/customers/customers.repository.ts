@@ -69,6 +69,11 @@ export class CustomersRepository {
       return { error }
     }
 
+    if (!data) {
+      this.logger.error('Brak danych zwróconych po wstawieniu klienta')
+      return {}
+    }
+
     return { data: CustomerMapper.toDto(data) }
   }
 
