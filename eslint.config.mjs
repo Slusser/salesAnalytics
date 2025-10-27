@@ -1,4 +1,8 @@
 import nx from '@nx/eslint-plugin';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const tsconfigRootDir = path.dirname(fileURLToPath(import.meta.url));
 
 export default [
   ...nx.configs['flat/base'],
@@ -17,6 +21,12 @@ export default [
   },
   {
     files: ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx'],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir,
+      },
+    },
     rules: {
       '@nx/enforce-module-boundaries': [
         'error',

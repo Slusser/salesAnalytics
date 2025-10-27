@@ -1,2 +1,1 @@
-export * from './order-calculation.util'
-
+export * from './order-calculation.util';
