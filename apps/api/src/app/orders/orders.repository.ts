@@ -1,45 +1,59 @@
-import { ConflictException, Injectable, Logger, NotFoundException } from '@nestjs/common'
-import { supabaseClient } from 'apps/db/supabase.client'
-import type { TablesInsert, TablesUpdate } from 'apps/db/database.types'
+import {
+  ConflictException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { supabaseClient } from 'apps/db/supabase.client';
+import type { TablesInsert, TablesUpdate } from 'apps/db/database.types';
 import type {
   CreateOrderCommand,
   DeleteOrderCommand,
   ListOrdersResponse,
   OrderDetailDto,
-  UpdateOrderCommand
-} from 'apps/shared/dtos/orders.dto'
-import { OrderMapper, type OrderDetailRow, type OrderListRow } from './order.mapper'
-import { PostgrestError } from '@supabase/supabase-js'
+  UpdateOrderCommand,
+} from 'apps/shared/dtos/orders.dto';
+import {
+  OrderMapper,
+  type OrderDetailRow,
+  type OrderListRow,
+} from './order.mapper';
+import { PostgrestError } from '@supabase/supabase-js';
 
 interface ListParams {
-  page: number
-  limit: number
-  customerId?: string
-  dateFrom?: string
-  dateTo?: string
-  sortField: 'orderDate' | 'orderNo' | 'customerName' | 'totalNetPln' | 'createdAt'
-  sortDirection: 'asc' | 'desc'
-  includeDeleted: boolean
+  page: number;
+  limit: number;
+  customerId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  sortField:
+    | 'orderDate'
+    | 'orderNo'
+    | 'customerName'
+    | 'totalNetPln'
+    | 'createdAt';
+  sortDirection: 'asc' | 'desc';
+  includeDeleted: boolean;
 }
 
 interface FindByIdOptions {
-  includeDeleted: boolean
+  includeDeleted: boolean;
 }
 
 interface CreateParams {
-  command: CreateOrderCommand
-  actorId: string
+  command: CreateOrderCommand;
+  actorId: string;
 }
 
 interface UpdateParams {
-  orderId: string
-  command: UpdateOrderCommand
-  actorId: string
+  orderId: string;
+  command: UpdateOrderCommand;
+  actorId: string;
 }
 
 interface SoftDeleteParams {
-  command: DeleteOrderCommand
-  actorId: string
+  command: DeleteOrderCommand;
+  actorId: string;
 }
 
 const SORT_FIELD_MAP: Record<ListParams['sortField'], string> = {
@@ -47,84 +61,93 @@ const SORT_FIELD_MAP: Record<ListParams['sortField'], string> = {
   orderNo: 'order_no',
   customerName: 'customers(name)',
   totalNetPln: 'total_net_pln',
-  createdAt: 'created_at'
-}
+  createdAt: 'created_at',
+};
 
 @Injectable()
 export class OrdersRepository {
-  private readonly client = supabaseClient
-  private readonly logger = new Logger(OrdersRepository.name)
+  private readonly client = supabaseClient;
+  private readonly logger = new Logger(OrdersRepository.name);
 
   async list(params: ListParams): Promise<ListOrdersResponse> {
-    const offset = (params.page - 1) * params.limit
+    const offset = (params.page - 1) * params.limit;
     const baseQuery = this.client
       .from('orders')
       .select(
         `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const,
         { count: 'exact' }
       )
-      .order(SORT_FIELD_MAP[params.sortField], { ascending: params.sortDirection === 'asc' })
-      .range(offset, offset + params.limit - 1)
+      .order(SORT_FIELD_MAP[params.sortField], {
+        ascending: params.sortDirection === 'asc',
+      })
+      .range(offset, offset + params.limit - 1);
 
-    let query = baseQuery
+    let query = baseQuery;
 
     if (!params.includeDeleted) {
-      query = query.is('deleted_at', null)
+      query = query.is('deleted_at', null);
     }
 
     if (params.customerId) {
-      query = query.eq('customer_id', params.customerId)
+      query = query.eq('customer_id', params.customerId);
     }
 
     if (params.dateFrom) {
-      query = query.gte('order_date', params.dateFrom)
+      query = query.gte('order_date', params.dateFrom);
     }
 
     if (params.dateTo) {
-      query = query.lte('order_date', params.dateTo)
+      query = query.lte('order_date', params.dateTo);
     }
 
-    const { data, count, error } = await query
+    const { data, count, error } = await query;
 
     if (error) {
-      this.logger.error('Nie udało się pobrać listy zamówień', error)
-      throw error
+      this.logger.error('Nie udało się pobrać listy zamówień', error);
+      throw error;
     }
 
-    const items = (data ?? []).map((row) => OrderMapper.toListDto(row as OrderListRow))
+    const items = (data ?? []).map((row) =>
+      OrderMapper.toListDto(row as OrderListRow)
+    );
 
     return {
       items,
       total: count ?? 0,
       page: params.page,
-      limit: params.limit
-    }
+      limit: params.limit,
+    };
   }
 
-  async findById(id: string, options: FindByIdOptions): Promise<OrderDetailDto | null> {
-    const { includeDeleted } = options
+  async findById(
+    id: string,
+    options: FindByIdOptions
+  ): Promise<OrderDetailDto | null> {
+    const { includeDeleted } = options;
 
     const baseQuery = this.client
       .from('orders')
       .select(
         `id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
       )
-      .eq('id', id)
+      .eq('id', id);
 
-    const filteredQuery = includeDeleted ? baseQuery : baseQuery.is('deleted_at', null)
+    const filteredQuery = includeDeleted
+      ? baseQuery
+      : baseQuery.is('deleted_at', null);
 
-    const { data, error } = await filteredQuery.maybeSingle()
+    const { data, error } = await filteredQuery.maybeSingle();
 
     if (error) {
-      this.logger.error(`Nie udało się pobrać zamówienia ${id}`, error)
-      throw error
+      this.logger.error(`Nie udało się pobrać zamówienia ${id}`, error);
+      throw error;
     }
 
     if (!data) {
-      return null
+      return null;
     }
 
-    return OrderMapper.toDetailDto(data as OrderDetailRow)
+    return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
   async findActiveById(id: string): Promise<OrderDetailDto | null> {
@@ -135,22 +158,25 @@ export class OrdersRepository {
       )
       .eq('id', id)
       .is('deleted_at', null)
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.logger.error(`Nie udało się pobrać aktywnego zamówienia ${id}`, error)
-      throw error
+      this.logger.error(
+        `Nie udało się pobrać aktywnego zamówienia ${id}`,
+        error
+      );
+      throw error;
     }
 
     if (!data) {
-      return null
+      return null;
     }
 
-    return OrderMapper.toDetailDto(data as OrderDetailRow)
+    return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
   async create(params: CreateParams): Promise<OrderDetailDto> {
-    const { command, actorId } = params
+    const { command, actorId } = params;
 
     const payload: TablesInsert<'orders'> = {
       order_no: command.orderNo,
@@ -167,8 +193,8 @@ export class OrdersRepository {
       total_gross_pln: command.totalGrossPln,
       total_gross_eur: command.totalGrossEur ?? null,
       comment: command.comment ?? null,
-      created_by: actorId
-    }
+      created_by: actorId,
+    };
 
     const { data, error } = await this.client
       .from('orders')
@@ -176,30 +202,30 @@ export class OrdersRepository {
       .select(
         `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
       )
-      .single()
+      .single();
 
     if (error) {
-      this.handleCreateError(error)
+      this.handleCreateError(error);
     }
 
     if (!data) {
-      throw new Error('Brak danych utworzonego zamówienia.')
+      throw new Error('Brak danych utworzonego zamówienia.');
     }
 
-    return OrderMapper.toDetailDto(data as OrderDetailRow)
+    return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
   private handleCreateError(error: PostgrestError): never {
     if (error.code === '23505') {
       throw new ConflictException({
         code: 'ORDERS_CREATE_CONFLICT',
-        message: 'Zamówienie o podanym numerze już istnieje.'
-      })
+        message: 'Zamówienie o podanym numerze już istnieje.',
+      });
     }
 
-    this.logger.error('Nie udało się utworzyć zamówienia', error)
+    this.logger.error('Nie udało się utworzyć zamówienia', error);
 
-    throw error
+    throw error;
   }
 
   async findByIdForUpdate(orderId: string): Promise<OrderDetailRow | null> {
@@ -209,18 +235,21 @@ export class OrdersRepository {
         `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
       )
       .eq('id', orderId)
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.logger.error(`Nie udało się pobrać zamówienia ${orderId} do aktualizacji`, error)
-      throw error
+      this.logger.error(
+        `Nie udało się pobrać zamówienia ${orderId} do aktualizacji`,
+        error
+      );
+      throw error;
     }
 
-    return (data as OrderDetailRow | null) ?? null
+    return (data as OrderDetailRow | null) ?? null;
   }
 
   async update(params: UpdateParams): Promise<OrderDetailDto> {
-    const { command, orderId, actorId } = params
+    const { command, orderId, actorId } = params;
 
     const payload: TablesUpdate<'orders'> = {
       order_no: command.orderNo,
@@ -237,8 +266,8 @@ export class OrdersRepository {
       total_gross_pln: command.totalGrossPln,
       total_gross_eur: command.totalGrossEur ?? null,
       comment: command.comment ?? null,
-      updated_at: new Date().toISOString()
-    }
+      updated_at: new Date().toISOString(),
+    };
 
     const { data, error } = await this.client
       .from('orders')
@@ -247,54 +276,58 @@ export class OrdersRepository {
       .select(
         `id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at` as const
       )
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.handleUpdateError(error, orderId)
+      this.handleUpdateError(error, orderId);
     }
 
     if (!data) {
       throw new NotFoundException({
         code: 'ORDER_NOT_FOUND',
-        message: 'Nie znaleziono zamówienia.'
-      })
+        message: 'Nie znaleziono zamówienia.',
+      });
     }
 
-    return OrderMapper.toDetailDto(data as OrderDetailRow)
+    return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
   private handleUpdateError(error: PostgrestError, orderId: string): never {
     if (error.code === '23505') {
       throw new ConflictException({
         code: 'ORDERS_UPDATE_CONFLICT',
-        message: 'Zamówienie o podanym numerze już istnieje.'
-      })
+        message: 'Zamówienie o podanym numerze już istnieje.',
+      });
     }
 
-    this.logger.error(`Nie udało się zaktualizować zamówienia ${orderId}`, error)
+    this.logger.error(
+      `Nie udało się zaktualizować zamówienia ${orderId}`,
+      error
+    );
 
-    throw error
+    throw error;
   }
 
   async softDelete(params: SoftDeleteParams): Promise<void> {
-    const { command, actorId } = params
+    const { command, actorId } = params;
 
     const payload: TablesUpdate<'orders'> = {
       deleted_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
+      updated_at: new Date().toISOString(),
+    };
 
     const { error } = await this.client
       .from('orders')
       .update(payload)
       .eq('id', command.orderId)
-      .is('deleted_at', null)
+      .is('deleted_at', null);
 
     if (error) {
-      this.logger.error(`Nie udało się soft-delete zamówienia ${command.orderId}`, error)
-      throw error
+      this.logger.error(
+        `Nie udało się soft-delete zamówienia ${command.orderId}`,
+        error
+      );
+      throw error;
     }
   }
 }
-
-

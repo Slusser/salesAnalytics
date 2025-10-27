@@ -1,34 +1,37 @@
-import { Logger } from '@nestjs/common'
+import { Logger } from '@nestjs/common';
 
-import type { OrderDetailDto, OrderListItemDto } from 'apps/shared/dtos/orders.dto'
+import type {
+  OrderDetailDto,
+  OrderListItemDto,
+} from 'apps/shared/dtos/orders.dto';
 
 export interface OrderListRow {
-  id: string
-  order_no: string
-  order_date: string
-  item_name: string
-  quantity: number
-  is_eur: boolean
-  eur_rate: number | null
-  producer_discount_pct: number
-  distributor_discount_pct: number
-  vat_rate_pct: number
-  total_net_pln: number
-  total_gross_pln: number
-  total_gross_eur: number | null
-  created_at: string
-  updated_at: string
-  deleted_at: string | null
-  customer_id: string
-  created_by: string
+  id: string;
+  order_no: string;
+  order_date: string;
+  item_name: string;
+  quantity: number;
+  is_eur: boolean;
+  eur_rate: number | null;
+  producer_discount_pct: number;
+  distributor_discount_pct: number;
+  vat_rate_pct: number;
+  total_net_pln: number;
+  total_gross_pln: number;
+  total_gross_eur: number | null;
+  created_at: string;
+  updated_at: string;
+  deleted_at: string | null;
+  customer_id: string;
+  created_by: string;
 }
 
 export interface OrderDetailRow extends OrderListRow {
-  comment: string | null
-  currency_code: string
+  comment: string | null;
+  currency_code: string;
 }
 
-const logger = new Logger('OrderMapper')
+const logger = new Logger('OrderMapper');
 
 /**
  * Mapper odpowiedzialny za konwersję rekordów Supabase na DTO wykorzystywane przez API.
@@ -36,10 +39,12 @@ const logger = new Logger('OrderMapper')
  */
 export class OrderMapper {
   static toListDto(row: OrderListRow): OrderListItemDto {
-    const createdBy = row.created_by
+    const createdBy = row.created_by;
 
     if (!createdBy) {
-      logger.warn(`Rekord zamówienia ${row.id} nie zawiera danych o użytkowniku tworzącym.`)
+      logger.warn(
+        `Rekord zamówienia ${row.id} nie zawiera danych o użytkowniku tworzącym.`
+      );
     }
 
     return {
@@ -60,19 +65,17 @@ export class OrderMapper {
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
-      deletedAt: row.deleted_at
-    }
+      deletedAt: row.deleted_at,
+    };
   }
 
   static toDetailDto(row: OrderDetailRow): OrderDetailDto {
-    const base = this.toListDto(row)
+    const base = this.toListDto(row);
 
     return {
       ...base,
       comment: row.comment,
-      currencyCode: row.currency_code
-    }
+      currencyCode: row.currency_code,
+    };
   }
 }
-
-

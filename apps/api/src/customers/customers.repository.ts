@@ -1,163 +1,176 @@
-import { Injectable, Logger } from '@nestjs/common'
-import type { PostgrestError } from '@supabase/supabase-js'
+import { Injectable, Logger } from '@nestjs/common';
+import type { PostgrestError } from '@supabase/supabase-js';
 
-import type { Tables, TablesInsert, TablesUpdate } from 'apps/db/database.types'
-import { supabaseClient } from 'apps/db/supabase.client'
-import { CustomerMapper } from './customers.mapper'
+import type {
+  Tables,
+  TablesInsert,
+  TablesUpdate,
+} from 'apps/db/database.types';
+import { supabaseClient } from 'apps/db/supabase.client';
+import { CustomerMapper } from './customers.mapper';
 import type {
   CustomerDto,
   DeleteCustomerCommand,
   ListCustomersQuery,
   ListCustomersResponse,
-  UpdateCustomerCommand
-} from 'apps/shared/dtos/customers.dto'
+  UpdateCustomerCommand,
+} from 'apps/shared/dtos/customers.dto';
 
 interface InsertCustomerParams {
-  name: string
-  isActive: boolean
-  actorId: string
+  name: string;
+  isActive: boolean;
+  actorId: string;
 }
 
-interface ListParams extends Required<Pick<ListCustomersQuery, 'page' | 'limit'>> {
-  search?: string
-  includeInactive: boolean
+interface ListParams
+  extends Required<Pick<ListCustomersQuery, 'page' | 'limit'>> {
+  search?: string;
+  includeInactive: boolean;
 }
 
 interface UpdateCustomerParams extends UpdateCustomerCommand {
-  customerId: string
+  customerId: string;
 }
 
 type SoftDeleteParams = Pick<DeleteCustomerCommand, 'customerId'> & {
-  deletedAt: string
-}
+  deletedAt: string;
+};
 
 @Injectable()
 export class CustomersRepository {
-  private readonly client = supabaseClient
-  private readonly logger = new Logger(CustomersRepository.name)
+  private readonly client = supabaseClient;
+  private readonly logger = new Logger(CustomersRepository.name);
 
   async isActiveNameTaken(name: string): Promise<boolean> {
-    const normalized = name.trim()
-    const pattern = normalized.replace(/[%_]/g, '\\$&')
+    const normalized = name.trim();
+    const pattern = normalized.replace(/[%_]/g, '\\$&');
 
     const { count, error } = await this.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .is('deleted_at', null)
-      .ilike('name', pattern)
+      .ilike('name', pattern);
 
     if (error) {
-      throw error
+      throw error;
     }
 
-    return (count ?? 0) > 0
+    return (count ?? 0) > 0;
   }
 
-  async insert(customer: InsertCustomerParams): Promise<{ data?: CustomerDto; error?: PostgrestError }> {
+  async insert(
+    customer: InsertCustomerParams
+  ): Promise<{ data?: CustomerDto; error?: PostgrestError }> {
     const payload: TablesInsert<'customers'> = {
       name: customer.name,
-      is_active: customer.isActive
-    }
+      is_active: customer.isActive,
+    };
 
     const { data, error } = await this.client
       .from('customers')
       .insert(payload)
       .select()
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      return { error }
+      return { error };
     }
 
     if (!data) {
-      this.logger.error('Brak danych zwróconych po wstawieniu klienta')
-      return {}
+      this.logger.error('Brak danych zwróconych po wstawieniu klienta');
+      return {};
     }
 
-    return { data: CustomerMapper.toDto(data) }
+    return { data: CustomerMapper.toDto(data) };
   }
 
   async findById(customerId: string): Promise<{
-    data?: Tables<'customers'> | null
-    error?: PostgrestError
+    data?: Tables<'customers'> | null;
+    error?: PostgrestError;
   }> {
     const { data, error } = await this.client
       .from('customers')
       .select('id, name, is_active, created_at, updated_at, deleted_at')
       .eq('id', customerId)
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.logger.error(`Błąd podczas pobierania klienta ${customerId}`, error)
-      return { error }
+      this.logger.error(`Błąd podczas pobierania klienta ${customerId}`, error);
+      return { error };
     }
 
-    return { data: (data as Tables<'customers'> | null) ?? null }
+    return { data: (data as Tables<'customers'> | null) ?? null };
   }
 
-  async isActiveNameTakenByOther(name: string, excludingCustomerId: string): Promise<boolean> {
-    const normalized = name.trim()
-    const pattern = normalized.replace(/[%_]/g, '\\$&')
+  async isActiveNameTakenByOther(
+    name: string,
+    excludingCustomerId: string
+  ): Promise<boolean> {
+    const normalized = name.trim();
+    const pattern = normalized.replace(/[%_]/g, '\\$&');
 
     const { count, error } = await this.client
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .is('deleted_at', null)
       .ilike('name', pattern)
-      .neq('id', excludingCustomerId)
+      .neq('id', excludingCustomerId);
 
     if (error) {
-      throw error
+      throw error;
     }
 
-    return (count ?? 0) > 0
+    return (count ?? 0) > 0;
   }
 
   async softDelete(params: SoftDeleteParams): Promise<{
-    data?: CustomerDto | null
-    error?: PostgrestError
+    data?: CustomerDto | null;
+    error?: PostgrestError;
   }> {
     const payload: TablesUpdate<'customers'> = {
       is_active: false,
       deleted_at: params.deletedAt,
-      updated_at: new Date().toISOString()
-    }
+      updated_at: new Date().toISOString(),
+    };
 
     const { data, error } = await this.client
       .from('customers')
       .update(payload)
       .eq('id', params.customerId)
       .select('id, name, is_active, created_at, updated_at, deleted_at')
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.logger.error(`Błąd podczas soft-delete klienta ${params.customerId}`, error)
-      return { error }
+      this.logger.error(
+        `Błąd podczas soft-delete klienta ${params.customerId}`,
+        error
+      );
+      return { error };
     }
 
     if (!data) {
-      return { data: null }
+      return { data: null };
     }
 
-    return { data: CustomerMapper.toDto(data as Tables<'customers'>) }
+    return { data: CustomerMapper.toDto(data as Tables<'customers'>) };
   }
 
   async update(params: UpdateCustomerParams): Promise<{
-    data?: CustomerDto | null
-    error?: PostgrestError
+    data?: CustomerDto | null;
+    error?: PostgrestError;
   }> {
-    const payload: TablesUpdate<'customers'> = {}
+    const payload: TablesUpdate<'customers'> = {};
 
     if (params.name !== undefined) {
-      payload.name = params.name
+      payload.name = params.name;
     }
 
     if (params.isActive !== undefined) {
-      payload.is_active = params.isActive
+      payload.is_active = params.isActive;
     }
 
     if (params.deletedAt !== undefined) {
-      payload.deleted_at = params.deletedAt
+      payload.deleted_at = params.deletedAt;
     }
 
     const { data, error } = await this.client
@@ -165,54 +178,59 @@ export class CustomersRepository {
       .update(payload)
       .eq('id', params.customerId)
       .select('id, name, is_active, created_at, updated_at, deleted_at')
-      .maybeSingle()
+      .maybeSingle();
 
     if (error) {
-      this.logger.error(`Błąd podczas aktualizacji klienta ${params.customerId}`, error)
-      return { error }
+      this.logger.error(
+        `Błąd podczas aktualizacji klienta ${params.customerId}`,
+        error
+      );
+      return { error };
     }
 
     if (!data) {
-      return { data: null }
+      return { data: null };
     }
 
-    return { data: CustomerMapper.toDto(data as Tables<'customers'>) }
+    return { data: CustomerMapper.toDto(data as Tables<'customers'>) };
   }
 
   async list(params: ListParams): Promise<ListCustomersResponse> {
-    const { page, limit, search, includeInactive } = params
-    const offset = (page - 1) * limit
+    const { page, limit, search, includeInactive } = params;
+    const offset = (page - 1) * limit;
 
     let query = this.client
       .from('customers')
-      .select('id, name, is_active, created_at, updated_at, deleted_at', { count: 'exact' })
+      .select('id, name, is_active, created_at, updated_at, deleted_at', {
+        count: 'exact',
+      })
       .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1)
+      .range(offset, offset + limit - 1);
 
     if (!includeInactive) {
-      query = query.is('deleted_at', null).eq('is_active', true)
+      query = query.is('deleted_at', null).eq('is_active', true);
     }
 
     if (search) {
-      query = query.ilike('name', `%${search}%`)
+      query = query.ilike('name', `%${search}%`);
     }
 
-    const { data, count, error } = await query
+    const { data, count, error } = await query;
 
     if (error) {
-      this.logger.error('Błąd podczas pobierania listy klientów', error)
-      throw error
+      this.logger.error('Błąd podczas pobierania listy klientów', error);
+      throw error;
     }
 
-    const items = (data ?? []).map((row) => CustomerMapper.toDto(row as Tables<'customers'>))
+    const items = (data ?? []).map((row) =>
+      CustomerMapper.toDto(row as Tables<'customers'>)
+    );
 
     return {
       items,
       total: count ?? 0,
       page,
-      limit
-    }
+      limit,
+    };
   }
 }
-
-
