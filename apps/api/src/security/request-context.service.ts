@@ -1,44 +1,51 @@
-import { Injectable, Logger } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common';
 
-import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto'
-import type { UserRoleValue } from 'apps/shared/dtos/user-roles.dto'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import type { CustomerMutatorContext } from 'apps/shared/dtos/customers.dto';
+import type { UserRoleValue } from 'apps/shared/dtos/user-roles.dto';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
-import { SupabaseFactory } from '../supabase/supabase.factory'
+import { SupabaseFactory } from '../supabase/supabase.factory';
 
 interface UserRolesResponse {
-  role: UserRoleValue
+  role: UserRoleValue;
 }
 
 @Injectable()
 export class RequestContextService {
-  private readonly logger = new Logger(RequestContextService.name)
+  private readonly logger = new Logger(RequestContextService.name);
 
   constructor(private readonly supabaseFactory: SupabaseFactory) {}
 
-  async resolveCurrentUser(accessToken: string): Promise<CustomerMutatorContext | undefined> {
-    const supabase = this.supabaseFactory.create(accessToken)
+  async resolveCurrentUser(
+    accessToken: string
+  ): Promise<CustomerMutatorContext | undefined> {
+    const supabase = this.supabaseFactory.create(accessToken);
 
-    const { data: userData, error: userError } = await supabase.auth.getUser(accessToken)
+    const { data: userData, error: userError } = await supabase.auth.getUser(
+      accessToken
+    );
 
     if (userError || !userData?.user) {
-      this.logger.warn('Nie udało się pobrać użytkownika z tokenu dostępowego', {
-        error: userError?.message
-      })
-      return undefined
+      this.logger.warn(
+        'Nie udało się pobrać użytkownika z tokenu dostępowego',
+        {
+          error: userError?.message,
+        }
+      );
+      return undefined;
     }
 
-    const userId = userData.user.id
+    const userId = userData.user.id;
 
-    const userRoles = await this.fetchUserRoles(supabase, userId)
+    const userRoles = await this.fetchUserRoles(supabase, userId);
     if (!userRoles) {
-      return undefined
+      return undefined;
     }
 
     return {
       actorId: userId,
-      actorRoles: userRoles
-    }
+      actorRoles: userRoles,
+    };
   }
 
   private async fetchUserRoles(
@@ -48,21 +55,19 @@ export class RequestContextService {
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', userId)
+      .eq('user_id', userId);
 
     if (error) {
-      this.logger.error('Błąd pobierania ról użytkownika', error)
-      return undefined
+      this.logger.error('Błąd pobierania ról użytkownika', error);
+      return undefined;
     }
 
-    const roles = data?.map((row: UserRolesResponse) => row.role) ?? []
+    const roles = data?.map((row: UserRolesResponse) => row.role) ?? [];
 
     if (roles.length === 0) {
-      this.logger.warn(`Użytkownik ${userId} nie posiada przypisanych ról.`)
+      this.logger.warn(`Użytkownik ${userId} nie posiada przypisanych ról.`);
     }
 
-    return roles
+    return roles;
   }
 }
-
-

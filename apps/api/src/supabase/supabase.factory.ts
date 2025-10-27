@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common'
-import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import { Injectable } from '@nestjs/common';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-import type { Database } from 'apps/db/database.types'
+import type { Database } from 'apps/db/database.types';
 
-const supabaseUrl = process.env.SUPABASE_URL ?? ''
-const supabaseAnonKey = process.env.SUPABASE_KEY ?? ''
+const supabaseUrl = process.env.SUPABASE_URL ?? '';
+const supabaseAnonKey = process.env.SUPABASE_KEY ?? '';
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Brak konfiguracji Supabase: SUPABASE_URL lub SUPABASE_KEY.')
+  throw new Error('Brak konfiguracji Supabase: SUPABASE_URL lub SUPABASE_KEY.');
 }
 
 @Injectable()
@@ -17,17 +17,15 @@ export class SupabaseFactory {
       auth: {
         autoRefreshToken: false,
         persistSession: false,
-        detectSessionInUrl: false
+        detectSessionInUrl: false,
       },
       global: accessToken
         ? {
             headers: {
-              Authorization: `Bearer ${accessToken}`
-            }
+              Authorization: `Bearer ${accessToken}`,
+            },
           }
-        : undefined
-    })
+        : undefined,
+    });
   }
 }
-
-
