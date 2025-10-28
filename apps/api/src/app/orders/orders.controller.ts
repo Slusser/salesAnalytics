@@ -55,6 +55,7 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Get()
+  @Roles('viewer', 'editor', 'owner')
   @ApiOperation({
     summary: 'Pobiera listę zamówień z filtrowaniem i paginacją.',
   })
@@ -331,6 +332,7 @@ export class OrdersController {
   }
 
   @Get(':orderId')
+  @Roles('viewer', 'editor', 'owner')
   @ApiOperation({ summary: 'Pobiera szczegóły pojedynczego zamówienia.' })
   @ApiParam({
     name: 'orderId',

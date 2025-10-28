@@ -4,7 +4,6 @@ import {
   computed,
   effect,
   inject,
-  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
@@ -45,7 +44,6 @@ export class OrdersNewPageComponent {
   private readonly fxRateService = inject(FxRateService);
 
   protected readonly state = computed(() => this.store.state());
-  protected readonly customers = signal<{ label: string; value: string }[]>([]);
 
   constructor() {
     effect(() => {

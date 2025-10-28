@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { Router } from '@angular/router';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 
 import { OrdersListService } from '../../service/orders/orders-list.service';
 import { OrdersToolbarComponent } from './shared/orders-toolbar/orders-toolbar.component';
@@ -23,6 +24,7 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
   imports: [
     CommonModule,
     NzAlertModule,
+    NzButtonModule,
     OrdersToolbarComponent,
     OrdersDataTableComponent,
     PaginationComponent,
@@ -102,6 +104,18 @@ export class OrdersPage {
   protected onRowToggle(orderId: string): void {
     const current = this.expandedRowId();
     this.ordersService.setExpandedRow(current === orderId ? null : orderId);
+  }
+
+  protected canMutate(): boolean {
+    return this.ordersService.canMutate();
+  }
+
+  protected onCreate(): void {
+    if (!this.ordersService.canMutate() || this.loading()) {
+      return;
+    }
+
+    this.router.navigate(['/orders/new']);
   }
 
   protected onEdit(orderId: string): void {

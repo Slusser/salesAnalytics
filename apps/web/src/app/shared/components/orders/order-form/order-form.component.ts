@@ -35,6 +35,7 @@ import type {
   OrderFormServerErrors,
 } from '../../../../pages/orders/new/orders-new.types';
 import { LoaderButtonComponent } from '../../loader-button/loader-button.component';
+import { CustomersService } from '../../../../service/customers/customers.service';
 
 const ORDER_NO_MAX_LENGTH = 64;
 const ITEM_NAME_MAX_LENGTH = 120;
@@ -87,7 +88,9 @@ export class OrderFormComponent {
   readonly serverErrors = input<OrderFormServerErrors | null>(null);
   readonly calculation = input<OrderCalculationResult | null>(null);
 
-  readonly customersOptions = input<{ label: string; value: string }[]>([]);
+  private readonly customersService = inject(CustomersService);
+
+  protected readonly customersOptions = signal<{ label: string; value: string }[]>([]);
 
   readonly submitted = output<OrderFormModel>();
   readonly cancelled = output<void>();
@@ -142,6 +145,7 @@ export class OrderFormComponent {
   );
 
   constructor() {
+    this.loadCustomersOptions();
     this.setupModelEffect();
     this.setupSubmittingEffect();
     this.setupServerErrorsEffect();
@@ -345,6 +349,29 @@ export class OrderFormComponent {
     eurRateControl.setValue(null, { emitEvent: false });
     grossEurControl.disable({ emitEvent: false });
     grossEurControl.setValue(null, { emitEvent: false });
+  }
+
+  private loadCustomersOptions(): void {
+    this.customersService
+      .get({ limit: 1000 })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (customers) => {
+          const options = customers
+            .filter((customer) => customer.isActive)
+            .map((customer) => ({
+              label: customer.name,
+              value: customer.id,
+            }))
+            .sort((a, b) => a.label.localeCompare(b.label, 'pl', { sensitivity: 'base' }));
+
+          this.customersOptions.set(options);
+        },
+        error: (error) => {
+          console.error('Nie udało się pobrać listy kontrahentów.', error);
+          this.customersOptions.set([]);
+        },
+      });
   }
 
   private resolveErrorMessage(controlName: keyof OrderFormModel): string {

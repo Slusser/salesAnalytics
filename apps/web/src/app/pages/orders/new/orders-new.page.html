@@ -22,7 +22,6 @@
         [calculation]="state().calculation"
         [submitting]="state().submitting"
         [serverErrors]="state().serverErrors"
-        [customersOptions]="customers()"
         (submitted)="onFormSubmit($event)"
         (cancelled)="onCancel()"
         (dirtyChange)="onDirtyChange($event)"

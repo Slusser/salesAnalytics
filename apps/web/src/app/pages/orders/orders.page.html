@@ -2,6 +2,16 @@
   <header class="page-header">
     <h2>Zamówienia</h2>
     <div class="page-header__actions">
+      @if (canMutate()) {
+        <button
+          nz-button
+          nzType="primary"
+          [disabled]="loading()"
+          (click)="onCreate()"
+        >
+          Dodaj
+        </button>
+      }
       <app-manual-refresh-button
         [disabled]="loading()"
         (clicked)="onManualRefresh()"
