@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import type {
   CustomerRowVm,
   CustomersQueryParamsVm,
-} from '../../service/customers/customers-list.types';
+} from '../../service/customers/customers.types';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
@@ -19,7 +19,7 @@ import { ManualRefreshButtonComponent } from '../../shared/components/manual-ref
 import { CustomersTableComponent } from '../../shared/components/customers-table/customers-table.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
-import { CustomersListService } from '../../service/customers/customers-list.service';
+import { CustomersService } from '../../service/customers/customers.service';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 
 @Component({
@@ -41,7 +41,7 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomersPage {
-  private readonly service = inject(CustomersListService);
+  private readonly service = inject(CustomersService);
   private readonly router = inject(Router);
 
   protected readonly roles = this.service.roles;

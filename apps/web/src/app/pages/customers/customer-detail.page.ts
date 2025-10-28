@@ -21,7 +21,7 @@ import { finalize } from 'rxjs';
 import type { UpdateCustomerCommand } from '@shared/dtos/customers.dto';
 import type { AppRole } from '@shared/dtos/user-roles.dto';
 
-import { CustomersDetailService } from '../../service/customers/customers-detail.service';
+import { CustomersService } from '../../service/customers/customers.service';
 import { AuthSessionService } from '../../service/auth/auth-session.service';
 import type {
   ApiError,
@@ -69,7 +69,7 @@ interface PageState {
 export class CustomerDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly service = inject(CustomersDetailService);
+  private readonly service = inject(CustomersService);
   private readonly message = inject(NzMessageService);
   private readonly authSession = inject(AuthSessionService);
   private readonly destroyRef = inject(DestroyRef);

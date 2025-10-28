@@ -11,7 +11,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { CommonModule, DatePipe } from '@angular/common';
 
-import type { CustomerRowVm } from '../../../service/customers/customers-list.types';
+import type { CustomerRowVm } from '../../../service/customers/customers.types';
 import type { AppRole } from '@shared/dtos/user-roles.dto';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 

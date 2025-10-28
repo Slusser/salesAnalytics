@@ -16,8 +16,8 @@ import type {
   CustomerFormModel,
   ServerValidationErrors,
 } from '../../../shared/components/customers/customer-form/customer-form.types';
-import type { CreateCustomerRequest } from '../../../service/customers/customers-create.service';
-import { CustomersCreateService } from '../../../service/customers/customers-create.service';
+import type { CreateCustomerRequest } from '../../../service/customers/customers.types';
+import { CustomersService } from '../../../service/customers/customers.service';
 import { CustomerFormComponent } from '../../../shared/components/customers/customer-form/customer-form.component';
 
 @Component({
@@ -34,7 +34,7 @@ import { CustomerFormComponent } from '../../../shared/components/customers/cust
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomersNewPageComponent {
-  private readonly service = inject(CustomersCreateService);
+  private readonly service = inject(CustomersService);
   private readonly router = inject(Router);
   private readonly message = inject(NzMessageService);
 

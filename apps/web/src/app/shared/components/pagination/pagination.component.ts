@@ -9,7 +9,7 @@ import {
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { CUSTOMERS_LIMIT_OPTIONS } from '../../../service/customers/customers-list.types';
+import { CUSTOMERS_LIMIT_OPTIONS } from '../../../service/customers/customers.types';
 import { FormsModule } from '@angular/forms';
 
 @Component({
