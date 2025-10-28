@@ -16,15 +16,6 @@
         [disabled]="loading()"
         (clicked)="onManualRefresh()"
       />
-      <button
-        nz-button
-        nzType="default"
-        nzShape="round"
-        [disabled]="loading() || exportInProgress()"
-        (click)="onExport()"
-      >
-        Eksportuj XLSX
-      </button>
     </div>
   </header>
 

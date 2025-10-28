@@ -91,10 +91,6 @@ export class OrdersPage {
     this.ordersService.refetch();
   }
 
-  protected onExport(): void {
-    this.ordersService.exportCurrentList();
-  }
-
   protected onSortChange(
     sort: Parameters<OrdersListService['handleSortChange']>[0]
   ): void {

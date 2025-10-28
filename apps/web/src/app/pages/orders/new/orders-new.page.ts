@@ -15,7 +15,7 @@ import { OrdersNewStore } from './orders-new.store';
 import { OrderFormComponent } from '../../../shared/components/orders/order-form/order-form.component';
 import { OrderCalculationPreviewComponent } from '../../../shared/components/orders/order-calculation-preview/order-calculation-preview.component';
 import { FxRateBannerComponent } from '../../../shared/components/orders/fx-rate-banner/fx-rate-banner.component';
-import type { OrderFormModel } from './orders-new.types';
+import type { OrderCalculationResult, OrderFormModel } from './orders-new.types';
 import type { OrderResponse } from '@shared/dtos/orders.dto';
 import { OrdersCreateService } from '../../../service/orders/orders-create.service';
 import { FxRateService } from '../../../service/orders/fx-rate.service';
@@ -37,6 +37,17 @@ import { FxRateService } from '../../../service/orders/fx-rate.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OrdersNewPageComponent {
+  public static readonly EMPTY_CALCULATION: OrderCalculationResult = {
+    netAfterProducer: 0,
+    netAfterDistributor: 0,
+    vatAmount: 0,
+    grossPln: 0,
+    grossEur: 0,
+    differencePln: 0,
+    differenceEur: 0,
+    withinTolerance: true,
+  };
+
   private readonly store = inject(OrdersNewStore);
   private readonly router = inject(Router);
   private readonly message = inject(NzMessageService);
@@ -44,6 +55,9 @@ export class OrdersNewPageComponent {
   private readonly fxRateService = inject(FxRateService);
 
   protected readonly state = computed(() => this.store.state());
+  protected readonly calculationPreview = computed(
+    () => this.store.calculation() ?? OrdersNewPageComponent.EMPTY_CALCULATION
+  );
 
   constructor() {
     effect(() => {

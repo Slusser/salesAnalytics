@@ -55,6 +55,7 @@ export interface OrderRowVm {
   currencyLabel: string;
   netFormatted: string;
   grossFormatted: string;
+  vatRatePct: number;
   createdAt: string;
   createdByName?: string;
   deleted: boolean;

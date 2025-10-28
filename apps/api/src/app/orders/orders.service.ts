@@ -293,13 +293,6 @@ export class OrdersService {
       });
     }
 
-    if (existing.deleted_at) {
-      throw new ForbiddenException({
-        code: 'ORDERS_UPDATE_FORBIDDEN',
-        message: 'Nie można aktualizować usuniętego zamówienia.',
-      });
-    }
-
     const normalizedCommand = this.normalizeCommand(command);
 
     this.validateCommand(normalizedCommand);
@@ -333,14 +326,28 @@ export class OrdersService {
 
   private normalizeCommand<T extends BaseOrderCommand>(command: T): T {
     const trimmedComment = command.comment?.trim() ?? undefined;
-    const normalizedOrderNo = command.orderNo.trim().toUpperCase();
-    const normalizedItemName = command.itemName.trim();
+    const normalizedOrderNo = command.orderNo?.trim().toUpperCase();
+    const normalizedItemName = command.itemName?.trim();
+    const normalizedDeletedAt = command.deletedAt ? new Date(command.deletedAt).toISOString() : null;
+    const producerDiscountPct = command.producerDiscountPct ? Math.max(0, Math.min(100, command.producerDiscountPct)) : null;
+    const distributorDiscountPct = command.distributorDiscountPct ? Math.max(0, Math.min(100, command.distributorDiscountPct)) : null;
+    const vatRatePct = command.vatRatePct ? Math.max(0, Math.min(100, command.vatRatePct)) : null;
+    const totalNetPln = command.totalNetPln ? Math.max(0, command.totalNetPln) : null;
+    const totalGrossPln = command.totalGrossPln ? Math.max(0, command.totalGrossPln) : null;
+    const totalGrossEur = command.totalGrossEur ? Math.max(0, command.totalGrossEur) : null;
 
     return {
       ...command,
       orderNo: normalizedOrderNo,
       itemName: normalizedItemName,
       comment: trimmedComment,
+      deletedAt: normalizedDeletedAt,
+      producerDiscountPct: producerDiscountPct,
+      distributorDiscountPct: distributorDiscountPct,
+      vatRatePct: vatRatePct,
+      totalNetPln: totalNetPln,
+      totalGrossPln: totalGrossPln,
+      totalGrossEur: totalGrossEur,
     } as T;
   }
 
@@ -375,7 +382,7 @@ export class OrdersService {
     }
 
     if (
-      !this.areAmountsConsistent(command.totalNetPln, command.totalGrossPln)
+      !this.areAmountsConsistent(command.totalNetPln, command.totalGrossPln, command.vatRatePct)
     ) {
       throw new BadRequestException({
         code: 'ORDERS_CREATE_VALIDATION',
@@ -383,22 +390,10 @@ export class OrdersService {
           'Suma brutto w PLN musi mieścić się w tolerancji względem sumy netto.',
       });
     }
-
-    if (command.isEur && command.totalGrossEur != null) {
-      const totalGrossEur = command.totalGrossEur;
-      const expectedGrossEur = command.totalGrossPln / command.eurRate!;
-
-      if (!this.areAmountsConsistent(expectedGrossEur, totalGrossEur)) {
-        throw new BadRequestException({
-          code: 'ORDERS_CREATE_VALIDATION',
-          message: 'Suma brutto w EUR niezgodna z wartością przeliczoną z PLN.',
-        });
-      }
-    }
   }
 
-  private areAmountsConsistent(a: number, b: number): boolean {
-    return Math.abs(a - b) <= AMOUNT_TOLERANCE;
+  private areAmountsConsistent(a: number, b: number, vatRate: number): boolean {
+    return Math.abs(a*(1+vatRate/100) - b) <= AMOUNT_TOLERANCE;
   }
 
   async delete(

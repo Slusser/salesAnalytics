@@ -2,7 +2,7 @@
   <header class="orders-new-page__header">
     <h1 class="orders-new-page__title">Nowe zamówienie</h1>
     <p class="orders-new-page__subtitle">
-      Wprowadź dane zamówienia, uzupełnij kurs EUR i zastosuj import z pliku XLSX.
+      Wprowadź dane zamówienia, uzupełnij kurs EUR.
     </p>
   </header>
 
@@ -31,12 +31,9 @@
 
     <aside class="orders-new-page__sidebar">
       <app-order-calculation-preview
-        *ngIf="state().calculation"
-        [calculation]="state().calculation!"
+        [calculation]="state().calculation"
         [currency]="state().formModel.currencyCode"
       />
-
     </aside>
   </div>
 </section>
-

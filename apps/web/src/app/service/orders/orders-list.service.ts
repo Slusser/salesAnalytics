@@ -8,7 +8,6 @@ import { NzNotificationService } from 'ng-zorro-antd/notification';
 import {
   catchError,
   distinctUntilChanged,
-  finalize,
   map,
   of,
   shareReplay,
@@ -30,7 +29,6 @@ import {
   ORDERS_LIMIT_OPTIONS,
   ORDERS_MAX_ORDER_NO_LENGTH,
   OrderRowVm,
-  OrdersExportPayload,
   OrdersFilterFormState,
   OrdersListVm,
   OrdersQueryParamsVm,
@@ -251,41 +249,6 @@ export class OrdersListService {
     this.expandedRowId.set(orderId);
   }
 
-  exportCurrentList(): void {
-    if (this.exportState().inProgress) {
-      return;
-    }
-
-    const payload: OrdersExportPayload = {
-      params: this.params(),
-      timestamp: new Date().toISOString(),
-    };
-
-    this.exportState.set({ inProgress: true });
-
-    this.requestExport(payload)
-      .pipe(
-        tap((blob) => {
-          if (!blob) {
-            return;
-          }
-          this.triggerDownload(
-            blob,
-            `orders-${this.buildExportSuffix(payload.timestamp)}.xlsx`
-          );
-          this.message.success('Eksport zamówień zakończony sukcesem.');
-        }),
-        catchError((error) => {
-          this.handleExportError(error);
-          return of(null);
-        }),
-        finalize(() => {
-          this.exportState.set({ inProgress: false });
-        })
-      )
-      .subscribe();
-  }
-
   navigateToOrder(orderId: string): void {
     this.router.navigate(['/orders', orderId]);
   }
@@ -356,12 +319,6 @@ export class OrdersListService {
       .pipe(shareReplay(1));
   }
 
-  private requestExport(payload: OrdersExportPayload) {
-    return this.http.post('/api/orders/export', payload, {
-      responseType: 'blob' as const,
-    });
-  }
-
   private performMutation(
     order: OrderRowVm,
     action: 'soft-delete' | 'restore'
@@ -375,7 +332,7 @@ export class OrdersListService {
     const request$ =
       action === 'soft-delete'
         ? this.http.delete(`/api/orders/${order.id}`)
-        : this.http.post(`/api/orders/${order.id}/restore`, {});
+        : this.http.put(`/api/orders/${order.id}`, { ...order, deletedAt: null,  deleted: false });
 
     request$
       .pipe(
@@ -806,6 +763,7 @@ export class OrdersListService {
       orderDate: dto.orderDate,
       totalNetPln: dto.totalNetPln,
       totalGrossPln: dto.totalGrossPln,
+      vatRatePct: dto.vatRatePct,
       currencyCode,
       currencyLabel,
       netFormatted: this.formatCurrency(dto.totalNetPln, 'PLN'),

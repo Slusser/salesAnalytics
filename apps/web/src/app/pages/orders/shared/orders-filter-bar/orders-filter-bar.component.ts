@@ -4,9 +4,11 @@ import {
   Component,
   EventEmitter,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
+  SimpleChanges,
   computed,
   inject,
   signal,
@@ -62,7 +64,7 @@ const DEBOUNCE_MS = 300;
   styleUrl: './orders-filter-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OrdersFilterBarComponent implements OnInit, OnDestroy {
+export class OrdersFilterBarComponent implements OnInit, OnDestroy, OnChanges {
   private readonly fb = inject(FormBuilder);
 
   @Input({ required: true }) value!: OrdersFilterFormState;
@@ -93,6 +95,21 @@ export class OrdersFilterBarComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    const formGroup = this.form();
+    if (!formGroup) {
+      return;
+    }
+
+    if (changes['value']) {
+      this.patchFormValue(formGroup, this.value);
+    }
+
+    if (changes['disabled']) {
+      this.applyDisabledState(formGroup);
+    }
+  }
+
   protected onReset(): void {
     this.resetRequested.emit();
   }
@@ -108,11 +125,8 @@ export class OrdersFilterBarComponent implements OnInit, OnDestroy {
     });
 
     this.form.set(form);
-
-    form.disable({ emitEvent: false });
-    if (!this.disabled) {
-      form.enable({ emitEvent: false });
-    }
+    this.patchFormValue(form, this.value);
+    this.applyDisabledState(form);
 
     this.subscription.add(
       form.valueChanges
@@ -135,6 +149,25 @@ export class OrdersFilterBarComponent implements OnInit, OnDestroy {
         )
         .subscribe((partial) => this.filtersChange.emit(partial))
     );
+  }
+
+  private patchFormValue(form: FilterFormGroup, value: OrdersFilterFormState): void {
+    form.patchValue(
+      {
+        orderNo: value.orderNo ?? null,
+        dateRange: this.toDateRange(value.dateRange),
+      },
+      { emitEvent: false }
+    );
+  }
+
+  private applyDisabledState(form: FilterFormGroup): void {
+    if (this.disabled) {
+      form.disable({ emitEvent: false });
+      return;
+    }
+
+    form.enable({ emitEvent: false });
   }
 
   private toDateRange(

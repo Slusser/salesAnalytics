@@ -62,6 +62,7 @@ export interface OrderAuditEntryDto {
 export type OrderAuditResponse = PaginatedResponse<OrderAuditEntryDto>
 
 export interface BaseOrderCommand {
+  deletedAt?: OrderRow["deleted_at"]
   orderNo: OrderRow["order_no"]
   customerId: OrderRow["customer_id"]
   orderDate: OrderRow["order_date"]

@@ -53,7 +53,12 @@
     <nz-form-item>
       <nz-form-label nzRequired for="itemName">Nazwa produktu</nz-form-label>
       <nz-form-control [nzErrorTip]="itemNameError()">
-        <input nz-input id="itemName" formControlName="itemName" maxlength="120" />
+        <input
+          nz-input
+          id="itemName"
+          formControlName="itemName"
+          maxlength="120"
+        />
       </nz-form-control>
     </nz-form-item>
 
@@ -84,13 +89,13 @@
       <nz-form-item>
         <nz-form-label nzRequired for="eurRate">Kurs EUR</nz-form-label>
         <nz-form-control [nzErrorTip]="eurRateError()">
-        <nz-input-number
-          id="eurRate"
-          formControlName="eurRate"
-          [nzMin]="0.0001"
-          [nzStep]="0.0001"
-          [nzPrecision]="4"
-        />
+          <nz-input-number
+            id="eurRate"
+            formControlName="eurRate"
+            [nzMin]="0.0001"
+            [nzStep]="0.0001"
+            [nzPrecision]="4"
+          />
         </nz-form-control>
       </nz-form-item>
 
@@ -109,7 +114,9 @@
     </ng-container>
 
     <nz-form-item>
-      <nz-form-label for="producerDiscountPct">Rabat producenta (%)</nz-form-label>
+      <nz-form-label for="producerDiscountPct"
+        >Rabat producenta (%)</nz-form-label
+      >
       <nz-form-control>
         <nz-input-number
           id="producerDiscountPct"
@@ -123,7 +130,9 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label for="distributorDiscountPct">Rabat dystrybutora (%)</nz-form-label>
+      <nz-form-label for="distributorDiscountPct"
+        >Rabat dystrybutora (%)</nz-form-label
+      >
       <nz-form-control>
         <nz-input-number
           id="distributorDiscountPct"
@@ -194,13 +203,20 @@
     <app-loader-button
       type="submit"
       [loading]="submitting()"
+      [disabled]="form.invalid || submitting()"
+      htmlType="submit"
+      nzType="primary"
+      label="Zapisz zamówienie"
+    >
+    </app-loader-button>
+    <button
+      nz-button
+      nzType="default"
+      type="button"
+      (click)="onCancel()"
       [disabled]="submitting()"
     >
-      Zapisz zamówienie
-    </app-loader-button>
-    <button nz-button nzType="default" type="button" (click)="onCancel()" [disabled]="submitting()">
       Anuluj
     </button>
   </div>
 </form>
-
