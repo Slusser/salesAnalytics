@@ -328,13 +328,27 @@ export class OrdersService {
     const trimmedComment = command.comment?.trim() ?? undefined;
     const normalizedOrderNo = command.orderNo?.trim().toUpperCase();
     const normalizedItemName = command.itemName?.trim();
-    const normalizedDeletedAt = command.deletedAt ? new Date(command.deletedAt).toISOString() : null;
-    const producerDiscountPct = command.producerDiscountPct ? Math.max(0, Math.min(100, command.producerDiscountPct)) : null;
-    const distributorDiscountPct = command.distributorDiscountPct ? Math.max(0, Math.min(100, command.distributorDiscountPct)) : null;
-    const vatRatePct = command.vatRatePct ? Math.max(0, Math.min(100, command.vatRatePct)) : null;
-    const totalNetPln = command.totalNetPln ? Math.max(0, command.totalNetPln) : null;
-    const totalGrossPln = command.totalGrossPln ? Math.max(0, command.totalGrossPln) : null;
-    const totalGrossEur = command.totalGrossEur ? Math.max(0, command.totalGrossEur) : null;
+    const normalizedDeletedAt = command.deletedAt
+      ? new Date(command.deletedAt).toISOString()
+      : command.deletedAt ?? null;
+    const producerDiscountPct = command.producerDiscountPct != null
+      ? Math.max(0, Math.min(100, command.producerDiscountPct))
+      : null;
+    const distributorDiscountPct = command.distributorDiscountPct != null
+      ? Math.max(0, Math.min(100, command.distributorDiscountPct))
+      : null;
+    const vatRatePct = command.vatRatePct != null
+      ? Math.max(0, Math.min(100, command.vatRatePct))
+      : null;
+    const totalNetPln = command.totalNetPln != null
+      ? Math.max(0, command.totalNetPln)
+      : null;
+    const totalGrossPln = command.totalGrossPln != null
+      ? Math.max(0, command.totalGrossPln)
+      : null;
+    const totalGrossEur = command.totalGrossEur != null
+      ? Math.max(0, command.totalGrossEur)
+      : null;
 
     return {
       ...command,

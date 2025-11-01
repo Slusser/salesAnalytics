@@ -329,6 +329,7 @@ export class OrdersListService {
 
     this.confirmation.update((state) => ({ ...state, loading: true }));
 
+    console.log('performMutation', order, action);
     const request$ =
       action === 'soft-delete'
         ? this.http.delete(`/api/orders/${order.id}`)
@@ -394,27 +395,6 @@ export class OrdersListService {
 
     const message = this.extractErrorMessage(error) ?? defaultMessage;
     this.message.error(message);
-  }
-
-  private handleExportError(error: unknown): void {
-    console.error('Orders export error', error);
-    this.message.error(
-      'Nie udało się wyeksportować zamówień. Spróbuj ponownie później.'
-    );
-  }
-
-  private triggerDownload(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    anchor.rel = 'noopener noreferrer';
-    anchor.click();
-    URL.revokeObjectURL(url);
-  }
-
-  private buildExportSuffix(timestamp: string): string {
-    return timestamp.replace(/[:T]/g, '-').split('.')[0] ?? 'export';
   }
 
   private extractErrorMessage(error: unknown): string | null {
@@ -764,6 +744,9 @@ export class OrdersListService {
       totalNetPln: dto.totalNetPln,
       totalGrossPln: dto.totalGrossPln,
       vatRatePct: dto.vatRatePct,
+      producerDiscountPct: dto.producerDiscountPct,
+      distributorDiscountPct: dto.distributorDiscountPct,
+      totalGrossEur: dto.totalGrossEur,
       currencyCode,
       currencyLabel,
       netFormatted: this.formatCurrency(dto.totalNetPln, 'PLN'),

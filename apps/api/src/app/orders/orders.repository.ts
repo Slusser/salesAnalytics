@@ -266,6 +266,7 @@ export class OrdersRepository {
       total_gross_pln: command.totalGrossPln,
       total_gross_eur: command.totalGrossEur ?? null,
       comment: command.comment ?? null,
+      deleted_at: command.deletedAt ?? null,
       updated_at: new Date().toISOString(),
     };
 
