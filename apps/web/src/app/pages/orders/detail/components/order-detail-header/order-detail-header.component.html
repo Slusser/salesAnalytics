@@ -1,0 +1,43 @@
+<nz-page-header
+  nzTitle="Szczegóły zamówienia"
+  nzBackIcon="arrow-left"
+  (nzBack)="onBack()"
+>
+  <ng-container nzPageHeaderTags>
+    @if (isDeleted()) {
+      <nz-tag nzColor="red">Usunięte</nz-tag>
+    } @else {
+      <nz-tag nzColor="green">Aktywne</nz-tag>
+    }
+  </ng-container>
+
+  <nz-page-header-extra>
+    <div class="order-detail-header__actions">
+      <button nz-button nzType="default" (click)="onOpenAudit()" [disabled]="!permissions.canViewAudit">
+        Historia zmian
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        nzDanger
+        (click)="onSoftDelete()"
+        [disabled]="!permissions.canDelete || isDeleted() || loadingMutation"
+      >
+        Usuń
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        (click)="onRestore()"
+        [disabled]="!permissions.canRestore || !isDeleted() || loadingMutation"
+      >
+        Przywróć
+      </button>
+    </div>
+  </nz-page-header-extra>
+
+  <nz-page-header-content>
+    <app-order-metadata-card [metadata]="metadata"></app-order-metadata-card>
+  </nz-page-header-content>
+</nz-page-header>
+

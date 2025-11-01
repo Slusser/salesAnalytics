@@ -1,0 +1,67 @@
+<section class="order-detail">
+  @if (isLoading()) {
+    <app-order-detail-skeleton></app-order-detail-skeleton>
+  } @else if (status() === 'forbidden') {
+    <nz-result nzStatus="403" nzTitle="Brak uprawnień" nzSubTitle="Nie masz dostępu do tego zamówienia.">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="onBack()">Wróć do listy</button>
+      </div>
+    </nz-result>
+  } @else if (status() === 'not-found') {
+    <nz-result nzStatus="404" nzTitle="Nie znaleziono zamówienia" nzSubTitle="Sprawdź, czy adres jest poprawny.">
+      <div nz-result-extra>
+        <button nz-button nzType="primary" (click)="onBack()">Wróć do listy</button>
+      </div>
+    </nz-result>
+  } @else if (orderDetail(); as detail) {
+    <div class="order-detail__layout">
+      <app-order-detail-header
+        class="order-detail__header"
+        [metadata]="detail.metadata"
+        [permissions]="permissions()"
+        [loadingMutation]="confirmDialog().loading"
+        (back)="onBack()"
+        (softDelete)="onSoftDelete()"
+        (restore)="onRestore()"
+        (openAudit)="onOpenAudit()"
+      ></app-order-detail-header>
+
+      <div class="order-detail__body">
+        <app-order-actions-panel
+          [state]="detail.actions"
+          (submit)="onSubmit()"
+          (reset)="onReset()"
+          (softDelete)="onSoftDelete()"
+          (restore)="onRestore()"
+        ></app-order-actions-panel>
+
+        <div class="order-detail__form-placeholder">
+          <nz-result
+            nzStatus="info"
+            nzTitle="Formularz zamówienia"
+            nzSubTitle="Sekcja formularza zostanie zaimplementowana w kolejnych krokach."
+          ></nz-result>
+        </div>
+      </div>
+    </div>
+  } @else if (error()) {
+    <nz-result nzStatus="500" nzTitle="Błąd" [nzSubTitle]="error() ?? ''">
+      <div nz-result-extra>
+        <button nz-button nzType="default" (click)="onRefresh()">Spróbuj ponownie</button>
+      </div>
+    </nz-result>
+  } @else {
+    <app-order-detail-skeleton></app-order-detail-skeleton>
+  }
+
+  <app-confirm-dialog
+    [open]="confirmDialog().visible"
+    [title]="confirmDialogTitle()"
+    [description]="confirmDialogDescription()"
+    [confirmLabel]="confirmDialog().confirmLabel"
+    [loading]="confirmDialog().loading"
+    (confirmed)="onConfirmDialogConfirm()"
+    (closed)="onConfirmDialogClose()"
+  ></app-confirm-dialog>
+</section>
+

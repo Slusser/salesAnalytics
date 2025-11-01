@@ -75,6 +75,12 @@ export const appRoutes: Route[] = [
         canDeactivate: [() => import('./pages/orders/new/orders-new.can-deactivate.guard').then((m) => m.ordersNewCanDeactivateGuard)],
       },
       {
+        path: 'orders/:orderId',
+        canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
+        loadChildren: () =>
+          import('./pages/orders/detail/order-detail.routes').then((m) => m.ORDER_DETAIL_ROUTES),
+      },
+      {
         path: '403',
         loadComponent: () =>
           import('./pages/error/forbidden.page').then((m) => m.ForbiddenPage),

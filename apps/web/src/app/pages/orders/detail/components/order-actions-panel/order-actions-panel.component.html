@@ -1,0 +1,48 @@
+<nz-space [nzSize]="16" class="order-actions-panel">
+  <button
+    nz-button
+    nzType="primary"
+    nzSpaceItem
+    [disabled]="!state.canSubmit"
+    [nzLoading]="state.submitting"
+    (click)="onSubmit()"
+  >
+    Zapisz
+  </button>
+
+  <button
+    nz-button
+    nzType="default"
+    nzSpaceItem
+    (click)="onReset()"
+    [disabled]="!state.canReset"
+  >
+    Cofnij zmiany
+  </button>
+
+  @if (state.showDelete) {
+    <button
+      nz-button
+      nzType="default"
+      nzDanger
+      nzSpaceItem
+      (click)="onSoftDelete()"
+      [disabled]="state.disableDelete"
+    >
+      Usuń
+    </button>
+  }
+
+  @if (state.showRestore) {
+    <button
+      nz-button
+      nzType="primary"
+      nzSpaceItem
+      (click)="onRestore()"
+      [disabled]="state.disableRestore"
+    >
+      Przywróć
+    </button>
+  }
+</nz-space>
+
