@@ -1,0 +1,290 @@
+<nz-card class="order-detail-form">
+  @if (detail(); as detail) {
+    <div class="order-detail-form__header">
+      <div class="order-detail-form__header-text">
+        <h2 class="order-detail-form__title">Zamówienie {{ detail.metadata.orderNo }}</h2>
+        <p class="order-detail-form__subtitle">
+          Edytuj dane i zapisz, aby zaktualizować zamówienie.
+        </p>
+      </div>
+
+      <div class="order-detail-form__header-tags">
+        <nz-tag nzColor="blue">{{ detail.metadata.currencyCode }}</nz-tag>
+        @if (detail.isDeleted) {
+          <nz-tag nzColor="red">Usunięte</nz-tag>
+        } @else {
+          <nz-tag nzColor="green">Aktywne</nz-tag>
+        }
+      </div>
+    </div>
+
+    <div class="order-detail-form__meta">
+      <div class="order-detail-form__meta-item">
+        <span class="order-detail-form__meta-label">ID</span>
+        <span>{{ detail.metadata.id }}</span>
+      </div>
+      <div class="order-detail-form__meta-item">
+        <span class="order-detail-form__meta-label">Kontrahent</span>
+        <span>{{ detail.metadata.customerName }}</span>
+      </div>
+      <div class="order-detail-form__meta-item">
+        <span class="order-detail-form__meta-label">Utworzono</span>
+        <span>{{ detail.metadata.createdAt | date: 'yyyy-MM-dd HH:mm' }}</span>
+      </div>
+      <div class="order-detail-form__meta-item">
+        <span class="order-detail-form__meta-label">Zaktualizowano</span>
+        <span>{{ detail.metadata.updatedAt | date: 'yyyy-MM-dd HH:mm' }}</span>
+      </div>
+      @if (detail.metadata.createdByName) {
+        <div class="order-detail-form__meta-item">
+          <span class="order-detail-form__meta-label">Autor</span>
+          <span>{{ detail.metadata.createdByName }}</span>
+        </div>
+      }
+      @if (detail.metadata.deletedAt) {
+        <div class="order-detail-form__meta-item">
+          <span class="order-detail-form__meta-label">Usunięto</span>
+          <span>{{ detail.metadata.deletedAt | date: 'yyyy-MM-dd HH:mm' }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <nz-divider></nz-divider>
+
+  @if (formState(); as state) {
+    @if (state.errors.length) {
+      <div class="order-detail-form__alerts">
+        <nz-alert
+          *ngFor="let error of state.errors"
+          nzType="error"
+          [nzMessage]="error"
+          nzShowIcon
+        />
+      </div>
+    }
+  }
+
+  @if (validationState(); as validation) {
+    <div class="order-detail-form__warnings">
+      @if (validation.eurRateMissing) {
+        <nz-alert
+          nzType="warning"
+          nzShowIcon
+          nzMessage="Podaj kurs EUR oraz wartości brutto w EUR, aby zapisać zamówienie."
+        />
+      }
+      @if (validation.invalidCustomer) {
+        <nz-alert
+          nzType="warning"
+          nzShowIcon
+          nzMessage="Wybierz poprawnego kontrahenta."
+        />
+      }
+    </div>
+  }
+
+  <form
+    nz-form
+    [formGroup]="form"
+    nzLayout="vertical"
+    (ngSubmit)="onSubmit()"
+    class="order-detail-form__form"
+  >
+    <div class="order-detail-form__grid">
+      <nz-form-item>
+        <nz-form-label nzRequired for="orderNo">Numer zamówienia</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('orderNo')">
+          <input
+            nz-input
+            id="orderNo"
+            formControlName="orderNo"
+            [maxlength]="64"
+            autocomplete="off"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="customerId">Kontrahent</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('customerId')">
+          <nz-select
+            id="customerId"
+            formControlName="customerId"
+            nzShowSearch
+            nzPlaceHolder="Wybierz kontrahenta"
+          >
+            <nz-option
+              *ngFor="let option of customersOptions()"
+              [nzValue]="option.value"
+              [nzLabel]="option.label"
+            />
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="orderDate">Data zamówienia</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('orderDate')">
+          <nz-date-picker
+            id="orderDate"
+            formControlName="orderDate"
+            nzFormat="yyyy-MM-dd"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="itemName">Nazwa produktu</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('itemName')">
+          <input
+            nz-input
+            id="itemName"
+            formControlName="itemName"
+            [maxlength]="120"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="quantity">Ilość</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('quantity')">
+          <nz-input-number
+            id="quantity"
+            formControlName="quantity"
+            [nzMin]="0.01"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="order-detail-form__switch-item">
+        <nz-form-label for="isEur">Rozliczenie w EUR</nz-form-label>
+        <nz-form-control>
+          <nz-switch id="isEur" formControlName="isEur"></nz-switch>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label for="producerDiscountPct">Rabat producenta (%)</nz-form-label>
+        <nz-form-control>
+          <nz-input-number
+            id="producerDiscountPct"
+            formControlName="producerDiscountPct"
+            [nzMin]="0"
+            [nzMax]="100"
+            [nzStep]="0.1"
+            [nzPrecision]="1"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label for="distributorDiscountPct">Rabat dystrybutora (%)</nz-form-label>
+        <nz-form-control>
+          <nz-input-number
+            id="distributorDiscountPct"
+            formControlName="distributorDiscountPct"
+            [nzMin]="0"
+            [nzMax]="100"
+            [nzStep]="0.1"
+            [nzPrecision]="1"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="vatRatePct">VAT (%)</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('vatRatePct')">
+          <nz-input-number
+            id="vatRatePct"
+            formControlName="vatRatePct"
+            [nzMin]="0"
+            [nzMax]="100"
+            [nzStep]="0.1"
+            [nzPrecision]="1"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="totalNetPln">Netto (PLN)</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('totalNetPln')">
+          <nz-input-number
+            id="totalNetPln"
+            formControlName="totalNetPln"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="totalGrossPln">Brutto (PLN)</nz-form-label>
+        <nz-form-control [nzErrorTip]="resolveError('totalGrossPln')">
+          <nz-input-number
+            id="totalGrossPln"
+            formControlName="totalGrossPln"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      @if (canShowEurFields()) {
+        <nz-form-item>
+          <nz-form-label nzRequired for="eurRate">Kurs EUR</nz-form-label>
+          <nz-form-control [nzErrorTip]="resolveError('eurRate')">
+            <nz-input-number
+              id="eurRate"
+              formControlName="eurRate"
+              [nzMin]="0.0001"
+              [nzStep]="0.0001"
+              [nzPrecision]="4"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired for="totalGrossEur">Brutto (EUR)</nz-form-label>
+          <nz-form-control [nzErrorTip]="resolveError('totalGrossEur')">
+            <nz-input-number
+              id="totalGrossEur"
+              formControlName="totalGrossEur"
+              [nzMin]="0"
+              [nzStep]="0.01"
+              [nzPrecision]="2"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      }
+    </div>
+
+    <nz-form-item>
+      <nz-form-label for="comment">Komentarz</nz-form-label>
+      <nz-form-control [nzErrorTip]="resolveError('comment')">
+        <textarea
+          nz-input
+          id="comment"
+          formControlName="comment"
+          rows="3"
+          [maxlength]="1000"
+        ></textarea>
+      </nz-form-control>
+    </nz-form-item>
+  </form>
+
+  <div class="order-detail-form__actions">
+    <app-order-actions-panel
+      [state]="actionsState()"
+      (submit)="onSubmit()"
+      (reset)="onReset()"
+      (softDelete)="onSoftDelete()"
+      (restore)="onRestore()"
+    ></app-order-actions-panel>
+  </div>
+</nz-card>
+

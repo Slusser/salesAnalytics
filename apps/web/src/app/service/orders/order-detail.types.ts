@@ -111,6 +111,7 @@ export interface OrderAuditVm {
 
 export interface OrderMutationResultVm {
   success: boolean;
+  mode: 'update' | 'delete' | 'restore';
   errorCode?: string;
   message?: string;
 }

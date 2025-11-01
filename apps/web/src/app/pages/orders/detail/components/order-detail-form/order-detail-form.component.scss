@@ -1,0 +1,87 @@
+.order-detail-form {
+  display: grid;
+  gap: 1.5rem;
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  &__header-text {
+    display: grid;
+    gap: 0.25rem;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: #6b7280;
+  }
+
+  &__header-tags {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  &__meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 140px;
+  }
+
+  &__meta-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+  }
+
+  &__alerts,
+  &__warnings {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  &__form {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  &__grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  &__switch-item {
+    display: flex;
+    align-items: center;
+
+    nz-form-label {
+      margin-bottom: 0;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+

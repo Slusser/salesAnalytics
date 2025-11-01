@@ -375,7 +375,7 @@ export class OrderDetailStore {
           this.applyOrderResponse(response);
           this.statusSignal.set('idle');
           this.message.success('Zamówienie zapisane.');
-          this.mutationResultSignal.set({ success: true });
+          this.mutationResultSignal.set({ success: true, mode: 'update' });
         }),
         catchError((error) => {
           this.handleSubmitError(error);
@@ -459,7 +459,7 @@ export class OrderDetailStore {
               ? 'Zamówienie zostało oznaczone jako usunięte.'
               : 'Zamówienie zostało przywrócone.';
           this.message.success(successMessage);
-          this.mutationResultSignal.set({ success: true });
+          this.mutationResultSignal.set({ success: true, mode });
           this.cancelDialog();
         }),
         catchError((error) => {
@@ -672,6 +672,11 @@ export class OrderDetailStore {
   private handleSubmitError(error: unknown): void {
     const message = this.extractErrorMessage(error);
     this.statusSignal.set('error');
+    this.mutationResultSignal.set({
+      success: false,
+      mode: 'update',
+      message: message ?? undefined,
+    });
 
     if (!message) {
       this.notification.error(
@@ -692,7 +697,7 @@ export class OrderDetailStore {
         : 'Nie udało się przywrócić zamówienia.');
 
     this.notification.error('Operacja nie powiodła się', message);
-    this.mutationResultSignal.set({ success: false, message });
+    this.mutationResultSignal.set({ success: false, mode, message });
   }
 
   private extractStatus(error: unknown): number | null {

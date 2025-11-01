@@ -78,7 +78,7 @@ export const appRoutes: Route[] = [
         path: 'orders/:orderId',
         canMatch: [roleGuard(['viewer', 'owner', 'editor'])],
         loadChildren: () =>
-          import('./pages/orders/detail/order-detail.routes').then((m) => m.ORDER_DETAIL_ROUTES),
+          import('./pages/orders/detail/order-edit.routes').then((m) => m.ORDER_EDIT_ROUTES),
       },
       {
         path: '403',

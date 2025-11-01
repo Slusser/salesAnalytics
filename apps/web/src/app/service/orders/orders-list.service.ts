@@ -249,10 +249,6 @@ export class OrdersListService {
     this.expandedRowId.set(orderId);
   }
 
-  navigateToOrder(orderId: string): void {
-    this.router.navigate(['/orders', orderId]);
-  }
-
   canMutate(): boolean {
     return this.permissions().canMutate;
   }

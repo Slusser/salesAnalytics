@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -13,30 +14,30 @@ import { NzResultModule } from 'ng-zorro-antd/result';
 
 import { OrderDetailStore } from '../../../service/orders/order-detail.store';
 import { OrderDetailHeaderComponent } from './components/order-detail-header/order-detail-header.component';
-import { OrderActionsPanelComponent } from './components/order-actions-panel/order-actions-panel.component';
 import { SkeletonDetailComponent } from './components/skeleton-detail/skeleton-detail.component';
 import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialog/confirm-dialog.component';
+import { OrderDetailFormComponent } from './components/order-detail-form/order-detail-form.component';
 
-import type { OrderDetailCanDeactivate } from './order-detail.can-deactivate.guard';
+import type { OrderEditCanDeactivate } from './order-edit.can-deactivate.guard';
 
 @Component({
-  selector: 'app-order-detail-page',
+  selector: 'app-order-edit-page',
   standalone: true,
   imports: [
     CommonModule,
     NzButtonModule,
     NzResultModule,
     OrderDetailHeaderComponent,
-    OrderActionsPanelComponent,
     SkeletonDetailComponent,
     ConfirmDialogComponent,
+    OrderDetailFormComponent,
   ],
-  templateUrl: './order-detail.page.html',
-  styleUrl: './order-detail.page.scss',
+  templateUrl: './order-edit.page.html',
+  styleUrl: './order-edit.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [OrderDetailStore],
 })
-export class OrderDetailPageComponent implements OrderDetailCanDeactivate {
+export class OrderEditPageComponent implements OrderEditCanDeactivate {
   private readonly store = inject(OrderDetailStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -54,8 +55,24 @@ export class OrderDetailPageComponent implements OrderDetailCanDeactivate {
     this.confirmDialog().mode === 'restore' ? 'Przywracanie zamówienia' : 'Usunięcie zamówienia',
   );
   protected readonly confirmDialogDescription = computed(() => this.confirmDialog().message);
+  protected readonly mutationResult = this.store.mutationResult;
 
   constructor() {
+    effect(
+      () => {
+        const result = this.mutationResult();
+
+        if (!result || !result.success || result.mode !== 'update') {
+          return;
+        }
+
+        void this.router.navigate(['/orders']).finally(() => {
+          this.store.clearMutationResult();
+        });
+      },
+      { allowSignalWrites: true },
+    );
+
     this.route.paramMap
       .pipe(
         map((params) => params.get('orderId')),
@@ -86,12 +103,8 @@ export class OrderDetailPageComponent implements OrderDetailCanDeactivate {
     this.router.navigate(['/orders']);
   }
 
-  protected onSubmit(): void {
-    this.store.submit();
-  }
-
-  protected onReset(): void {
-    this.store.resetForm();
+  protected onOpenAudit(): void {
+    this.store.toggleAuditVisibility();
   }
 
   protected onSoftDelete(): void {
@@ -102,21 +115,12 @@ export class OrderDetailPageComponent implements OrderDetailCanDeactivate {
     this.store.openRestoreDialog();
   }
 
-  protected onOpenAudit(): void {
-    this.store.toggleAuditVisibility();
-  }
-
   protected onConfirmDialogConfirm(): void {
     this.store.confirmMutation();
   }
 
   protected onConfirmDialogClose(): void {
     this.store.cancelDialog();
-  }
-
-  protected canShowActions(): boolean {
-    const detail = this.orderDetail();
-    return Boolean(detail);
   }
 }
 

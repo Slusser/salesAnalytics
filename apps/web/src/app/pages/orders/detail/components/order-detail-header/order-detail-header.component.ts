@@ -9,12 +9,11 @@ import type {
   OrderMetadataVm,
   OrderRolePermissionsVm,
 } from '../../../../../service/orders/order-detail.types';
-import { OrderMetadataCardComponent } from '../order-metadata-card/order-metadata-card.component';
 
 @Component({
   selector: 'app-order-detail-header',
   standalone: true,
-  imports: [CommonModule, NzPageHeaderModule, NzButtonModule, NzTagModule, NzIconModule, OrderMetadataCardComponent],
+  imports: [CommonModule, NzPageHeaderModule, NzButtonModule, NzTagModule, NzIconModule],
   templateUrl: './order-detail-header.component.html',
   styleUrl: './order-detail-header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

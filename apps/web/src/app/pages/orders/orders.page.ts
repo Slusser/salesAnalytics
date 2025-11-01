@@ -140,10 +140,6 @@ export class OrdersPage {
     this.ordersService.askRestore(order);
   }
 
-  protected onView(orderId: string): void {
-    this.ordersService.navigateToOrder(orderId);
-  }
-
   protected onPageChange(page: number): void {
     this.ordersService.handlePaginationChange(page);
   }

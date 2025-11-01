@@ -44,7 +44,6 @@ export class OrdersDataTableComponent {
 
   @Output() readonly sortChange = new EventEmitter<OrdersSortState>();
   @Output() readonly rowToggle = new EventEmitter<string>();
-  @Output() readonly view = new EventEmitter<string>();
   @Output() readonly edit = new EventEmitter<string>();
   @Output() readonly softDelete = new EventEmitter<string>();
   @Output() readonly restore = new EventEmitter<string>();
@@ -63,10 +62,6 @@ export class OrdersDataTableComponent {
 
   protected onRowToggle(orderId: string): void {
     this.rowToggle.emit(orderId);
-  }
-
-  protected onView(orderId: string): void {
-    this.view.emit(orderId);
   }
 
   protected onEdit(orderId: string): void {

@@ -1,4 +1,4 @@
-<section class="order-detail">
+<section class="order-edit">
   @if (isLoading()) {
     <app-order-detail-skeleton></app-order-detail-skeleton>
   } @else if (status() === 'forbidden') {
@@ -14,9 +14,9 @@
       </div>
     </nz-result>
   } @else if (orderDetail(); as detail) {
-    <div class="order-detail__layout">
+    <div class="order-edit__layout">
       <app-order-detail-header
-        class="order-detail__header"
+        class="order-edit__header"
         [metadata]="detail.metadata"
         [permissions]="permissions()"
         [loadingMutation]="confirmDialog().loading"
@@ -26,22 +26,8 @@
         (openAudit)="onOpenAudit()"
       ></app-order-detail-header>
 
-      <div class="order-detail__body">
-        <app-order-actions-panel
-          [state]="detail.actions"
-          (submit)="onSubmit()"
-          (reset)="onReset()"
-          (softDelete)="onSoftDelete()"
-          (restore)="onRestore()"
-        ></app-order-actions-panel>
-
-        <div class="order-detail__form-placeholder">
-          <nz-result
-            nzStatus="info"
-            nzTitle="Formularz zamówienia"
-            nzSubTitle="Sekcja formularza zostanie zaimplementowana w kolejnych krokach."
-          ></nz-result>
-        </div>
+      <div class="order-edit__body">
+        <app-order-detail-form [detail]="detail"></app-order-detail-form>
       </div>
     </div>
   } @else if (error()) {
