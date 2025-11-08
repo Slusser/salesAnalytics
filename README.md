@@ -86,6 +86,13 @@ npx nx e2e api-e2e
 ```
 Note: `web-e2e` project exists but does not yet define runnable Nx targets.
 
+#### Unit testing assumptions
+- Vitest 3 is the unit-test runner for both Angular (`@analogjs/vitest-angular`) and NestJS projects.
+- Business logic (services, mappers, guards, validators, utilities) should reach at least 70% code coverage.
+- Backend focus: `OrdersService`, `CustomersService`, `AuthService`, domain mappers, guards (`JwtAuthGuard`, `RolesGuard`), validation pipes, and utility helpers.
+- Frontend focus: stateful services such as `OrdersListService`, `AuthSessionService`, `CustomersService`, form-driven components, presentation logic, pipes, and custom validators.
+- Critical calculations like `totalGrossPln = totalNetPln * (1 + vatRatePct/100)` must be covered with tolerance up to 0.01.
+
 ### Explore the graph
 ```bash
 npx nx graph
