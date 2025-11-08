@@ -1,8 +1,10 @@
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
+
+import { LoginPage } from './pages/login.po';
 
 test('has title', async ({ page }) => {
-  await page.goto('/');
+  const loginPage = new LoginPage(page);
 
-  // Expect h1 to contain a substring.
-  expect(await page.locator('h1').innerText()).toContain('Welcome');
+  await loginPage.goto();
+  await loginPage.expectLoginHeading();
 });

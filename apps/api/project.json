@@ -60,6 +60,14 @@
           "buildTarget": "api:build:production"
         }
       }
+    },
+    "test": {
+      "executor": "@nx/vite:test",
+      "outputs": ["{options.reportsDirectory}"],
+      "options": {
+        "reportsDirectory": "../../coverage/apps/api",
+        "passWithNoTests": false
+      }
     }
   }
 }
