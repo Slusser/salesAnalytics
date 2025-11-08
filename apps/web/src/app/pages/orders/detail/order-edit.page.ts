@@ -66,7 +66,7 @@ export class OrderEditPageComponent implements OrderEditCanDeactivate {
           return;
         }
 
-        void this.router.navigate(['/orders']).finally(() => {
+        void this.router.navigate(['/orders'], { state: { refresh: true } }).finally(() => {
           this.store.clearMutationResult();
         });
       },

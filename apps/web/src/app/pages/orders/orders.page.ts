@@ -66,6 +66,11 @@ export class OrdersPage {
   protected readonly exportInProgress = this.ordersService.exportInProgress;
 
   constructor() {
+    const navigation = this.router.getCurrentNavigation();
+    if (navigation?.extras.state?.['refresh']) {
+      queueMicrotask(() => this.ordersService.refetch());
+    }
+
     effect(() => {
       if (this.showError()) {
         console.error('Orders list error', this.error());
