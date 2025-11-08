@@ -20,8 +20,10 @@ import type {
   OrderListItemDto,
 } from '@shared/dtos/orders.dto';
 import type { AppRole } from '@shared/dtos/user-roles.dto';
+import type { CustomerDetailResponse, CustomerDto } from '@shared/dtos/customers.dto';
 
 import { AuthSessionService } from '../auth/auth-session.service';
+import { CustomersService } from '../customers/customers.service';
 import {
   ORDERS_ALLOWED_SORT_FIELDS,
   ORDERS_DEFAULT_LIMIT,
@@ -56,6 +58,8 @@ const DEFAULT_SORT: OrdersSortState = Object.freeze({
   direction: 'desc',
 });
 
+type CustomerSummary = Pick<CustomerDto, 'id' | 'name'>;
+
 @Injectable({ providedIn: 'root' })
 export class OrdersListService {
   private readonly http = inject(HttpClient);
@@ -64,6 +68,7 @@ export class OrdersListService {
   private readonly route = inject(ActivatedRoute);
   private readonly message = inject(NzMessageService);
   private readonly notification = inject(NzNotificationService);
+  private readonly customersService = inject(CustomersService);
 
   readonly permissions = signal<OrdersRolePermissionsVm>({
     canMutate: false,
@@ -87,6 +92,9 @@ export class OrdersListService {
   readonly loading = signal(false);
   readonly error = signal<unknown>(null);
   readonly data = signal<OrdersListVm | null>(null);
+
+  private readonly customersIndex = signal<Record<string, string>>({});
+  private readonly pendingCustomerRequests = new Set<string>();
 
   private readonly confirmation = signal<ConfirmationState>({
     open: false,
@@ -119,6 +127,7 @@ export class OrdersListService {
   constructor() {
     this.initializePermissions();
     this.initializeParamsEffect();
+    this.preloadCustomers();
     this.fetchOrders(this.params());
   }
 
@@ -735,7 +744,7 @@ export class OrdersListService {
       id: dto.id,
       orderNo: dto.orderNo,
       customerId: dto.customerId,
-      customerName: dto.customerId,
+      customerName: this.resolveCustomerName(dto.customerId),
       orderDate: dto.orderDate,
       totalNetPln: dto.totalNetPln,
       totalGrossPln: dto.totalGrossPln,
@@ -755,6 +764,126 @@ export class OrdersListService {
       deleted,
       rowDisabled,
     };
+  }
+
+  private preloadCustomers(): void {
+    this.customersService
+      .get({ limit: 1000, includeInactive: true })
+      .pipe(
+        catchError((error) => {
+          console.error('Nie udało się pobrać listy kontrahentów', error);
+          return of<CustomerDto[]>([]);
+        })
+      )
+      .subscribe((customers) => {
+        if (!customers) {
+          return;
+        }
+
+        const summaries: CustomerSummary[] = customers.map((customer) => ({
+          id: customer.id,
+          name: customer.name,
+        }));
+
+        this.mergeCustomers(summaries);
+      });
+  }
+
+  private ensureCustomerName(customerId: string): void {
+    if (!customerId) {
+      return;
+    }
+
+    const currentName = this.customersIndex()[customerId];
+    if (currentName) {
+      return;
+    }
+
+    if (this.pendingCustomerRequests.has(customerId)) {
+      return;
+    }
+
+    this.pendingCustomerRequests.add(customerId);
+
+    this.customersService
+      .getById(customerId)
+      .pipe(
+        catchError((error) => {
+          console.error(
+            `Nie udało się pobrać kontrahenta o identyfikatorze ${customerId}`,
+            error
+          );
+          return of<CustomerDetailResponse | null>(null);
+        })
+      )
+      .subscribe((customer) => {
+        this.pendingCustomerRequests.delete(customerId);
+
+        if (!customer) {
+          return;
+        }
+
+        this.mergeCustomers([{ id: customer.id, name: customer.name }]);
+      });
+  }
+
+  private mergeCustomers(customers: CustomerSummary[]): void {
+    if (!customers.length) {
+      return;
+    }
+
+    const entries = customers.reduce<Record<string, string>>((acc, customer) => {
+      acc[customer.id] = customer.name;
+      return acc;
+    }, {});
+
+    this.customersIndex.update((current) => ({ ...current, ...entries }));
+    this.refreshCustomerNames();
+  }
+
+  private refreshCustomerNames(): void {
+    const index = this.customersIndex();
+
+    this.data.update((current) => {
+      if (!current) {
+        return current;
+      }
+
+      let changed = false;
+
+      const items = current.items.map((item) => {
+        const name = index[item.customerId];
+        if (!name || item.customerName === name) {
+          return item;
+        }
+
+        changed = true;
+        return { ...item, customerName: name };
+      });
+
+      if (!changed) {
+        return current;
+      }
+
+      return {
+        ...current,
+        items,
+      };
+    });
+  }
+
+  private resolveCustomerName(customerId: string): string {
+    if (!customerId) {
+      return '';
+    }
+
+    const name = this.customersIndex()[customerId];
+    if (name) {
+      return name;
+    }
+
+    this.ensureCustomerName(customerId);
+    return customerId;
   }
 
   private formatCurrency(value: number, currency: 'PLN' | 'EUR'): string {

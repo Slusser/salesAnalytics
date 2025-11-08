@@ -27,8 +27,8 @@ import {
   CloseCircleOutline,
   CheckCircleOutline,
   ArrowRightOutline,
-  ArrowDownOutline  
-  } from '@ant-design/icons-angular/icons';
+  ArrowDownOutline,
+} from '@ant-design/icons-angular/icons';
 import { NZ_DATE_LOCALE, pl_PL, provideNzI18n } from 'ng-zorro-antd/i18n';
 import dfnsPl from 'date-fns/locale/pl';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
