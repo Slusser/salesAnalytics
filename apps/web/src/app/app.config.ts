@@ -18,8 +18,17 @@ import {
   RollbackOutline,
   EditOutline,
   DeleteOutline,
-  PlusOutline
-} from '@ant-design/icons-angular/icons';
+  PlusOutline,
+  ArrowLeftOutline,
+  BackwardOutline,
+  RedoOutline,
+  UndoOutline,
+  CheckOutline,
+  CloseCircleOutline,
+  CheckCircleOutline,
+  ArrowRightOutline,
+  ArrowDownOutline  
+  } from '@ant-design/icons-angular/icons';
 import { NZ_DATE_LOCALE, pl_PL, provideNzI18n } from 'ng-zorro-antd/i18n';
 import dfnsPl from 'date-fns/locale/pl';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -45,6 +54,15 @@ export const appConfig: ApplicationConfig = {
       EditOutline,
       DeleteOutline,
       PlusOutline,
+      ArrowLeftOutline,
+      BackwardOutline,
+      RedoOutline,
+      UndoOutline,
+      CheckOutline,
+      CloseCircleOutline,
+      CheckCircleOutline,
+      ArrowRightOutline,
+      ArrowDownOutline,
     ]),
   ],
 };

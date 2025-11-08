@@ -24,33 +24,9 @@ export class OrderDetailHeaderComponent {
   @Input() loadingMutation = false;
 
   @Output() readonly back = new EventEmitter<void>();
-  @Output() readonly softDelete = new EventEmitter<void>();
-  @Output() readonly restore = new EventEmitter<void>();
-  @Output() readonly openAudit = new EventEmitter<void>();
 
   protected onBack(): void {
     this.back.emit();
-  }
-
-  protected onSoftDelete(): void {
-    if (!this.permissions.canDelete) {
-      return;
-    }
-    this.softDelete.emit();
-  }
-
-  protected onRestore(): void {
-    if (!this.permissions.canRestore) {
-      return;
-    }
-    this.restore.emit();
-  }
-
-  protected onOpenAudit(): void {
-    if (!this.permissions.canViewAudit) {
-      return;
-    }
-    this.openAudit.emit();
   }
 
   protected isDeleted(): boolean {
