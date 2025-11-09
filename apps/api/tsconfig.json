@@ -1,10 +1,13 @@
 {
   "extends": "../../tsconfig.base.json",
-  "files": [],
+  "files": ["vitest.config.ts"],
   "include": [],
   "references": [
     {
       "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.spec.json"
     }
   ],
   "compilerOptions": {
