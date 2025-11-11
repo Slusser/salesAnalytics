@@ -1,11 +1,5 @@
-import {
-  Injectable,
-  Signal,
-  computed,
-  effect,
-  inject,
-  signal,
-} from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 
 import type {
@@ -20,43 +14,58 @@ interface SessionState {
   user: AuthenticatedUserDto | null;
 }
 
+type PersistableSessionState = {
+  tokens: AuthTokensDto;
+  user: AuthenticatedUserDto;
+};
+
 const STORAGE_KEY = 'salesAnalysis:auth';
 
 @Injectable({ providedIn: 'root' })
 export class AuthSessionService {
+  private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
 
   private readonly state = signal<SessionState>({ tokens: null, user: null });
+  private isSessionInitialized = false;
+  private storageRef: Storage | null | undefined;
 
   readonly user: Signal<AuthenticatedUserDto | null> = computed(
-    () => this.state().user
+    () => {
+      this.ensureSessionRestored();
+      return this.state().user;
+    }
   );
   readonly tokens: Signal<AuthTokensDto | null> = computed(
-    () => this.state().tokens
+    () => {
+      this.ensureSessionRestored();
+      return this.state().tokens;
+    }
   );
-  readonly isLoggedIn = computed(() =>
-    Boolean(this.state().tokens && this.state().user)
-  );
+  readonly isLoggedIn = computed(() => {
+    this.ensureSessionRestored();
+    return Boolean(this.state().tokens && this.state().user);
+  });
 
   constructor() {
-    this.restoreSession();
-    effect(() => {
-      const snapshot = this.state();
-      if (!snapshot.tokens || !snapshot.user) {
-        sessionStorage.removeItem(STORAGE_KEY);
-        return;
-      }
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
-    });
+    // eslint-disable-next-line no-console
+    console.log('AuthSessionService ctor');
   }
 
   setSession(response: AuthLoginResponse): void {
+    this.ensureSessionRestored();
     this.state.set({ tokens: this.pickTokens(response), user: response.user });
+    this.persistCurrentState();
   }
 
   clearSession(): void {
+    this.ensureSessionRestored();
     this.state.set({ tokens: null, user: null });
-    sessionStorage.removeItem(STORAGE_KEY);
+    this.persistCurrentState();
+    const storage = this.getStorage();
+    if (storage) {
+      this.callStorageRemoveItem(storage, STORAGE_KEY);
+    }
   }
 
   hasRole(role: string): boolean {
@@ -65,21 +74,36 @@ export class AuthSessionService {
     return user.roles.includes(role as AppRole);
   }
 
-  restoreSession(): void {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
+  private ensureSessionRestored(): void {
+    if (this.isSessionInitialized) {
+      return;
+    }
+    this.isSessionInitialized = true;
+    this.restoreSession();
+  }
+
+  private restoreSession(): void {
+    const storage = this.getStorage();
+    if (!storage) {
+      return;
+    }
+
+    const raw = this.callStorageGetItem(storage, STORAGE_KEY);
     if (!raw) {
+      this.callStorageRemoveItem(storage, STORAGE_KEY);
       return;
     }
 
     try {
       const parsed = JSON.parse(raw) as SessionState;
-      if (!parsed.tokens?.accessToken || !parsed.user?.id) {
-        this.clearSession();
+      if (!this.isSnapshotPersistable(parsed)) {
+        this.callStorageRemoveItem(storage, STORAGE_KEY);
         return;
       }
       this.state.set(parsed);
+      this.persistCurrentState();
     } catch {
-      this.clearSession();
+      this.callStorageRemoveItem(storage, STORAGE_KEY);
     }
   }
 
@@ -87,16 +111,18 @@ export class AuthSessionService {
     redirectTo?: string | null;
     extras?: NavigationExtras;
   }): void {
-    const redirectTo = options?.redirectTo ?? '/auth/login';
+    const redirectTo =
+      options && 'redirectTo' in options ? options.redirectTo : undefined;
+    const target = redirectTo === undefined ? '/auth/login' : redirectTo;
     this.clearSession();
-    if (redirectTo === null) {
+    if (target === null) {
       return;
     }
     if (options?.extras) {
-      this.router.navigate([redirectTo], options.extras);
+      this.router.navigate([target], options.extras);
       return;
     }
-    this.router.navigateByUrl(redirectTo);
+    this.router.navigateByUrl(target);
   }
 
   private pickTokens(response: AuthLoginResponse): AuthTokensDto {
@@ -105,5 +131,127 @@ export class AuthSessionService {
       refreshToken: response.refreshToken,
       expiresIn: response.expiresIn,
     };
+  }
+
+  private persistCurrentState(): void {
+    const storage = this.getStorage();
+    if (!storage) {
+      return;
+    }
+
+    const snapshot = this.state();
+    if (!this.isSnapshotPersistable(snapshot)) {
+      this.callStorageRemoveItem(storage, STORAGE_KEY);
+      return;
+    }
+
+    this.callStorageSetItem(storage, STORAGE_KEY, JSON.stringify(snapshot));
+  }
+
+  private isSnapshotPersistable(
+    snapshot: SessionState
+  ): snapshot is PersistableSessionState {
+    if (!snapshot.tokens || !snapshot.user) {
+      return false;
+    }
+
+    const { accessToken, refreshToken } = snapshot.tokens;
+    if (!accessToken || !refreshToken) {
+      return false;
+    }
+
+    if (!snapshot.user.id) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private callStorageGetItem(storage: Storage, key: string): string | null {
+    const runtimeWindow = (globalThis as { window?: Window }).window;
+    if (runtimeWindow?.sessionStorage) {
+      return runtimeWindow.sessionStorage.getItem(key);
+    }
+
+    if (typeof storage.getItem === 'function') {
+      return storage.getItem(key);
+    }
+
+    return null;
+  }
+
+  private callStorageSetItem(
+    storage: Storage,
+    key: string,
+    value: string
+  ): void {
+    const runtimeWindow = (globalThis as { window?: Window }).window;
+    if (runtimeWindow?.sessionStorage) {
+      runtimeWindow.sessionStorage.setItem(key, value);
+      return;
+    }
+
+    if (typeof storage.setItem === 'function') {
+      storage.setItem(key, value);
+    }
+  }
+
+  private callStorageRemoveItem(storage: Storage, key: string): void {
+    const runtimeWindow = (globalThis as { window?: Window }).window;
+    if (runtimeWindow?.sessionStorage) {
+      runtimeWindow.sessionStorage.removeItem(key);
+      return;
+    }
+
+    if (typeof storage.removeItem === 'function') {
+      storage.removeItem(key);
+    }
+  }
+
+  private getStorage(): Storage | null {
+    if (this.storageRef !== undefined) {
+      return this.storageRef;
+    }
+
+    const runtimeGlobal = globalThis as {
+      window?: Window & { sessionStorage?: Storage };
+      sessionStorage?: Storage;
+    };
+
+    const storage =
+      this.resolveStorage(() => runtimeGlobal.window?.sessionStorage) ??
+      this.resolveStorage(() => runtimeGlobal.sessionStorage) ??
+      this.resolveStorage(() => this.document?.defaultView?.sessionStorage) ??
+      null;
+
+    if (!storage) {
+      return null;
+    }
+
+    this.storageRef = storage;
+    return storage;
+  }
+
+  private resolveStorage(
+    factory: () => Storage | null | undefined
+  ): Storage | null {
+    try {
+      const storage = factory();
+      if (!storage) {
+        return null;
+      }
+
+      if (
+        typeof storage.getItem !== 'function' ||
+        typeof storage.setItem !== 'function' ||
+        typeof storage.removeItem !== 'function'
+      ) {
+        return null;
+      }
+
+      return storage;
+    } catch {
+      return null;
+    }
   }
 }

@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { formatDate } from '@angular/common';
-import { computed, effect, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -70,9 +70,16 @@ export class OrdersListService {
   private readonly notification = inject(NzNotificationService);
   private readonly customersService = inject(CustomersService);
 
-  readonly permissions = signal<OrdersRolePermissionsVm>({
-    canMutate: false,
-    canIncludeDeleted: false,
+  readonly permissions = computed<OrdersRolePermissionsVm>(() => {
+    const user = this.session.user();
+    const roles = user?.roles ?? [];
+    const canMutate =
+      roles.includes('owner' as AppRole) || roles.includes('editor' as AppRole);
+
+    return {
+      canMutate,
+      canIncludeDeleted: canMutate,
+    };
   });
 
   private readonly initialParams = this.normalizeParams(
@@ -125,7 +132,6 @@ export class OrdersListService {
   readonly showError = computed(() => Boolean(this.error()));
 
   constructor() {
-    this.initializePermissions();
     this.initializeParamsEffect();
     this.preloadCustomers();
     this.fetchOrders(this.params());
@@ -207,7 +213,7 @@ export class OrdersListService {
   }
 
   askSoftDelete(order: OrderRowVm): void {
-    if (!this.permissions().canMutate || this.loading()) {
+    if (!this.canMutate() || this.confirmation().loading) {
       return;
     }
 
@@ -222,7 +228,7 @@ export class OrdersListService {
   }
 
   askRestore(order: OrderRowVm): void {
-    if (!this.permissions().canMutate || this.loading()) {
+    if (!this.canMutate() || this.confirmation().loading) {
       return;
     }
 
@@ -260,22 +266,6 @@ export class OrdersListService {
 
   canMutate(): boolean {
     return this.permissions().canMutate;
-  }
-
-  private initializePermissions(): void {
-    effect(
-      () => {
-        const user = this.session.user();
-        const roles = user?.roles ?? [];
-        const canMutate =
-          roles.includes('owner' as AppRole) ||
-          roles.includes('editor' as AppRole);
-        const canIncludeDeleted = canMutate;
-
-        this.permissions.set({ canMutate, canIncludeDeleted });
-      },
-      { allowSignalWrites: true }
-    );
   }
 
   private initializeParamsEffect(): void {

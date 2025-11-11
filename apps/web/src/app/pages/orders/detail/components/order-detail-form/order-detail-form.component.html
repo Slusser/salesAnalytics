@@ -280,8 +280,8 @@
   <div class="order-detail-form__actions">
     <app-order-actions-panel
       [state]="actionsState()"
-      (submit)="onSubmit()"
-      (reset)="onReset()"
+      (submitted)="onSubmit()"
+      (resetRequested)="onReset()"
       (softDelete)="onSoftDelete()"
       (restore)="onRestore()"
     ></app-order-actions-panel>

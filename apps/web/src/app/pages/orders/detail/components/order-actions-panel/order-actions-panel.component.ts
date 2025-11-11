@@ -16,8 +16,8 @@ import type { OrderActionsStateVm } from '../../../../../service/orders/order-de
 export class OrderActionsPanelComponent {
   @Input({ required: true }) state!: OrderActionsStateVm;
 
-  @Output() readonly submit = new EventEmitter<void>();
-  @Output() readonly reset = new EventEmitter<void>();
+  @Output() readonly submitted = new EventEmitter<void>();
+  @Output() readonly resetRequested = new EventEmitter<void>();
   @Output() readonly softDelete = new EventEmitter<void>();
   @Output() readonly restore = new EventEmitter<void>();
 
@@ -25,14 +25,14 @@ export class OrderActionsPanelComponent {
     if (!this.state.canSubmit) {
       return;
     }
-    this.submit.emit();
+    this.submitted.emit();
   }
 
   protected onReset(): void {
     if (!this.state.canReset) {
       return;
     }
-    this.reset.emit();
+    this.resetRequested.emit();
   }
 
   protected onSoftDelete(): void {

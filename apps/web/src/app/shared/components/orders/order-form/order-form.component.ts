@@ -295,6 +295,9 @@ export class OrderFormComponent {
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
+        if (this.form.pristine) {
+          this.form.markAsDirty();
+        }
         this.dirtyChange.emit(this.form.dirty);
       });
   }
