@@ -109,6 +109,7 @@ describe('RolesGuard', () => {
       currentUser: {
         actorId: 'user-1',
         actorRoles: [viewerRole],
+        accessToken: 'token-viewer',
       },
     } as CurrentUserRequest;
 
@@ -126,6 +127,7 @@ describe('RolesGuard', () => {
       currentUser: {
         actorId: 'user-1',
         actorRoles: ['viewer', ownerRole],
+        accessToken: 'token-owner',
       },
     } as CurrentUserRequest;
 

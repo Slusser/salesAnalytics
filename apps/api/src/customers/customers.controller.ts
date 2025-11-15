@@ -129,6 +129,7 @@ export class CustomersController {
       customerId: params.customerId,
       actorId: currentUser.actorId,
       actorRoles: currentUser.actorRoles,
+      accessToken: currentUser.accessToken,
     });
   }
 

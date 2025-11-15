@@ -16,6 +16,7 @@ node_modules
 *.launch
 .settings/
 *.sublime-workspace
+.env.test
 
 # IDE - VSCode
 .vscode/*

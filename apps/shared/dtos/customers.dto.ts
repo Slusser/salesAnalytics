@@ -52,6 +52,7 @@ export interface DeleteCustomerCommand {
   customerId: CustomerRow["id"]
   actorId: string
   actorRoles: UserRoleValue[]
+  accessToken: string
 }
 
 export interface DeleteCustomerResponse extends CustomerDto {}
@@ -62,5 +63,6 @@ export interface DeleteCustomerResponse extends CustomerDto {}
 export interface CustomerMutatorContext {
   actorId: string
   actorRoles: UserRoleValue[]
+  accessToken: string
 }
 

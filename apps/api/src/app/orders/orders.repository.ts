@@ -4,8 +4,8 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { supabaseClient } from '@db/supabase.client';
-import type { TablesInsert, TablesUpdate } from '@db/database.types';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, TablesInsert, TablesUpdate } from '@db/database.types';
 import type {
   CreateOrderCommand,
   DeleteOrderCommand,
@@ -64,14 +64,18 @@ const SORT_FIELD_MAP: Record<ListParams['sortField'], string> = {
   createdAt: 'created_at',
 };
 
+type Supabase = SupabaseClient<Database>;
+
 @Injectable()
 export class OrdersRepository {
-  private readonly client = supabaseClient;
   private readonly logger = new Logger(OrdersRepository.name);
 
-  async list(params: ListParams): Promise<ListOrdersResponse> {
+  async list(
+    client: Supabase,
+    params: ListParams
+  ): Promise<ListOrdersResponse> {
     const offset = (params.page - 1) * params.limit;
-    const baseQuery = this.client
+    const baseQuery = client
       .from('orders')
       .select(
         'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const,
@@ -120,12 +124,13 @@ export class OrdersRepository {
   }
 
   async findById(
+    client: Supabase,
     id: string,
     options: FindByIdOptions
   ): Promise<OrderDetailDto | null> {
     const { includeDeleted } = options;
 
-    const baseQuery = this.client
+    const baseQuery = client
       .from('orders')
       .select(
         'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
@@ -150,8 +155,11 @@ export class OrdersRepository {
     return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
-  async findActiveById(id: string): Promise<OrderDetailDto | null> {
-    const { data, error } = await this.client
+  async findActiveById(
+    client: Supabase,
+    id: string
+  ): Promise<OrderDetailDto | null> {
+    const { data, error } = await client
       .from('orders')
       .select(
         'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
@@ -175,7 +183,10 @@ export class OrdersRepository {
     return OrderMapper.toDetailDto(data as OrderDetailRow);
   }
 
-  async create(params: CreateParams): Promise<OrderDetailDto> {
+  async create(
+    client: Supabase,
+    params: CreateParams
+  ): Promise<OrderDetailDto> {
     const { command, actorId } = params;
 
     const payload: TablesInsert<'orders'> = {
@@ -196,7 +207,7 @@ export class OrdersRepository {
       created_by: actorId,
     };
 
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('orders')
       .insert(payload)
       .select(
@@ -228,8 +239,11 @@ export class OrdersRepository {
     throw error;
   }
 
-  async findByIdForUpdate(orderId: string): Promise<OrderDetailRow | null> {
-    const { data, error } = await this.client
+  async findByIdForUpdate(
+    client: Supabase,
+    orderId: string
+  ): Promise<OrderDetailRow | null> {
+    const { data, error } = await client
       .from('orders')
       .select(
         'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
@@ -248,7 +262,10 @@ export class OrdersRepository {
     return (data as OrderDetailRow | null) ?? null;
   }
 
-  async update(params: UpdateParams): Promise<OrderDetailDto> {
+  async update(
+    client: Supabase,
+    params: UpdateParams
+  ): Promise<OrderDetailDto> {
     const { command, orderId } = params;
 
     const payload: TablesUpdate<'orders'> = {
@@ -270,7 +287,7 @@ export class OrdersRepository {
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('orders')
       .update(payload)
       .eq('id', orderId)
@@ -309,7 +326,7 @@ export class OrdersRepository {
     throw error;
   }
 
-  async softDelete(params: SoftDeleteParams): Promise<void> {
+  async softDelete(client: Supabase, params: SoftDeleteParams): Promise<void> {
     const { command } = params;
 
     const payload: TablesUpdate<'orders'> = {
@@ -317,7 +334,7 @@ export class OrdersRepository {
       updated_at: new Date().toISOString(),
     };
 
-    const { error } = await this.client
+    const { error } = await client
       .from('orders')
       .update(payload)
       .eq('id', command.orderId)

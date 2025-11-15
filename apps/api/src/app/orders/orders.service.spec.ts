@@ -19,6 +19,9 @@ import type {
 import { OrdersService } from './orders.service';
 import type { OrdersRepository } from './orders.repository';
 import type { UserRoleValue } from '@shared/dtos/user-roles.dto';
+import type { SupabaseFactory } from '../../supabase/supabase.factory';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@db/database.types';
 
 type OrdersRepositoryMock = {
   list: ReturnType<typeof vi.fn>;
@@ -30,18 +33,26 @@ type OrdersRepositoryMock = {
   softDelete: ReturnType<typeof vi.fn>;
 };
 
+type SupabaseFactoryMock = {
+  create: ReturnType<typeof vi.fn>;
+};
+
 describe('OrdersService', () => {
   let repository: OrdersRepositoryMock;
   let service: OrdersService;
+  let supabaseFactory: SupabaseFactoryMock;
+  let supabaseClient: SupabaseClient<Database>;
 
   const elevatedUser: CustomerMutatorContext = {
     actorId: 'user-1',
     actorRoles: ['owner' as UserRoleValue],
+    accessToken: 'token-owner',
   };
 
   const viewerUser: CustomerMutatorContext = {
     actorId: 'user-2',
     actorRoles: ['viewer' as UserRoleValue],
+    accessToken: 'token-viewer',
   };
 
   const baseCommand: CreateOrderCommand = {
@@ -73,7 +84,15 @@ describe('OrdersService', () => {
 
   beforeEach(() => {
     repository = createRepositoryMock();
-    service = new OrdersService(repository as unknown as OrdersRepository);
+    supabaseFactory = {
+      create: vi.fn(),
+    };
+    supabaseClient = {} as SupabaseClient<Database>;
+    supabaseFactory.create.mockReturnValue(supabaseClient);
+    service = new OrdersService(
+      repository as unknown as OrdersRepository,
+      supabaseFactory as unknown as SupabaseFactory
+    );
   });
 
   afterEach(() => {
@@ -114,7 +133,7 @@ describe('OrdersService', () => {
       const result = await service.list(query, elevatedUser);
 
       expect(result).toBe(response);
-      expect(repository.list).toHaveBeenCalledWith({
+      expect(repository.list).toHaveBeenCalledWith(supabaseClient, {
         page: 1,
         limit: 25,
         includeDeleted: false,
@@ -145,7 +164,7 @@ describe('OrdersService', () => {
       const result = await service.list(query, elevatedUser);
 
       expect(result).toBe(response);
-      expect(repository.list).toHaveBeenCalledWith({
+      expect(repository.list).toHaveBeenCalledWith(supabaseClient, {
         page: 2,
         limit: 10,
         includeDeleted: true,
@@ -204,9 +223,13 @@ describe('OrdersService', () => {
       const result = await service.getById('order-1', elevatedUser);
 
       expect(result).toBe(order);
-      expect(repository.findById).toHaveBeenCalledWith('order-1', {
+      expect(repository.findById).toHaveBeenCalledWith(
+        supabaseClient,
+        'order-1',
+        {
         includeDeleted: true,
-      });
+        }
+      );
     });
 
     it('rzuca ForbiddenException gdy zamówienie ma deletedAt a użytkownik nie ma uprawnień', async () => {
@@ -293,8 +316,9 @@ describe('OrdersService', () => {
 
       expect(result).toBe(normalizedResponse);
       expect(repository.create).toHaveBeenCalledTimes(1);
+      expect(repository.create.mock.calls[0][0]).toBe(supabaseClient);
 
-      const payload = repository.create.mock.calls[0][0];
+      const payload = repository.create.mock.calls[0][1];
       expect(payload.actorId).toBe('user-1');
       expect(payload.command).toMatchObject({
         orderNo: 'ABC-123',
@@ -447,7 +471,11 @@ describe('OrdersService', () => {
     });
 
     it('rzuca InternalServerErrorException gdy actorId nie jest ustawione', async () => {
-      const user: CustomerMutatorContext = { actorId: '', actorRoles: ['owner' as UserRoleValue] };
+      const user: CustomerMutatorContext = {
+        actorId: '',
+        actorRoles: ['owner' as UserRoleValue],
+        accessToken: 'token-missing',
+      };
 
       await expect(
         service.update('order-1', updateCommand, user)
@@ -492,8 +520,9 @@ describe('OrdersService', () => {
 
       expect(result).toBe(updatedOrder);
       expect(repository.update).toHaveBeenCalledTimes(1);
+      expect(repository.update.mock.calls[0][0]).toBe(supabaseClient);
 
-      const payload = repository.update.mock.calls[0][0];
+      const payload = repository.update.mock.calls[0][1];
       expect(payload.actorId).toBe('user-1');
       if (!updateCommand.deletedAt) {
         throw new Error('Test setup error: deletedAt must be defined');
@@ -550,7 +579,11 @@ describe('OrdersService', () => {
 
     it('rzuca InternalServerErrorException gdy actorId nie jest ustawione', async () => {
       await expect(
-        service.delete('order-1', { actorId: '', actorRoles: ['owner' as UserRoleValue] })
+        service.delete('order-1', {
+          actorId: '',
+          actorRoles: ['owner' as UserRoleValue],
+          accessToken: 'token-missing',
+        })
       ).rejects.toBeInstanceOf(InternalServerErrorException);
     });
 
@@ -584,7 +617,7 @@ describe('OrdersService', () => {
 
       await expect(service.delete('order-1', elevatedUser)).resolves.toBeUndefined();
 
-      expect(repository.softDelete).toHaveBeenCalledWith({
+      expect(repository.softDelete).toHaveBeenCalledWith(supabaseClient, {
         actorId: 'user-1',
         command: { orderId: 'order-1' },
       });

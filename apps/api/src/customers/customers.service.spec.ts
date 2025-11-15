@@ -6,8 +6,9 @@ import {
 } from '@nestjs/common';
 import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 
-import type { PostgrestError } from '@supabase/supabase-js';
-import type { Tables } from '@db/database.types';
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Tables } from '@db/database.types';
+import type { SupabaseFactory } from '../supabase/supabase.factory';
 import type {
   CreateCustomerCommand,
   CustomerDto,
@@ -35,6 +36,10 @@ type CustomersRepositoryMock = {
   softDelete: ReturnType<typeof vi.fn>;
   update: ReturnType<typeof vi.fn>;
   isActiveNameTakenByOther: ReturnType<typeof vi.fn>;
+};
+
+type SupabaseFactoryMock = {
+  create: ReturnType<typeof vi.fn>;
 };
 
 type CustomerRow = Tables<'customers'>;
@@ -83,25 +88,38 @@ const createPostgrestError = (
 describe('CustomersService', () => {
   let repository: CustomersRepositoryMock;
   let service: CustomersService;
+  let supabaseFactory: SupabaseFactoryMock;
+  let supabaseClient: SupabaseClient<Database>;
 
   const ownerContext: CustomerMutatorContext = {
     actorId: 'actor-1',
     actorRoles: ['owner' as UserRoleValue],
+    accessToken: 'token-owner',
   };
 
   const editorContext: CustomerMutatorContext = {
     actorId: 'actor-2',
     actorRoles: ['editor' as UserRoleValue],
+    accessToken: 'token-editor',
   };
 
   const viewerContext: CustomerMutatorContext = {
     actorId: 'actor-3',
     actorRoles: ['viewer' as UserRoleValue],
+    accessToken: 'token-viewer',
   };
 
   beforeEach(() => {
     repository = createRepositoryMock();
-    service = new CustomersService(repository as unknown as CustomersRepository);
+    supabaseFactory = {
+      create: vi.fn(),
+    };
+    supabaseClient = {} as SupabaseClient<Database>;
+    supabaseFactory.create.mockReturnValue(supabaseClient);
+    service = new CustomersService(
+      repository as unknown as CustomersRepository,
+      supabaseFactory as unknown as SupabaseFactory
+    );
   });
 
   afterEach(() => {
@@ -142,7 +160,7 @@ describe('CustomersService', () => {
       const result = await service.list(query, ownerContext);
 
       expect(result).toBe(response);
-      expect(repository.list).toHaveBeenCalledWith({
+      expect(repository.list).toHaveBeenCalledWith(supabaseClient, {
         page: 1,
         limit: 25,
         includeInactive: false,
@@ -201,7 +219,7 @@ describe('CustomersService', () => {
       const result = await service.create(command, editorContext);
 
       expect(result).toBe(dto);
-      expect(repository.insert).toHaveBeenCalledWith({
+      expect(repository.insert).toHaveBeenCalledWith(supabaseClient, {
         name: 'ACME',
         isActive: true,
         actorId: editorContext.actorId,
@@ -234,6 +252,7 @@ describe('CustomersService', () => {
       customerId: 'customer-1',
       actorId: ownerContext.actorId,
       actorRoles: ownerContext.actorRoles,
+      accessToken: ownerContext.accessToken,
     };
 
     it('rzuca InternalServerErrorException, gdy command jest pusty', async () => {
@@ -255,6 +274,7 @@ describe('CustomersService', () => {
         customerId: 'customer-1',
         actorId: viewerContext.actorId,
         actorRoles: viewerContext.actorRoles,
+        accessToken: viewerContext.accessToken,
       };
 
       await expect(service.delete(command)).rejects.toBeInstanceOf(
@@ -326,7 +346,7 @@ describe('CustomersService', () => {
 
       const result = await service.delete(baseCommand);
 
-      expect(repository.softDelete).toHaveBeenCalledWith({
+      expect(repository.softDelete).toHaveBeenCalledWith(supabaseClient, {
         customerId: baseCommand.customerId,
         deletedAt: now.toISOString(),
       });
@@ -472,7 +492,7 @@ describe('CustomersService', () => {
         ownerContext
       );
 
-      expect(repository.update).toHaveBeenCalledWith({
+      expect(repository.update).toHaveBeenCalledWith(supabaseClient, {
         customerId,
         name: undefined,
         isActive: false,
@@ -496,7 +516,7 @@ describe('CustomersService', () => {
         ownerContext
       );
 
-      expect(repository.update).toHaveBeenCalledWith({
+      expect(repository.update).toHaveBeenCalledWith(supabaseClient, {
         customerId,
         name: undefined,
         isActive: true,
@@ -539,7 +559,7 @@ describe('CustomersService', () => {
         ownerContext
       );
 
-      expect(repository.update).toHaveBeenCalledWith({
+      expect(repository.update).toHaveBeenCalledWith(supabaseClient, {
         customerId,
         name: 'Nowa nazwa',
         isActive: undefined,

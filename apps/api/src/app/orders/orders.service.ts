@@ -19,6 +19,9 @@ import type {
   UpdateOrderCommand,
 } from '@shared/dtos/orders.dto';
 import { OrdersRepository } from './orders.repository';
+import { SupabaseFactory } from '../../supabase/supabase.factory';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@db/database.types';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 25;
@@ -58,7 +61,10 @@ const SORT_FIELD_MAP: Record<
 export class OrdersService {
   private readonly logger = new Logger(OrdersService.name);
 
-  constructor(private readonly repository: OrdersRepository) {}
+  constructor(
+    private readonly repository: OrdersRepository,
+    private readonly supabaseFactory: SupabaseFactory
+  ) {}
 
   async list(
     query: ListOrdersQuery,
@@ -78,6 +84,13 @@ export class OrdersService {
         'Brak uprawnień do przeglądania usuniętych zamówień.'
       );
     }
+
+    const supabase = this.getSupabaseClientOrThrow(user.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_SUPABASE_TOKEN_MISSING',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
 
     const page = query.page ?? DEFAULT_PAGE;
     const limit = query.limit ?? DEFAULT_LIMIT;
@@ -104,7 +117,7 @@ export class OrdersService {
     );
 
     try {
-      return await this.repository.list({
+      return await this.repository.list(supabase, {
         page,
         limit,
         includeDeleted: query.includeDeleted ?? false,
@@ -137,6 +150,13 @@ export class OrdersService {
       (role) => role === 'editor' || role === 'owner'
     );
 
+    const supabase = this.getSupabaseClientOrThrow(user.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_SUPABASE_TOKEN_MISSING',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
+
     this.logger.debug(
       `Pobieranie zamówienia: orderId=${id}, actor=${
         user.actorId
@@ -144,7 +164,7 @@ export class OrdersService {
     );
 
     try {
-      const order = await this.repository.findById(id, {
+      const order = await this.repository.findById(supabase, id, {
         includeDeleted: isElevated,
       });
 
@@ -203,6 +223,13 @@ export class OrdersService {
       });
     }
 
+    const supabase = this.getSupabaseClientOrThrow(user.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_SUPABASE_TOKEN_MISSING',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
+
     this.logger.debug(
       `Rozpoczynam tworzenie zamówienia ${command.orderNo} przez użytkownika ${user.actorId}.`
     );
@@ -212,7 +239,7 @@ export class OrdersService {
     this.validateCommand(normalizedCommand);
 
     try {
-      const created = await this.repository.create({
+      const created = await this.repository.create(supabase, {
         command: normalizedCommand,
         actorId: user.actorId,
       });
@@ -266,6 +293,13 @@ export class OrdersService {
       });
     }
 
+    const supabase = this.getSupabaseClientOrThrow(user.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_SUPABASE_TOKEN_MISSING',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
+
     this.logger.debug(
       `Rozpoczynam aktualizację zamówienia ${this.maskOrderId(
         orderId
@@ -273,7 +307,7 @@ export class OrdersService {
     );
 
     const existing = await this.repository
-      .findByIdForUpdate(orderId)
+      .findByIdForUpdate(supabase, orderId)
       .catch((error) => {
         this.logger.error(
           `Błąd pobierania zamówienia ${orderId} przed aktualizacją`,
@@ -298,7 +332,7 @@ export class OrdersService {
     this.validateCommand(normalizedCommand);
 
     try {
-      return await this.repository.update({
+      return await this.repository.update(supabase, {
         orderId,
         command: normalizedCommand,
         actorId,
@@ -430,6 +464,13 @@ export class OrdersService {
       });
     }
 
+    const supabase = this.getSupabaseClientOrThrow(user.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'ORDERS_SUPABASE_TOKEN_MISSING',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
+
     const hasDeleteRole = (actorRoles ?? []).some(
       (role) => role === 'editor' || role === 'owner'
     );
@@ -450,7 +491,7 @@ export class OrdersService {
     let existing: OrderDetailDto | null;
 
     try {
-      existing = await this.repository.findActiveById(orderId);
+      existing = await this.repository.findActiveById(supabase, orderId);
     } catch (error) {
       this.logger.error(
         `Błąd pobrania zamówienia ${orderId} przed usunięciem`,
@@ -475,7 +516,7 @@ export class OrdersService {
     };
 
     try {
-      await this.repository.softDelete({ command, actorId });
+      await this.repository.softDelete(supabase, { command, actorId });
     } catch (error) {
       this.logger.error(
         `Nie udało się usunąć zamówienia ${orderId}`,
@@ -493,6 +534,17 @@ export class OrdersService {
         orderId
       )} zakończony powodzeniem`
     );
+  }
+
+  private getSupabaseClientOrThrow(
+    accessToken: string | undefined,
+    onMissing: () => never
+  ): SupabaseClient<Database> {
+    if (!accessToken) {
+      onMissing();
+    }
+
+    return this.supabaseFactory.create(accessToken);
   }
 
   private maskOrderId(orderId: string): string {

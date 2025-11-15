@@ -111,6 +111,7 @@ describe('JwtAuthGuard', () => {
     const currentUser = {
       actorId: 'user-1',
       actorRoles: ['owner' as UserRoleValue],
+      accessToken: token,
     } satisfies CustomerMutatorContext;
 
     resolveCurrentUser.mockResolvedValue(currentUser);

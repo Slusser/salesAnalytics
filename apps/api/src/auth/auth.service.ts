@@ -83,7 +83,7 @@ export class AuthService {
         error
       );
 
-      supabase = this.supabaseFactory.create();
+      supabase = this.supabaseFactory.create(undefined, { serviceRole: true });
       ({ data, error } = await supabase
         .from('user_roles')
         .select('role')

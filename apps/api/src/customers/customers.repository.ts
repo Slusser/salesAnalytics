@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { PostgrestError } from '@supabase/supabase-js';
+import type { PostgrestError, SupabaseClient } from '@supabase/supabase-js';
 
 import type {
+  Database,
   Tables,
   TablesInsert,
   TablesUpdate,
 } from '@db/database.types';
-import { supabaseClient } from '@db/supabase.client';
 import { CustomerMapper } from './customers.mapper';
 import type {
   CustomerDto,
@@ -36,16 +36,17 @@ type SoftDeleteParams = Pick<DeleteCustomerCommand, 'customerId'> & {
   deletedAt: string;
 };
 
+type Supabase = SupabaseClient<Database>;
+
 @Injectable()
 export class CustomersRepository {
-  private readonly client = supabaseClient;
   private readonly logger = new Logger(CustomersRepository.name);
 
-  async isActiveNameTaken(name: string): Promise<boolean> {
+  async isActiveNameTaken(client: Supabase, name: string): Promise<boolean> {
     const normalized = name.trim();
     const pattern = normalized.replace(/[%_]/g, '\\$&');
 
-    const { count, error } = await this.client
+    const { count, error } = await client
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .is('deleted_at', null)
@@ -59,6 +60,7 @@ export class CustomersRepository {
   }
 
   async insert(
+    client: Supabase,
     customer: InsertCustomerParams
   ): Promise<{ data?: CustomerDto; error?: PostgrestError }> {
     const payload: TablesInsert<'customers'> = {
@@ -66,7 +68,7 @@ export class CustomersRepository {
       is_active: customer.isActive,
     };
 
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('customers')
       .insert(payload)
       .select()
@@ -84,11 +86,14 @@ export class CustomersRepository {
     return { data: CustomerMapper.toDto(data) };
   }
 
-  async findById(customerId: string): Promise<{
+  async findById(
+    client: Supabase,
+    customerId: string
+  ): Promise<{
     data?: Tables<'customers'> | null;
     error?: PostgrestError;
   }> {
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('customers')
       .select('id, name, is_active, created_at, updated_at, deleted_at')
       .eq('id', customerId)
@@ -103,13 +108,14 @@ export class CustomersRepository {
   }
 
   async isActiveNameTakenByOther(
+    client: Supabase,
     name: string,
     excludingCustomerId: string
   ): Promise<boolean> {
     const normalized = name.trim();
     const pattern = normalized.replace(/[%_]/g, '\\$&');
 
-    const { count, error } = await this.client
+    const { count, error } = await client
       .from('customers')
       .select('id', { count: 'exact', head: true })
       .is('deleted_at', null)
@@ -123,7 +129,10 @@ export class CustomersRepository {
     return (count ?? 0) > 0;
   }
 
-  async softDelete(params: SoftDeleteParams): Promise<{
+  async softDelete(
+    client: Supabase,
+    params: SoftDeleteParams
+  ): Promise<{
     data?: CustomerDto | null;
     error?: PostgrestError;
   }> {
@@ -133,7 +142,7 @@ export class CustomersRepository {
       updated_at: new Date().toISOString(),
     };
 
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('customers')
       .update(payload)
       .eq('id', params.customerId)
@@ -155,7 +164,10 @@ export class CustomersRepository {
     return { data: CustomerMapper.toDto(data as Tables<'customers'>) };
   }
 
-  async update(params: UpdateCustomerParams): Promise<{
+  async update(
+    client: Supabase,
+    params: UpdateCustomerParams
+  ): Promise<{
     data?: CustomerDto | null;
     error?: PostgrestError;
   }> {
@@ -173,7 +185,7 @@ export class CustomersRepository {
       payload.deleted_at = params.deletedAt;
     }
 
-    const { data, error } = await this.client
+    const { data, error } = await client
       .from('customers')
       .update(payload)
       .eq('id', params.customerId)
@@ -195,11 +207,14 @@ export class CustomersRepository {
     return { data: CustomerMapper.toDto(data as Tables<'customers'>) };
   }
 
-  async list(params: ListParams): Promise<ListCustomersResponse> {
+  async list(
+    client: Supabase,
+    params: ListParams
+  ): Promise<ListCustomersResponse> {
     const { page, limit, search, includeInactive } = params;
     const offset = (page - 1) * limit;
 
-    let query = this.client
+    let query = client
       .from('customers')
       .select('id, name, is_active, created_at, updated_at, deleted_at', {
         count: 'exact',

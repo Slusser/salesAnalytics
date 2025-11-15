@@ -45,6 +45,7 @@ export class RequestContextService {
     return {
       actorId: userId,
       actorRoles: userRoles,
+      accessToken,
     };
   }
 
@@ -52,10 +53,26 @@ export class RequestContextService {
     supabase: SupabaseClient,
     userId: string
   ): Promise<UserRoleValue[] | undefined> {
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('user_roles')
       .select('role')
       .eq('user_id', userId);
+
+    if (error?.code === '42P17') {
+      this.logger.warn(
+        `RLS dla user_roles utknęło w rekursji przy tokenie użytkownika ${userId}. Próbuję odczytu z kluczem serwisowym.`,
+        error
+      );
+
+      const serviceClient = this.supabaseFactory.create(undefined, {
+        serviceRole: true,
+      });
+
+      ({ data, error } = await serviceClient
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId));
+    }
 
     if (error) {
       this.logger.error('Błąd pobierania ról użytkownika', error);

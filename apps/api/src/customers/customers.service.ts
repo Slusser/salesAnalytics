@@ -7,6 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PostgrestError } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type {
   CreateCustomerCommand,
@@ -20,6 +21,8 @@ import type {
 } from '@shared/dtos/customers.dto';
 import { CustomersRepository } from './customers.repository';
 import { CustomerMapper } from './customers.mapper';
+import type { Database } from '@db/database.types';
+import { SupabaseFactory } from '../supabase/supabase.factory';
 
 export class CustomerDuplicateNameError extends Error {
   readonly code = 'CUSTOMER_DUPLICATE_NAME';
@@ -57,7 +60,10 @@ export class CustomersListFailedError extends Error {
 export class CustomersService {
   private readonly logger = new Logger(CustomersService.name);
 
-  constructor(private readonly repository: CustomersRepository) {}
+  constructor(
+    private readonly repository: CustomersRepository,
+    private readonly supabaseFactory: SupabaseFactory
+  ) {}
 
   async list(
     query: ListCustomersQuery,
@@ -68,6 +74,15 @@ export class CustomersService {
         'Brak kontekstu użytkownika wykonującego operację.'
       );
     }
+
+    const supabase = this.getSupabaseClientOrThrow(
+      context.accessToken,
+      () => {
+        throw new CustomersListFailedError(
+          'Brak tokenu dostępowego użytkownika wykonującego operację.'
+        );
+      }
+    );
 
     const page = query.page ?? 1;
     const limit = query.limit ?? 25;
@@ -90,7 +105,7 @@ export class CustomersService {
     );
 
     try {
-      return await this.repository.list({
+      return await this.repository.list(supabase, {
         page,
         limit,
         includeInactive,
@@ -118,9 +133,20 @@ export class CustomersService {
     }
 
     const isActive = command.isActive ?? true;
+    const supabase = this.getSupabaseClientOrThrow(
+      context.accessToken,
+      () => {
+        throw new CustomerCreateFailedError(
+          'Brak tokenu dostępowego użytkownika wykonującego operację.'
+        );
+      }
+    );
 
     try {
-      const exists = await this.repository.isActiveNameTaken(trimmedName);
+      const exists = await this.repository.isActiveNameTaken(
+        supabase,
+        trimmedName
+      );
       if (exists) {
         throw new CustomerDuplicateNameError();
       }
@@ -134,7 +160,7 @@ export class CustomersService {
       this.logger.debug(`Command: ${JSON.stringify(command)}`);
       this.logger.debug(`Context: ${JSON.stringify(context)}`);
 
-      const result = await this.repository.insert({
+      const result = await this.repository.insert(supabase, {
         name: trimmedName,
         isActive,
         actorId: context.actorId,
@@ -181,6 +207,13 @@ export class CustomersService {
       });
     }
 
+    const supabase = this.getSupabaseClientOrThrow(command.accessToken, () => {
+      throw new InternalServerErrorException({
+        code: 'CUSTOMERS_DELETE_FAILED',
+        message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+      });
+    });
+
     const isAuthorized = actorRoles.some(
       (role) => role === 'editor' || role === 'owner'
     );
@@ -196,7 +229,7 @@ export class CustomersService {
       `Rozpoczęcie soft-delete klienta ${customerId} przez użytkownika ${actorId}`
     );
 
-    const existing = await this.repository.findById(customerId);
+    const existing = await this.repository.findById(supabase, customerId);
 
     if (existing.error) {
       this.logger.error(
@@ -227,7 +260,7 @@ export class CustomersService {
 
     const deletedAt = new Date().toISOString();
 
-    const result = await this.repository.softDelete({
+    const result = await this.repository.softDelete(supabase, {
       customerId,
       deletedAt,
     });
@@ -263,7 +296,20 @@ export class CustomersService {
       });
     }
 
-    const { data, error } = await this.repository.findById(customerId);
+    const supabase = this.getSupabaseClientOrThrow(
+      context.accessToken,
+      () => {
+        throw new InternalServerErrorException({
+          code: 'CUSTOMERS_GET_BY_ID_FAILED',
+          message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+        });
+      }
+    );
+
+    const { data, error } = await this.repository.findById(
+      supabase,
+      customerId
+    );
 
     if (error) {
       this.logger.error(`Nie udało się pobrać klienta ${customerId}`, error);
@@ -311,6 +357,16 @@ export class CustomersService {
       });
     }
 
+    const supabase = this.getSupabaseClientOrThrow(
+      context.accessToken,
+      () => {
+        throw new InternalServerErrorException({
+          code: 'CUSTOMERS_UPDATE_FAILED',
+          message: 'Brak tokenu dostępowego użytkownika wykonującego operację.',
+        });
+      }
+    );
+
     const actorRoles = context.actorRoles ?? [];
     const hasMutationRole = actorRoles.some(
       (role) => role === 'editor' || role === 'owner'
@@ -325,7 +381,7 @@ export class CustomersService {
 
     this.logger.debug(`Rozpoczęcie aktualizacji klienta ${customerId}`);
 
-    const existing = await this.repository.findById(customerId);
+    const existing = await this.repository.findById(supabase, customerId);
 
     if (existing.error) {
       this.logger.error(
@@ -394,6 +450,7 @@ export class CustomersService {
       nextName.toLowerCase() !== currentCustomer.name.toLowerCase()
     ) {
       const nameTaken = await this.repository.isActiveNameTakenByOther(
+        supabase,
         nextName,
         customerId
       );
@@ -415,7 +472,7 @@ export class CustomersService {
       deletedAt: shouldUpdateDeletedAt ? computedDeletedAt : undefined,
     };
 
-    const result = await this.repository.update({
+    const result = await this.repository.update(supabase, {
       customerId,
       ...updatePayload,
     });
@@ -460,5 +517,16 @@ export class CustomersService {
       code: 'CUSTOMERS_DELETE_FAILED',
       message: 'Nie udało się usunąć klienta.',
     });
+  }
+
+  private getSupabaseClientOrThrow(
+    accessToken: string | undefined,
+    onMissing: () => never
+  ): SupabaseClient<Database> {
+    if (!accessToken) {
+      onMissing();
+    }
+
+    return this.supabaseFactory.create(accessToken);
   }
 }
