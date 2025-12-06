@@ -27,15 +27,6 @@ export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiProperty({ description: 'Ilość zamówionych sztuk', type: Number })
   quantity!: number;
 
-  @ApiProperty({ description: 'Czy zamówienie jest rozliczane w EUR' })
-  isEur!: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Kurs EUR zastosowany w zamówieniu',
-    type: Number,
-  })
-  eurRate!: number | null;
-
   @ApiProperty({ description: 'Rabat producenta w procentach', type: Number })
   producerDiscountPct!: number;
 
@@ -50,12 +41,6 @@ export class OrderListItemResponseDto implements OrderListItemDto {
 
   @ApiProperty({ description: 'Suma brutto w PLN', type: Number })
   totalGrossPln!: number;
-
-  @ApiPropertyOptional({
-    description: 'Suma brutto w EUR (jeśli dotyczy)',
-    type: Number,
-  })
-  totalGrossEur!: number | null;
 
   @ApiProperty({
     description: 'Identyfikator użytkownika tworzącego zamówienie',

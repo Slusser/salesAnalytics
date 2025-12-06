@@ -78,7 +78,7 @@ export class OrdersRepository {
     const baseQuery = client
       .from('orders')
       .select(
-        'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const,
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const,
         { count: 'exact' }
       )
       .order(SORT_FIELD_MAP[params.sortField], {
@@ -133,7 +133,7 @@ export class OrdersRepository {
     const baseQuery = client
       .from('orders')
       .select(
-        'id, customer_id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', id);
 
@@ -162,7 +162,7 @@ export class OrdersRepository {
     const { data, error } = await client
       .from('orders')
       .select(
-        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', id)
       .is('deleted_at', null)
@@ -195,14 +195,11 @@ export class OrdersRepository {
       order_date: command.orderDate,
       item_name: command.itemName,
       quantity: command.quantity,
-      is_eur: command.isEur,
-      eur_rate: command.eurRate ?? null,
       producer_discount_pct: command.producerDiscountPct,
       distributor_discount_pct: command.distributorDiscountPct,
       vat_rate_pct: command.vatRatePct,
       total_net_pln: command.totalNetPln,
       total_gross_pln: command.totalGrossPln,
-      total_gross_eur: command.totalGrossEur ?? null,
       comment: command.comment ?? null,
       created_by: actorId,
     };
@@ -211,7 +208,7 @@ export class OrdersRepository {
       .from('orders')
       .insert(payload)
       .select(
-        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const
       )
       .single();
 
@@ -246,7 +243,7 @@ export class OrdersRepository {
     const { data, error } = await client
       .from('orders')
       .select(
-        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const
       )
       .eq('id', orderId)
       .maybeSingle();
@@ -274,14 +271,11 @@ export class OrdersRepository {
       order_date: command.orderDate,
       item_name: command.itemName,
       quantity: command.quantity,
-      is_eur: command.isEur,
-      eur_rate: command.eurRate ?? null,
       producer_discount_pct: command.producerDiscountPct,
       distributor_discount_pct: command.distributorDiscountPct,
       vat_rate_pct: command.vatRatePct,
       total_net_pln: command.totalNetPln,
       total_gross_pln: command.totalGrossPln,
-      total_gross_eur: command.totalGrossEur ?? null,
       comment: command.comment ?? null,
       deleted_at: command.deletedAt ?? null,
       updated_at: new Date().toISOString(),
@@ -292,7 +286,7 @@ export class OrdersRepository {
       .update(payload)
       .eq('id', orderId)
       .select(
-        'id, order_no, order_date, item_name, quantity, is_eur, eur_rate, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, total_gross_eur, comment, currency_code, created_by, created_at, updated_at, deleted_at' as const
+        'id, customer_id, order_no, order_date, item_name, quantity, producer_discount_pct, distributor_discount_pct, vat_rate_pct, total_net_pln, total_gross_pln, comment, created_by, created_at, updated_at, deleted_at' as const
       )
       .maybeSingle();
 

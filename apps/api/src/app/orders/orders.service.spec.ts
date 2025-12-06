@@ -61,14 +61,11 @@ describe('OrdersService', () => {
     orderDate: '2024-05-10',
     itemName: '  Produkt  ',
     quantity: 10,
-    isEur: false,
-    eurRate: null,
     producerDiscountPct: 12,
     distributorDiscountPct: 5,
     vatRatePct: 23,
     totalNetPln: 100,
     totalGrossPln: 123,
-    totalGrossEur: null,
     comment: '  testowy komentarz  ',
   };
 
@@ -193,16 +190,12 @@ describe('OrdersService', () => {
       orderDate: '2024-01-01',
       itemName: 'Produkt',
       quantity: 1,
-      isEur: false,
-      eurRate: null,
       producerDiscountPct: 0,
       distributorDiscountPct: 0,
       vatRatePct: 23,
       totalNetPln: 100,
       totalGrossPln: 123,
-      totalGrossEur: null,
       comment: 'Komentarz',
-      currencyCode: 'PLN',
       createdBy: 'user-3',
       createdAt: '2024-01-01T00:00:00Z',
       updatedAt: '2024-01-01T00:00:00Z',
@@ -276,14 +269,11 @@ describe('OrdersService', () => {
     it('normalizuje dane wejściowe przed utworzeniem zamówienia', async () => {
       const commandNeedingNormalization: CreateOrderCommand = {
         ...baseCommand,
-        isEur: true,
-        eurRate: 4.55,
         producerDiscountPct: 150,
         distributorDiscountPct: -10,
         vatRatePct: 150,
         totalNetPln: -100,
         totalGrossPln: -120,
-        totalGrossEur: -10,
       };
       const normalizedResponse: OrderDetailDto = {
         id: 'order-id',
@@ -291,17 +281,13 @@ describe('OrdersService', () => {
         customerId: 'customer-1',
         orderDate: '2024-05-10',
         itemName: 'Produkt',
-        quantity: 10,
-        isEur: true,
-        eurRate: 4.55,
+      quantity: 10,
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
         totalNetPln: 0,
         totalGrossPln: 0,
-        totalGrossEur: 0,
         comment: 'testowy komentarz',
-        currencyCode: 'PLN',
         createdBy: 'user-1',
         createdAt: '2024-05-10T12:00:00Z',
         updatedAt: '2024-05-10T12:00:00Z',
@@ -324,79 +310,20 @@ describe('OrdersService', () => {
         orderNo: 'ABC-123',
         itemName: 'Produkt',
         comment: 'testowy komentarz',
-        isEur: true,
-        eurRate: 4.55,
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
         totalNetPln: 0,
         totalGrossPln: 0,
-        totalGrossEur: 0,
       });
-    });
-
-    it('waliduje wymagany eurRate gdy zamówienie jest w EUR', async () => {
-      const command: CreateOrderCommand = {
-        ...baseCommand,
-        isEur: true,
-        totalGrossEur: null,
-        eurRate: null,
-        totalNetPln: 100,
-        totalGrossPln: 123,
-        vatRatePct: 23,
-      };
-
-      await expect(service.create(command, elevatedUser)).rejects.toBeInstanceOf(
-        BadRequestException
-      );
-
-      expect(repository.create).not.toHaveBeenCalled();
-    });
-
-    it('waliduje wymagane totalGrossEur gdy zamówienie jest w EUR', async () => {
-      const command: CreateOrderCommand = {
-        ...baseCommand,
-        isEur: true,
-        eurRate: 4.3,
-        totalGrossEur: null,
-        totalNetPln: 100,
-        totalGrossPln: 123,
-        vatRatePct: 23,
-      };
-
-      await expect(service.create(command, elevatedUser)).rejects.toBeInstanceOf(
-        BadRequestException
-      );
-
-      expect(repository.create).not.toHaveBeenCalled();
-    });
-
-    it('blokuje pola walutowe gdy zamówienie nie jest w EUR', async () => {
-      const command: CreateOrderCommand = {
-        ...baseCommand,
-        isEur: false,
-        eurRate: 4.2,
-        totalGrossEur: 120,
-        totalNetPln: 100,
-        totalGrossPln: 123,
-        vatRatePct: 23,
-      };
-
-      await expect(service.create(command, elevatedUser)).rejects.toBeInstanceOf(
-        BadRequestException
-      );
-
-      expect(repository.create).not.toHaveBeenCalled();
     });
 
     it('waliduje spójność kwot netto/brutto', async () => {
       const command: CreateOrderCommand = {
         ...baseCommand,
-        isEur: false,
         totalNetPln: 100,
         totalGrossPln: 150,
         vatRatePct: 23,
-        totalGrossEur: null,
       };
 
       await expect(service.create(command, elevatedUser)).rejects.toBeInstanceOf(
@@ -448,16 +375,12 @@ describe('OrdersService', () => {
       orderDate: '2024-05-10',
       itemName: 'Produkt',
       quantity: 10,
-      isEur: false,
-      eurRate: null,
       producerDiscountPct: 0,
       distributorDiscountPct: 0,
       vatRatePct: 23,
       totalNetPln: 100,
       totalGrossPln: 123,
-      totalGrossEur: null,
       comment: 'Komentarz',
-      currencyCode: 'PLN',
       createdBy: 'user-1',
       createdAt: '2024-05-10T00:00:00Z',
       updatedAt: '2024-05-10T00:00:00Z',
@@ -506,14 +429,11 @@ describe('OrdersService', () => {
         'order-1',
         {
           ...updateCommand,
-          isEur: true,
-          eurRate: 4.7,
           producerDiscountPct: 150,
           distributorDiscountPct: -5,
           vatRatePct: 200,
           totalNetPln: -50,
           totalGrossPln: -60,
-          totalGrossEur: -1,
         },
         elevatedUser
       );
@@ -529,14 +449,11 @@ describe('OrdersService', () => {
       }
 
       expect(payload.command).toMatchObject({
-        isEur: true,
-        eurRate: 4.7,
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
         totalNetPln: 0,
         totalGrossPln: 0,
-        totalGrossEur: 0,
         deletedAt: new Date(updateCommand.deletedAt).toISOString(),
       });
     });

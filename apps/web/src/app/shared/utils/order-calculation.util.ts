@@ -20,31 +20,16 @@ export function computeOrderTotals(
   const vatAmount = roundCurrency(netAfterDistributor * (vatRate / 100));
   const grossPln = roundCurrency(netAfterDistributor + vatAmount);
 
-  const eurRate =
-    input.currency === 'EUR' ? normalizeNumber(input.eurRate ?? 0) : 0;
-  const grossEur =
-    input.currency === 'EUR' && eurRate > 0
-      ? roundCurrency(grossPln / eurRate)
-      : undefined;
-
   const differencePln = roundCurrency(grossPln - net);
-  const differenceEur =
-    grossEur != null
-      ? roundCurrency(grossEur - net / (eurRate || 1))
-      : undefined;
 
-  const withinTolerance =
-    Math.abs(differencePln) <= TOLERANCE &&
-    (differenceEur == null || Math.abs(differenceEur) <= TOLERANCE);
+  const withinTolerance = Math.abs(differencePln) <= TOLERANCE;
 
   return {
     netAfterProducer,
     netAfterDistributor,
     vatAmount,
     grossPln,
-    grossEur,
     differencePln,
-    differenceEur,
     withinTolerance,
   };
 }

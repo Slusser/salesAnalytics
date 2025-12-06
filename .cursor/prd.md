@@ -22,14 +22,14 @@ Organizacje śledzą zamówienia w wielu skoroszytach i plikach, co utrudnia sp�
 
 3.2 Model danych i identyfikacja rekordów
 
-1) Zamówienie: wewnętrzny GUID, unikalny numer zamówienia, nazwa kontrahenta, nazwa elementu, ilość sztuk, kwota netto, kwota brutto, rabat producenta (%), rabat dystrybutora (%), waluta (PLN/EUR), kurs EUR (wymagany dla EUR), data zamówienia.
+1) Zamówienie: wewnętrzny GUID, unikalny numer zamówienia, nazwa kontrahenta, nazwa elementu, ilość sztuk, kwota netto, kwota brutto, rabat producenta (%), rabat dystrybutora (%), waluta PLN, data zamówienia.
 2) Unikalność numeru zamówienia: brak duplikatów; błąd unikalności przy próbie zapisu. Zakres unikalności domyślnie globalny w MVP (do doprecyzowania).
 3) Data zamówienia: z formatki przy ręcznym wprowadzaniu; przy imporcie z pliku – z daty utworzenia pliku (do ponownej oceny).
 
 3.3 CRUD zamówień, walidacja i audyt
 
 1) Dodawanie, odczyt, przeglądanie, edytowanie i usuwanie zamówień (CRUD) zgodnie z rolami.
-2) Walidacje: istnienie kontrahenta, unikalny numer, wymagane pola, poprawność typów, spójność netto↔brutto z tolerancją ±0,01, wymagany kurs EUR dla waluty EUR.
+2) Walidacje: istnienie kontrahenta, unikalny numer, wymagane pola, poprawność typów, spójność netto↔brutto z tolerancją ±0,01.
 3) Algorytm kalkulacji: netto → rabat producenta (%) → rabat dystrybutora (%) → VAT 23% → brutto; stały VAT 23%; tolerancja rozbieżności ±0,01. Zasady zaokrągleń do potwierdzenia.
 4) Audyt zmian: zapis autora, daty i czasu, wartości przed/po w formacie JSON; wpis audytowy dla każdej operacji modyfikującej.
 5) Telemetria MVP: logowanie zdarzenia „zapis zamówienia do bazy”.
@@ -44,7 +44,7 @@ Organizacje śledzą zamówienia w wielu skoroszytach i plikach, co utrudnia sp�
 3.5 Kursy walut i kalkulacje
 
 1) Waluta raportowa i agregacyjna: PLN. Kurs NBP z daty zamówienia; możliwość ręcznej zmiany kursu dla editor/owner.
-2) Dla waluty EUR kurs jest wymagany; po zmianie kursu przeliczenia i KPI automatycznie się aktualizują.
+2) Wszystkie wartości liczone są w PLN; kursy walut nie są wspierane.
 
 3.6 Dashboard i analityka
 
@@ -124,17 +124,17 @@ Tytuł: Dodanie zamówienia (formularz)
 Opis: Jako editor chcę dodać zamówienie przez formularz, aby rejestrować nowe dane.
 Kryteria akceptacji:
 - Wymagane pola: numer zamówienia, kontrahent, nazwa elementu, ilość, netto, waluta, data.
-- Dla EUR wymagany kurs; PLN nie wymaga kursu.
+- Wszystkie pola kwotowe dotyczą PLN.
 - Spójność netto↔brutto weryfikowana z tolerancją ±0,01.
 - Numer zamówienia musi być unikalny; duplikat blokuje zapis z komunikatem.
 - Po zapisie powstaje wpis audytu i zdarzenie telemetrii „zapis zamówienia do bazy”.
 
 US-004
 Tytuł: Edycja zamówienia
-Opis: Jako editor chcę edytować istniejące zamówienie, aby korygować dane (w tym kurs EUR).
+Opis: Jako editor chcę edytować istniejące zamówienie, aby korygować dane.
 Kryteria akceptacji:
 - Edycja dostępna tylko dla editor/owner.
-- Możliwość zmiany kursu EUR; po zmianie przeliczenia aktualizują brutto i KPI.
+- Kursy walut nie są obsługiwane; korekty dotyczą wyłącznie wartości w PLN.
 - Po zapisie walidacja jak przy dodaniu i wpis audytu z wartościami przed/po.
 
 US-005
@@ -209,7 +209,7 @@ US-014
 Tytuł: Kurs NBP i przeliczenia do PLN
 Opis: Jako system chcę pobrać kurs NBP z daty zamówienia, aby agregować w PLN.
 Kryteria akceptacji:
-- Dla EUR pobierany jest kurs z daty zamówienia; przy braku kursu – komunikat i możliwość ręcznego wprowadzenia dla editor/owner.
+- Wszystkie przeliczenia odbywają się w PLN, bez pobierania kursów walut.
 - Zmiana kursu wywołuje ponowne przeliczenia.
 
 US-015

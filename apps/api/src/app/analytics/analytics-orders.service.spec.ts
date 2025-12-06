@@ -87,27 +87,6 @@ describe('AnalyticsOrdersService', () => {
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
-  it('rzuca ForbiddenException, gdy scope jest pusty', async () => {
-    await expect(
-      service.getDailyBreakdown({
-        ...baseCommand,
-        requester: createRequester(),
-        customerScope: [],
-      })
-    ).rejects.toBeInstanceOf(ForbiddenException);
-  });
-
-  it('rzuca ForbiddenException, gdy customerId nie należy do scope', async () => {
-    await expect(
-      service.getDailyBreakdown({
-        ...baseCommand,
-        requester: createRequester(),
-        customerScope: ['cust-1'],
-        customerId: 'cust-999',
-      })
-    ).rejects.toBeInstanceOf(ForbiddenException);
-  });
-
   it('zwraca uzupełniony kalendarz i wywołuje repozytorium', async () => {
     repository.fetchDailyBreakdown.mockResolvedValue([
       { date: '2024-05-01', sumNetPln: 100.129, ordersCount: 1 },

@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,11 +13,9 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrdersNewStore } from './orders-new.store';
 import { OrderFormComponent } from '../../../shared/components/orders/order-form/order-form.component';
 import { OrderCalculationPreviewComponent } from '../../../shared/components/orders/order-calculation-preview/order-calculation-preview.component';
-import { FxRateBannerComponent } from '../../../shared/components/orders/fx-rate-banner/fx-rate-banner.component';
 import type { OrderCalculationResult, OrderFormModel } from './orders-new.types';
 import type { OrderResponse } from '@shared/dtos/orders.dto';
 import { OrdersCreateService } from '../../../service/orders/orders-create.service';
-import { FxRateService } from '../../../service/orders/fx-rate.service';
 
 @Component({
   selector: 'app-orders-new-page',
@@ -29,7 +26,6 @@ import { FxRateService } from '../../../service/orders/fx-rate.service';
     NzCardModule,
     OrderFormComponent,
     OrderCalculationPreviewComponent,
-    FxRateBannerComponent,
   ],
   providers: [OrdersNewStore],
   templateUrl: './orders-new.page.html',
@@ -42,9 +38,7 @@ export class OrdersNewPageComponent {
     netAfterDistributor: 0,
     vatAmount: 0,
     grossPln: 0,
-    grossEur: 0,
     differencePln: 0,
-    differenceEur: 0,
     withinTolerance: true,
   };
 
@@ -52,29 +46,11 @@ export class OrdersNewPageComponent {
   private readonly router = inject(Router);
   private readonly message = inject(NzMessageService);
   private readonly ordersCreateService = inject(OrdersCreateService);
-  private readonly fxRateService = inject(FxRateService);
 
   protected readonly state = computed(() => this.store.state());
   protected readonly calculationPreview = computed(
     () => this.store.calculation() ?? OrdersNewPageComponent.EMPTY_CALCULATION
   );
-
-  constructor() {
-    effect(() => {
-      const snapshot = this.state();
-      if (!snapshot) {
-        return;
-      }
-
-      if (
-        snapshot.formModel.currencyCode === 'EUR' &&
-        !snapshot.formModel.eurRate &&
-        snapshot.fxRate.status === 'idle'
-      ) {
-        this.requestFxRate(snapshot.formModel.orderDate);
-      }
-    });
-  }
 
   protected onFormSubmit(model: OrderFormModel): void {
     if (this.state().submitting) {
@@ -112,43 +88,6 @@ export class OrdersNewPageComponent {
     this.store.updateCalculationFromForm();
   }
 
-  protected onFxRefresh(): void {
-    const form = this.state().formModel;
-    this.requestFxRate(form.orderDate);
-  }
-
-  protected onFxOverrideToggle(enabled: boolean): void {
-    this.store.toggleFxManualOverride({ enabled });
-  }
-
-  protected onFxOverrideChange(rate: number): void {
-    this.store.patchForm({ eurRate: rate });
-    this.store.updateCalculationFromForm();
-  }
-
-  private requestFxRate(date: string): void {
-    if (!date) {
-      return;
-    }
-
-    this.store.setFxRateState({
-      status: 'loading',
-      manualOverride: this.state().fxRate.manualOverride,
-      rate: this.state().fxRate.rate,
-      sourceDate: this.state().fxRate.sourceDate,
-    });
-
-    this.fxRateService.getRate({ date }).subscribe({
-      next: (rate) => {
-        this.store.applyFxRate(rate.rate, rate.date);
-      },
-      error: (error) => {
-        this.store.setFxRateError(error?.message);
-        this.message.error('Nie udało się pobrać kursu EUR.');
-      },
-    });
-  }
-
   private handleCreateSuccess(response: OrderResponse): void {
     this.store.setSubmitting(false);
     this.store.resetDirty();
@@ -174,14 +113,11 @@ export class OrdersNewPageComponent {
       orderDate: model.orderDate,
       itemName: model.itemName,
       quantity: model.quantity,
-      isEur: model.currencyCode === 'EUR',
-      eurRate: model.eurRate,
       producerDiscountPct: model.producerDiscountPct,
       distributorDiscountPct: model.distributorDiscountPct,
       vatRatePct: model.vatRatePct,
       totalNetPln: model.totalNetPln,
       totalGrossPln: model.totalGrossPln,
-      totalGrossEur: model.totalGrossEur,
       comment: model.comment,
     };
   }

@@ -726,8 +726,6 @@ export class OrdersListService {
 
   private mapRow(dto: OrderListItemDto): OrderRowVm {
     const deleted = Boolean(dto.deletedAt);
-    const currencyCode = dto.isEur ? 'EUR' : 'PLN';
-    const currencyLabel = dto.isEur ? 'EUR' : 'PLN';
     const rowDisabled = deleted;
 
     return {
@@ -741,14 +739,8 @@ export class OrdersListService {
       vatRatePct: dto.vatRatePct,
       producerDiscountPct: dto.producerDiscountPct,
       distributorDiscountPct: dto.distributorDiscountPct,
-      totalGrossEur: dto.totalGrossEur,
-      currencyCode,
-      currencyLabel,
-      netFormatted: this.formatCurrency(dto.totalNetPln, 'PLN'),
-      grossFormatted: this.formatCurrency(
-        dto.totalGrossPln,
-        dto.isEur ? 'EUR' : 'PLN'
-      ),
+      netFormatted: this.formatCurrency(dto.totalNetPln),
+      grossFormatted: this.formatCurrency(dto.totalGrossPln),
       createdAt: dto.createdAt,
       createdByName: undefined,
       deleted,
@@ -876,10 +868,10 @@ export class OrdersListService {
     return customerId;
   }
 
-  private formatCurrency(value: number, currency: 'PLN' | 'EUR'): string {
+  private formatCurrency(value: number): string {
     const formatter = new Intl.NumberFormat('pl-PL', {
       style: 'currency',
-      currency,
+      currency: 'PLN',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });

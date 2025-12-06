@@ -22,7 +22,6 @@ import { OrdersNewPageComponent } from '../../../../pages/orders/new/orders-new.
 })
 export class OrderCalculationPreviewComponent {
   readonly calculation = input.required<OrderCalculationResult | null>();
-  readonly currency = input<'PLN' | 'EUR'>('PLN');
 
   protected readonly statusTag = computed(() => {
     const calc = this.calculation() ?? OrdersNewPageComponent.EMPTY_CALCULATION;

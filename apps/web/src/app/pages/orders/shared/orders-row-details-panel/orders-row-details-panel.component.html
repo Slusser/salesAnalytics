@@ -8,9 +8,6 @@
   <nz-descriptions-item nzTitle="Data zamówienia" [nzSpan]="1">
     {{ order.orderDate | date : 'yyyy-MM-dd' }}
   </nz-descriptions-item>
-  <nz-descriptions-item nzTitle="Waluta" [nzSpan]="1">
-    <nz-tag>{{ order.currencyLabel }}</nz-tag>
-  </nz-descriptions-item>
   <nz-descriptions-item nzTitle="Wartość netto" [nzSpan]="1">
     {{ order.netFormatted }}
   </nz-descriptions-item>

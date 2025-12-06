@@ -22,7 +22,6 @@ export interface OrderMetadataVm {
   deletedAt?: string | null;
   createdByName?: string | null;
   customerName: string;
-  currencyCode: 'PLN' | 'EUR';
 }
 
 export interface OrderRolePermissionsVm {
@@ -38,14 +37,11 @@ export interface OrderFormValue {
   orderDate: string;
   itemName: string;
   quantity: number;
-  isEur: boolean;
-  eurRate?: number | null;
   producerDiscountPct: number;
   distributorDiscountPct: number;
   vatRatePct: number;
   totalNetPln: number;
   totalGrossPln: number;
-  totalGrossEur?: number | null;
   comment?: string | null;
 }
 
@@ -55,20 +51,16 @@ export interface OrderFormControls {
   orderDate: FormControl<string>;
   itemName: FormControl<string>;
   quantity: FormControl<number>;
-  isEur: FormControl<boolean>;
-  eurRate: FormControl<number | null>;
   producerDiscountPct: FormControl<number>;
   distributorDiscountPct: FormControl<number>;
   vatRatePct: FormControl<number>;
   totalNetPln: FormControl<number>;
   totalGrossPln: FormControl<number>;
-  totalGrossEur: FormControl<number | null>;
   comment: FormControl<string | null>;
 }
 
 export interface OrderFormValidationVm {
   toleranceExceeded: boolean;
-  eurRateMissing: boolean;
   invalidCustomer: boolean;
 }
 
@@ -121,15 +113,6 @@ export interface ConfirmDialogStateVm {
   message: string;
   confirmLabel: string;
   loading: boolean;
-}
-
-export interface FxRateBannerVm {
-  visible: boolean;
-  severity: 'info' | 'warning';
-  rate?: number;
-  rateDate?: string;
-  manualOverride: boolean;
-  disableRefresh: boolean;
 }
 
 export interface OrderDetailVm {

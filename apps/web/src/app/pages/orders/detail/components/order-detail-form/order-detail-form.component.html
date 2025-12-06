@@ -9,7 +9,6 @@
       </div>
 
       <div class="order-detail-form__header-tags">
-        <nz-tag nzColor="blue">{{ detail.metadata.currencyCode }}</nz-tag>
         @if (detail.isDeleted) {
           <nz-tag nzColor="red">Usunięte</nz-tag>
         } @else {
@@ -67,13 +66,6 @@
 
   @if (validationState(); as validation) {
     <div class="order-detail-form__warnings">
-      @if (validation.eurRateMissing) {
-        <nz-alert
-          nzType="warning"
-          nzShowIcon
-          nzMessage="Podaj kurs EUR oraz wartości brutto w EUR, aby zapisać zamówienie."
-        />
-      }
       @if (validation.invalidCustomer) {
         <nz-alert
           nzType="warning"
@@ -159,13 +151,6 @@
         </nz-form-control>
       </nz-form-item>
 
-      <nz-form-item class="order-detail-form__switch-item">
-        <nz-form-label for="isEur">Rozliczenie w EUR</nz-form-label>
-        <nz-form-control>
-          <nz-switch id="isEur" formControlName="isEur"></nz-switch>
-        </nz-form-control>
-      </nz-form-item>
-
       <nz-form-item>
         <nz-form-label for="producerDiscountPct">Rabat producenta (%)</nz-form-label>
         <nz-form-control>
@@ -234,33 +219,6 @@
         </nz-form-control>
       </nz-form-item>
 
-      @if (canShowEurFields()) {
-        <nz-form-item>
-          <nz-form-label nzRequired for="eurRate">Kurs EUR</nz-form-label>
-          <nz-form-control [nzErrorTip]="resolveError('eurRate')">
-            <nz-input-number
-              id="eurRate"
-              formControlName="eurRate"
-              [nzMin]="0.0001"
-              [nzStep]="0.0001"
-              [nzPrecision]="4"
-            />
-          </nz-form-control>
-        </nz-form-item>
-
-        <nz-form-item>
-          <nz-form-label nzRequired for="totalGrossEur">Brutto (EUR)</nz-form-label>
-          <nz-form-control [nzErrorTip]="resolveError('totalGrossEur')">
-            <nz-input-number
-              id="totalGrossEur"
-              formControlName="totalGrossEur"
-              [nzMin]="0"
-              [nzStep]="0.01"
-              [nzPrecision]="2"
-            />
-          </nz-form-control>
-        </nz-form-item>
-      }
     </div>
 
     <nz-form-item>

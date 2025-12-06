@@ -51,13 +51,10 @@ export interface OrderRowVm {
   orderDate: string;
   totalNetPln: number;
   totalGrossPln: number;
-  currencyCode: string;
-  currencyLabel: string;
   netFormatted: string;
   grossFormatted: string;
   producerDiscountPct: number;
   distributorDiscountPct: number;
-  totalGrossEur: number | null;
   vatRatePct: number;
   createdAt: string;
   createdByName?: string;

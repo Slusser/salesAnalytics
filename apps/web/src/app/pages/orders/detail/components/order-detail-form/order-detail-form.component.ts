@@ -171,10 +171,6 @@ export class OrderDetailFormComponent {
           return 'Kwota netto PLN jest wymagana.';
         case 'totalGrossPln':
           return 'Kwota brutto PLN jest wymagana.';
-        case 'eurRate':
-          return 'Uzupełnij kurs EUR.';
-        case 'totalGrossEur':
-          return 'Uzupełnij wartość brutto EUR.';
         default:
           break;
       }
@@ -202,9 +198,6 @@ export class OrderDetailFormComponent {
       if (controlName === 'totalGrossPln') {
         return 'Kwota brutto PLN nie może być ujemna.';
       }
-      if (controlName === 'eurRate') {
-        return 'Kurs EUR musi być dodatni.';
-      }
     }
 
     if (errors['max']) {
@@ -216,10 +209,6 @@ export class OrderDetailFormComponent {
     }
 
     return '';
-  }
-
-  protected canShowEurFields(): boolean {
-    return this.form.controls.isEur.value;
   }
 
   private buildForm(): OrderDetailFormGroup {
@@ -245,10 +234,6 @@ export class OrderDetailFormComponent {
       quantity: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0.01)],
       }),
-      isEur: this.fb.control(false),
-      eurRate: this.fb.control<number | null>(null, {
-        validators: [Validators.min(0.0001)],
-      }),
       producerDiscountPct: this.fb.control(0, {
         validators: [Validators.min(0), Validators.max(100)],
       }),
@@ -267,9 +252,6 @@ export class OrderDetailFormComponent {
       }),
       totalGrossPln: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0)],
-      }),
-      totalGrossEur: this.fb.control<number | null>(null, {
-        validators: [Validators.min(0)],
       }),
       comment: this.fb.control<string | null>(null, {
         validators: [Validators.maxLength(COMMENT_MAX_LENGTH)],
@@ -296,20 +278,6 @@ export class OrderDetailFormComponent {
       .subscribe(() => {
         const value = this.toOrderFormValue();
 
-        if (!value.isEur) {
-          if (
-            this.form.controls.eurRate.value !== null ||
-            this.form.controls.totalGrossEur.value !== null
-          ) {
-            this.form.patchValue(
-              { eurRate: null, totalGrossEur: null },
-              { emitEvent: false }
-            );
-          }
-          value.eurRate = null;
-          value.totalGrossEur = null;
-        }
-
         this.store.updateFormValue(value, { markDirty: this.form.dirty });
         this.store.markFormDirty(this.form.dirty);
 
@@ -332,14 +300,11 @@ export class OrderDetailFormComponent {
         orderDate: value.orderDate ?? '',
         itemName: value.itemName ?? '',
         quantity: value.quantity ?? 0,
-        isEur: Boolean(value.isEur),
-        eurRate: value.eurRate ?? null,
         producerDiscountPct: value.producerDiscountPct ?? 0,
         distributorDiscountPct: value.distributorDiscountPct ?? 0,
         vatRatePct: value.vatRatePct ?? 0,
         totalNetPln: value.totalNetPln ?? 0,
         totalGrossPln: value.totalGrossPln ?? 0,
-        totalGrossEur: value.totalGrossEur ?? null,
         comment: value.comment ?? null,
       },
       { emitEvent: false }
@@ -367,14 +332,11 @@ export class OrderDetailFormComponent {
       orderDate: this.normalizeDate(raw.orderDate),
       itemName: raw.itemName.trim(),
       quantity: Number(raw.quantity) || 0,
-      isEur: Boolean(raw.isEur),
-      eurRate: raw.isEur ? raw.eurRate ?? null : null,
       producerDiscountPct: Number(raw.producerDiscountPct) || 0,
       distributorDiscountPct: Number(raw.distributorDiscountPct) || 0,
       vatRatePct: Number(raw.vatRatePct) || 0,
       totalNetPln: Number(raw.totalNetPln) || 0,
       totalGrossPln: Number(raw.totalGrossPln) || 0,
-      totalGrossEur: raw.isEur ? raw.totalGrossEur ?? null : null,
       comment: raw.comment?.trim() ? raw.comment.trim() : null,
     };
   }
@@ -386,28 +348,13 @@ export class OrderDetailFormComponent {
       a.orderDate === b.orderDate &&
       a.itemName === b.itemName &&
       Number(a.quantity) === Number(b.quantity) &&
-      Boolean(a.isEur) === Boolean(b.isEur) &&
-      this.normalizeNullableNumber(a.eurRate) ===
-        this.normalizeNullableNumber(b.eurRate) &&
       Number(a.producerDiscountPct) === Number(b.producerDiscountPct) &&
       Number(a.distributorDiscountPct) === Number(b.distributorDiscountPct) &&
       Number(a.vatRatePct) === Number(b.vatRatePct) &&
       Number(a.totalNetPln) === Number(b.totalNetPln) &&
       Number(a.totalGrossPln) === Number(b.totalGrossPln) &&
-      this.normalizeNullableNumber(a.totalGrossEur) ===
-        this.normalizeNullableNumber(b.totalGrossEur) &&
       (a.comment ?? '') === (b.comment ?? '')
     );
-  }
-
-  private normalizeNullableNumber(
-    value: number | null | undefined
-  ): number | null {
-    if (value === null || value === undefined) {
-      return null;
-    }
-    const result = Number(value);
-    return Number.isNaN(result) ? null : result;
   }
 
   private normalizeDate(value: string | Date | null | undefined): string {
@@ -441,7 +388,6 @@ export class OrderDetailFormComponent {
   private computeValidation(value: OrderFormValue): OrderFormValidationVm {
     return {
       toleranceExceeded: false,
-      eurRateMissing: value.isEur && (!value.eurRate || value.eurRate <= 0),
       invalidCustomer: !value.customerId,
     };
   }
@@ -455,10 +401,6 @@ export class OrderDetailFormComponent {
 
     if (validation.invalidCustomer) {
       messages.add('Wybierz poprawnego kontrahenta.');
-    }
-
-    if (validation.eurRateMissing) {
-      messages.add('Podaj kurs EUR oraz wartości brutto EUR.');
     }
 
     return Array.from(messages);

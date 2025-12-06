@@ -1,7 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
-  IsBoolean,
   IsDateString,
   IsNotEmpty,
   IsNumber,
@@ -12,7 +11,6 @@ import {
   Max,
   MaxLength,
   Min,
-  ValidateIf,
 } from 'class-validator';
 
 import type { CreateOrderCommand } from '@shared/dtos/orders.dto';
@@ -118,42 +116,6 @@ export class CreateOrderDto implements CreateOrderCommand {
   quantity!: number;
 
   @ApiProperty({
-    description: 'Czy zamówienie rozliczane jest w EUR',
-    default: false,
-  })
-  @Transform(({ value }) => {
-    if (typeof value === 'boolean') {
-      return value;
-    }
-
-    if (value === 'true' || value === '1') {
-      return true;
-    }
-
-    if (value === 'false' || value === '0') {
-      return false;
-    }
-
-    return value;
-  })
-  @IsBoolean({ message: 'Pole isEur musi być wartością logiczną.' })
-  isEur!: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Kurs EUR zastosowany w zamówieniu',
-    minimum: 0,
-    type: Number,
-  })
-  @Transform(({ value }) => toNumber(value))
-  @ValidateIf((dto: CreateOrderDto) => dto.isEur)
-  @IsNumber(
-    { allowInfinity: false, allowNaN: false },
-    { message: 'Pole eurRate musi być liczbą.' }
-  )
-  @IsPositive({ message: 'Kurs EUR musi być dodatni.' })
-  eurRate?: number;
-
-  @ApiProperty({
     description: 'Rabat producenta w procentach',
     minimum: 0,
     maximum: MAX_DISCOUNT,
@@ -221,20 +183,6 @@ export class CreateOrderDto implements CreateOrderCommand {
   )
   @Min(0, { message: 'Suma brutto nie może być ujemna.' })
   totalGrossPln!: number;
-
-  @ApiPropertyOptional({
-    description: 'Suma brutto w EUR (jeśli dotyczy)',
-    minimum: 0,
-    type: Number,
-  })
-  @Transform(({ value }) => toNumber(value))
-  @ValidateIf((dto: CreateOrderDto) => dto.isEur)
-  @IsNumber(
-    { allowInfinity: false, allowNaN: false },
-    { message: 'Pole totalGrossEur musi być liczbą.' }
-  )
-  @Min(0, { message: 'Suma brutto w EUR nie może być ujemna.' })
-  totalGrossEur?: number;
 
   @ApiPropertyOptional({
     description: 'Dodatkowy komentarz do zamówienia',

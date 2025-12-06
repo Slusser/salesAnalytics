@@ -49,14 +49,11 @@ type OrderFormGroup = FormGroup<{
   orderDate: FormControl<string>;
   itemName: FormControl<string>;
   quantity: FormControl<number>;
-  currencyCode: FormControl<OrderFormModel['currencyCode']>;
-  eurRate: FormControl<number | null>;
   producerDiscountPct: FormControl<number>;
   distributorDiscountPct: FormControl<number>;
   vatRatePct: FormControl<number>;
   totalNetPln: FormControl<number>;
   totalGrossPln: FormControl<number>;
-  totalGrossEur: FormControl<number | null>;
   comment: FormControl<string | null>;
 }>;
 
@@ -103,9 +100,6 @@ export class OrderFormComponent {
   private readonly calculationSignal = signal(this.calculation());
 
   protected readonly form = this.buildForm();
-  protected readonly canShowEurFields = computed(
-    () => this.form.controls.currencyCode.value === 'EUR'
-  );
   protected readonly hasServerErrors = computed(
     () => !!this.serverErrorsSignal()
   );
@@ -128,20 +122,11 @@ export class OrderFormComponent {
   protected readonly quantityError = computed(() =>
     this.resolveErrorMessage('quantity')
   );
-  protected readonly currencyError = computed(() =>
-    this.resolveErrorMessage('currencyCode')
-  );
-  protected readonly eurRateError = computed(() =>
-    this.resolveErrorMessage('eurRate')
-  );
   protected readonly totalNetError = computed(() =>
     this.resolveErrorMessage('totalNetPln')
   );
   protected readonly totalGrossPlnError = computed(() =>
     this.resolveErrorMessage('totalGrossPln')
-  );
-  protected readonly totalGrossEurError = computed(() =>
-    this.resolveErrorMessage('totalGrossEur')
   );
 
   constructor() {
@@ -151,7 +136,6 @@ export class OrderFormComponent {
     this.setupServerErrorsEffect();
     this.setupDirtyTracking();
     this.setupRecalculationEffect();
-    this.enforceCurrencyControls();
   }
 
   protected onSubmit(): void {
@@ -195,10 +179,6 @@ export class OrderFormComponent {
       quantity: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0.01)],
       }),
-      currencyCode: this.fb.control<'PLN' | 'EUR'>('PLN', {
-        validators: [Validators.required],
-      }),
-      eurRate: this.fb.control<number | null>(null),
       producerDiscountPct: this.fb.control(0, {
         validators: PERCENT_VALIDATORS,
       }),
@@ -214,7 +194,6 @@ export class OrderFormComponent {
       totalGrossPln: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0)],
       }),
-      totalGrossEur: this.fb.control<number | null>(null),
       comment: this.fb.control<string | null>(null, {
         validators: [Validators.maxLength(COMMENT_MAX_LENGTH)],
       }),
@@ -227,15 +206,12 @@ export class OrderFormComponent {
       this.form.reset(
         {
           ...model,
-          eurRate: model.eurRate ?? null,
-          totalGrossEur: model.totalGrossEur ?? null,
           comment: model.comment ?? null,
         },
         { emitEvent: false }
       );
       this.form.markAsPristine();
       this.form.markAsUntouched();
-      this.enforceCurrencyControls();
     });
   }
 
@@ -249,7 +225,6 @@ export class OrderFormComponent {
       }
 
       this.form.enable({ emitEvent: false });
-      this.enforceCurrencyControls();
     });
   }
 
@@ -312,8 +287,6 @@ export class OrderFormComponent {
           producerDiscountPct: value.producerDiscountPct,
           distributorDiscountPct: value.distributorDiscountPct,
           vatRatePct: value.vatRatePct,
-          currency: value.currencyCode,
-          eurRate: value.eurRate,
         };
 
         this.recalculate.emit(input);
@@ -335,23 +308,6 @@ export class OrderFormComponent {
       delete rest['server'];
       this.form.setErrors(Object.keys(rest).length ? rest : null);
     }
-  }
-
-  private enforceCurrencyControls(): void {
-    const currency = this.form.controls.currencyCode.value;
-    const eurRateControl = this.form.controls.eurRate;
-    const grossEurControl = this.form.controls.totalGrossEur;
-
-    if (currency === 'EUR') {
-      eurRateControl.enable({ emitEvent: false });
-      grossEurControl.enable({ emitEvent: false });
-      return;
-    }
-
-    eurRateControl.disable({ emitEvent: false });
-    eurRateControl.setValue(null, { emitEvent: false });
-    grossEurControl.disable({ emitEvent: false });
-    grossEurControl.setValue(null, { emitEvent: false });
   }
 
   private loadCustomersOptions(): void {
@@ -400,8 +356,6 @@ export class OrderFormComponent {
           return 'Nazwa produktu jest wymagana.';
         case 'quantity':
           return 'Ilość jest wymagana.';
-        case 'currencyCode':
-          return 'Wybierz walutę.';
         case 'totalNetPln':
           return 'Kwota netto PLN jest wymagana.';
         case 'totalGrossPln':
@@ -454,16 +408,12 @@ export class OrderFormComponent {
       orderDate: raw.orderDate,
       itemName: raw.itemName.trim(),
       quantity: Number(raw.quantity),
-      currencyCode: raw.currencyCode,
-      eurRate: raw.eurRate ?? undefined,
       producerDiscountPct: Number(raw.producerDiscountPct),
       distributorDiscountPct: Number(raw.distributorDiscountPct),
       vatRatePct: Number(raw.vatRatePct),
       totalNetPln: Number(raw.totalNetPln),
       totalGrossPln: Number(raw.totalGrossPln),
-      totalGrossEur: raw.totalGrossEur ?? undefined,
       comment: raw.comment ?? undefined,
-      isEur: raw.currencyCode === 'EUR',
     };
   }
 }

@@ -76,44 +76,6 @@
     </nz-form-item>
 
     <nz-form-item>
-      <nz-form-label nzRequired for="currencyCode">Waluta</nz-form-label>
-      <nz-form-control [nzErrorTip]="currencyError()">
-        <nz-select id="currencyCode" formControlName="currencyCode">
-          <nz-option nzLabel="PLN" nzValue="PLN" />
-          <nz-option nzLabel="EUR" nzValue="EUR" />
-        </nz-select>
-      </nz-form-control>
-    </nz-form-item>
-
-    <ng-container *ngIf="canShowEurFields()">
-      <nz-form-item>
-        <nz-form-label nzRequired for="eurRate">Kurs EUR</nz-form-label>
-        <nz-form-control [nzErrorTip]="eurRateError()">
-          <nz-input-number
-            id="eurRate"
-            formControlName="eurRate"
-            [nzMin]="0.0001"
-            [nzStep]="0.0001"
-            [nzPrecision]="4"
-          />
-        </nz-form-control>
-      </nz-form-item>
-
-      <nz-form-item>
-        <nz-form-label nzRequired for="totalGrossEur">Brutto EUR</nz-form-label>
-        <nz-form-control [nzErrorTip]="totalGrossEurError()">
-          <nz-input-number
-            id="totalGrossEur"
-            formControlName="totalGrossEur"
-            [nzMin]="0"
-            [nzStep]="0.01"
-            [nzPrecision]="2"
-          />
-        </nz-form-control>
-      </nz-form-item>
-    </ng-container>
-
-    <nz-form-item>
       <nz-form-label for="producerDiscountPct"
         >Rabat producenta (%)</nz-form-label
       >

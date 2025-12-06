@@ -24,14 +24,11 @@ export function mapOrderDetailDtoToFormValue(
     orderDate: dto.orderDate,
     itemName: dto.itemName,
     quantity: dto.quantity,
-    isEur: dto.isEur,
-    eurRate: dto.eurRate ?? null,
     producerDiscountPct: dto.producerDiscountPct,
     distributorDiscountPct: dto.distributorDiscountPct,
     vatRatePct: dto.vatRatePct,
     totalNetPln: dto.totalNetPln,
     totalGrossPln: dto.totalGrossPln,
-    totalGrossEur: dto.totalGrossEur ?? null,
     comment: dto.comment ?? null,
   };
 }
@@ -48,14 +45,12 @@ export function mapOrderDetailDtoToMetadata(
     deletedAt: dto.deletedAt,
     createdByName: options.createdByName ?? null,
     customerName: options.customerName ?? dto.customerId,
-    currencyCode: dto.currencyCode === 'EUR' ? 'EUR' : 'PLN',
   };
 }
 
 export function createDefaultFormValidation(): OrderFormValidationVm {
   return {
     toleranceExceeded: false,
-    eurRateMissing: false,
     invalidCustomer: false,
   };
 }

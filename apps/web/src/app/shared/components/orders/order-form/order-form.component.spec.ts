@@ -32,13 +32,11 @@ describe('OrderFormComponent', () => {
     orderDate: '2024-05-20',
     itemName: 'Produkt testowy',
     quantity: 5,
-    currencyCode: 'PLN',
     producerDiscountPct: 10,
     distributorDiscountPct: 5,
     vatRatePct: 23,
     totalNetPln: 1000,
     totalGrossPln: 1230,
-    isEur: false,
   };
 
   const createComponent = (model: OrderFormModel = baseModel) => {
@@ -132,46 +130,15 @@ describe('OrderFormComponent', () => {
       orderDate: baseModel.orderDate,
       itemName: baseModel.itemName,
       quantity: baseModel.quantity,
-      currencyCode: baseModel.currencyCode,
-      eurRate: null,
       producerDiscountPct: baseModel.producerDiscountPct,
       distributorDiscountPct: baseModel.distributorDiscountPct,
       vatRatePct: baseModel.vatRatePct,
       totalNetPln: baseModel.totalNetPln,
       totalGrossPln: baseModel.totalGrossPln,
-      totalGrossEur: null,
       comment: null,
     });
     expect(componentApi.form.pristine).toBe(true);
     expect(componentApi.form.touched).toBe(false);
-  });
-
-  it('wyłącza pola kwot EUR dla zamówień w PLN', () => {
-    createComponent();
-
-    expect(componentApi.form.controls.eurRate.disabled).toBe(true);
-    expect(componentApi.form.controls.totalGrossEur.disabled).toBe(true);
-    expect(componentApi.form.controls.eurRate.value).toBeNull();
-    expect(componentApi.form.controls.totalGrossEur.value).toBeNull();
-  });
-
-  it('aktywuje pola EUR zgodnie z modelem wejściowym', () => {
-    const eurModel: OrderFormModel = {
-      ...baseModel,
-      currencyCode: 'EUR',
-      eurRate: 4.5,
-      totalGrossEur: 220,
-      comment: 'Import',
-      isEur: true,
-    };
-
-    createComponent(eurModel);
-
-    expect(componentApi.form.controls.eurRate.disabled).toBe(false);
-    expect(componentApi.form.controls.totalGrossEur.disabled).toBe(false);
-    expect(componentApi.form.controls.eurRate.value).toBe(4.5);
-    expect(componentApi.form.controls.totalGrossEur.value).toBe(220);
-    expect(componentApi.form.controls.comment.value).toBe('Import');
   });
 
   it('oznacza formularz i nie emituje submit, gdy dane są niepoprawne', () => {
@@ -187,17 +154,11 @@ describe('OrderFormComponent', () => {
     expect(submitSpy).not.toHaveBeenCalled();
   });
 
-  it('przycina tekst i wylicza isEur podczas wysyłki poprawnego formularza', () => {
-    const eurModel: OrderFormModel = {
+  it('przycina tekst i wysyła dane w PLN', () => {
+    createComponent({
       ...baseModel,
-      currencyCode: 'EUR',
-      eurRate: 4.4,
-      totalGrossEur: 200,
       comment: 'Zamówienie bazowe',
-      isEur: true,
-    };
-
-    createComponent(eurModel);
+    });
 
     const submitSpy = vi.spyOn(component.submitted, 'emit');
 
@@ -210,27 +171,21 @@ describe('OrderFormComponent', () => {
     componentApi.form.controls.vatRatePct.setValue(8);
     componentApi.form.controls.totalNetPln.setValue(500);
     componentApi.form.controls.totalGrossPln.setValue(540);
-    componentApi.form.controls.totalGrossEur.setValue(120);
-    componentApi.form.controls.eurRate.setValue(4.75);
 
     submit();
 
     expect(submitSpy).toHaveBeenCalledWith({
       orderNo: 'ORD-XYZ',
-      customerId: eurModel.customerId,
-      orderDate: eurModel.orderDate,
+      customerId: baseModel.customerId,
+      orderDate: baseModel.orderDate,
       itemName: 'Lampa biurkowa',
       quantity: 2,
-      currencyCode: 'EUR',
-      eurRate: 4.75,
       producerDiscountPct: 15,
       distributorDiscountPct: 5,
       vatRatePct: 8,
       totalNetPln: 500,
       totalGrossPln: 540,
-      totalGrossEur: 120,
       comment: 'Notatka wewnętrzna',
-      isEur: true,
     });
   });
 
@@ -339,7 +294,6 @@ describe('OrderFormComponent', () => {
       producerDiscountPct: 12,
       distributorDiscountPct: 3,
       vatRatePct: 8,
-      currency: 'PLN',
     };
 
     expect(recalcSpy).toHaveBeenCalledTimes(1);

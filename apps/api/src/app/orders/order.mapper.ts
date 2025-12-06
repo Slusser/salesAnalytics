@@ -11,14 +11,11 @@ export interface OrderListRow {
   order_date: string;
   item_name: string;
   quantity: number;
-  is_eur: boolean;
-  eur_rate: number | null;
   producer_discount_pct: number;
   distributor_discount_pct: number;
   vat_rate_pct: number;
   total_net_pln: number;
   total_gross_pln: number;
-  total_gross_eur: number | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -28,7 +25,6 @@ export interface OrderListRow {
 
 export interface OrderDetailRow extends OrderListRow {
   comment: string | null;
-  currency_code: string;
 }
 
 const logger = new Logger('OrderMapper');
@@ -54,14 +50,11 @@ export class OrderMapper {
       orderDate: row.order_date,
       itemName: row.item_name,
       quantity: row.quantity,
-      isEur: row.is_eur,
-      eurRate: row.eur_rate,
       producerDiscountPct: row.producer_discount_pct,
       distributorDiscountPct: row.distributor_discount_pct,
       vatRatePct: row.vat_rate_pct,
       totalNetPln: row.total_net_pln,
       totalGrossPln: row.total_gross_pln,
-      totalGrossEur: row.total_gross_eur,
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
@@ -75,7 +68,6 @@ export class OrderMapper {
     return {
       ...base,
       comment: row.comment,
-      currencyCode: row.currency_code,
     };
   }
 }

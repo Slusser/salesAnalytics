@@ -12,14 +12,11 @@ const createOrderListRow = (
   order_date: '2024-01-15',
   item_name: 'Produkt testowy',
   quantity: 5,
-  is_eur: false,
-  eur_rate: null,
   producer_discount_pct: 10,
   distributor_discount_pct: 5,
   vat_rate_pct: 23,
   total_net_pln: 1000,
   total_gross_pln: 1230,
-  total_gross_eur: null,
   created_at: '2024-01-16T10:30:00.000Z',
   updated_at: '2024-01-17T12:00:00.000Z',
   deleted_at: null,
@@ -33,7 +30,6 @@ const createOrderDetailRow = (
 ): OrderDetailRow => ({
   ...createOrderListRow(),
   comment: 'Komentarz do zamówienia',
-  currency_code: 'PLN',
   ...overrides,
 });
 
@@ -43,11 +39,7 @@ describe('OrderMapper', () => {
   });
 
   it('mapuje rekord listy na DTO z zachowaniem wszystkich pól', () => {
-    const row = createOrderListRow({
-      is_eur: true,
-      eur_rate: 4.39,
-      total_gross_eur: 280.18,
-    });
+    const row = createOrderListRow();
 
     const result = OrderMapper.toListDto(row);
 
@@ -58,14 +50,11 @@ describe('OrderMapper', () => {
       orderDate: '2024-01-15',
       itemName: 'Produkt testowy',
       quantity: 5,
-      isEur: true,
-      eurRate: 4.39,
       producerDiscountPct: 10,
       distributorDiscountPct: 5,
       vatRatePct: 23,
       totalNetPln: 1000,
       totalGrossPln: 1230,
-      totalGrossEur: 280.18,
       createdBy: 'user-1',
       createdAt: '2024-01-16T10:30:00.000Z',
       updatedAt: '2024-01-17T12:00:00.000Z',
@@ -88,10 +77,9 @@ describe('OrderMapper', () => {
     expect(result.createdBy).toBe('');
   });
 
-  it('mapuje rekord szczegółowy, zachowując komentarz i kod waluty', () => {
+  it('mapuje rekord szczegółowy, zachowując komentarz', () => {
     const row = createOrderDetailRow({
       comment: null,
-      currency_code: 'EUR',
     });
 
     const result = OrderMapper.toDetailDto(row);
@@ -103,20 +91,16 @@ describe('OrderMapper', () => {
       orderDate: '2024-01-15',
       itemName: 'Produkt testowy',
       quantity: 5,
-      isEur: false,
-      eurRate: null,
       producerDiscountPct: 10,
       distributorDiscountPct: 5,
       vatRatePct: 23,
       totalNetPln: 1000,
       totalGrossPln: 1230,
-      totalGrossEur: null,
       createdBy: 'user-1',
       createdAt: '2024-01-16T10:30:00.000Z',
       updatedAt: '2024-01-17T12:00:00.000Z',
       deletedAt: null,
       comment: null,
-      currencyCode: 'EUR',
     });
   });
 });

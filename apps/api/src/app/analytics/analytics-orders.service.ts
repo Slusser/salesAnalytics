@@ -36,7 +36,6 @@ export class AnalyticsOrdersService {
 
     const rawScope = command.customerScope ?? requester.customerIds;
     const customerScope = this.normalizeScope(rawScope);
-    const scopeProvided = Array.isArray(rawScope);
 
     if (command.customerId && customerScope && customerScope.length > 0) {
       this.ensureCustomerInScope(command.customerId, customerScope);
@@ -46,13 +45,6 @@ export class AnalyticsOrdersService {
       command.year,
       command.month
     );
-
-    if (scopeProvided && (!customerScope || customerScope.length === 0)) {
-      this.logger.warn(
-        'Brak przypisanych klientów w zakresie użytkownika – zwracam pusty rozkład dzienny.'
-      );
-      return this.fillMissingDays(monthStart, monthEnd, []);
-    }
 
     const supabase = this.getSupabaseClientOrThrow(requester.accessToken, () => {
       throw new InternalServerErrorException({

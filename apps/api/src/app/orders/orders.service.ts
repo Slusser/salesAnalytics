@@ -380,9 +380,6 @@ export class OrdersService {
     const totalGrossPln = command.totalGrossPln != null
       ? Math.max(0, command.totalGrossPln)
       : null;
-    const totalGrossEur = command.totalGrossEur != null
-      ? Math.max(0, command.totalGrossEur)
-      : null;
 
     return {
       ...command,
@@ -395,40 +392,10 @@ export class OrdersService {
       vatRatePct: vatRatePct,
       totalNetPln: totalNetPln,
       totalGrossPln: totalGrossPln,
-      totalGrossEur: totalGrossEur,
     } as T;
   }
 
   private validateCommand(command: BaseOrderCommand): void {
-    if (command.isEur) {
-      if (command.eurRate == null) {
-        throw new BadRequestException({
-          code: 'ORDERS_CREATE_VALIDATION',
-          message:
-            'Pole eurRate jest wymagane, gdy zamówienie rozliczane jest w EUR.',
-        });
-      }
-
-      if (command.totalGrossEur == null) {
-        throw new BadRequestException({
-          code: 'ORDERS_CREATE_VALIDATION',
-          message:
-            'Pole totalGrossEur jest wymagane, gdy zamówienie rozliczane jest w EUR.',
-        });
-      }
-    } else {
-      if (
-        command.eurRate != null ||
-        command.totalGrossEur != null
-      ) {
-        throw new BadRequestException({
-          code: 'ORDERS_CREATE_VALIDATION',
-          message:
-            'Pola eurRate i totalGrossEur są dozwolone tylko, gdy zamówienie rozliczane jest w EUR.',
-        });
-      }
-    }
-
     if (
       !this.areAmountsConsistent(command.totalNetPln, command.totalGrossPln, command.vatRatePct)
     ) {

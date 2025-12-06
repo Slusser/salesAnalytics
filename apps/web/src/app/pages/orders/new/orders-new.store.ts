@@ -1,9 +1,7 @@
-import { Injectable, computed, effect, signal } from '@angular/core';
+import { Injectable, computed, signal } from '@angular/core';
 
 import { computeOrderTotals } from '../../../shared/utils/order-calculation.util';
 import type {
-  FxRateOverride,
-  FxRateState,
   ImportPanelState,
   OrderCalculationInput,
   OrderCalculationResult,
@@ -18,24 +16,12 @@ const DEFAULT_FORM_MODEL: OrderFormModel = {
   orderDate: '',
   itemName: '',
   quantity: 1,
-  currencyCode: 'PLN',
-  eurRate: undefined,
   producerDiscountPct: 0,
   distributorDiscountPct: 0,
   vatRatePct: 23,
   totalNetPln: 0,
   totalGrossPln: 0,
-  totalGrossEur: undefined,
   comment: '',
-  isEur: false,
-};
-
-const DEFAULT_FX_STATE: FxRateState = {
-  status: 'idle',
-  manualOverride: false,
-  rate: undefined,
-  sourceDate: undefined,
-  message: undefined,
 };
 
 const DEFAULT_IMPORT_STATE: ImportPanelState = {
@@ -60,9 +46,6 @@ export class OrdersNewStore {
   private readonly serverErrorsSignal = signal<OrderFormServerErrors | null>(
     null
   );
-  private readonly fxRateStateSignal = signal<FxRateState>({
-    ...DEFAULT_FX_STATE,
-  });
   private readonly importPanelStateSignal = signal<ImportPanelState>({
     ...DEFAULT_IMPORT_STATE,
   });
@@ -74,7 +57,6 @@ export class OrdersNewStore {
   readonly dirty = computed(() => this.dirtySignal());
   readonly submitting = computed(() => this.submittingSignal());
   readonly serverErrors = computed(() => this.serverErrorsSignal());
-  readonly fxRateState = computed(() => this.fxRateStateSignal());
   readonly importState = computed(() => this.importPanelStateSignal());
   readonly lastResponse = computed(() => this.lastResponseSignal());
 
@@ -84,20 +66,9 @@ export class OrdersNewStore {
     formDirty: this.dirty(),
     submitting: this.submitting(),
     serverErrors: this.serverErrors(),
-    fxRate: this.fxRateState(),
     importState: this.importState(),
     lastResponse: this.lastResponse(),
   }));
-
-  constructor() {
-    effect(() => {
-      const form = this.formModelSignal();
-      const isEur = form.currencyCode === 'EUR';
-      if (form.isEur !== isEur) {
-        this.formModelSignal.update((current) => ({ ...current, isEur }));
-      }
-    });
-  }
 
   patchForm(
     partial: Partial<OrderFormModel>,
@@ -105,18 +76,10 @@ export class OrdersNewStore {
   ): void {
     const shouldMarkDirty = options.markDirty ?? true;
     this.formModelSignal.update((current) => {
-      const merged = { ...current, ...partial };
-      if (merged.currencyCode === 'EUR' && !merged.isEur) {
-        merged.isEur = true;
-      }
-
-      if (merged.currencyCode === 'PLN') {
-        merged.isEur = false;
-        merged.eurRate = undefined;
-        merged.totalGrossEur = undefined;
-      }
-
-      return merged;
+      return {
+        ...current,
+        ...partial,
+      };
     });
 
     if (shouldMarkDirty) {
@@ -131,8 +94,6 @@ export class OrdersNewStore {
       producerDiscountPct: model.producerDiscountPct,
       distributorDiscountPct: model.distributorDiscountPct,
       vatRatePct: model.vatRatePct,
-      currency: model.currencyCode,
-      eurRate: model.eurRate,
     };
     const result = computeOrderTotals(input);
     this.calculationSignal.set(result);
@@ -158,58 +119,6 @@ export class OrdersNewStore {
     this.serverErrorsSignal.set(errors);
   }
 
-  setFxRateState(state: FxRateState): void {
-    this.fxRateStateSignal.set({ ...state });
-  }
-
-  applyFxRate(rate: number, sourceDate: string): void {
-    this.fxRateStateSignal.set({
-      status: 'loaded',
-      rate,
-      sourceDate,
-      manualOverride: false,
-    });
-    this.patchForm(
-      {
-        currencyCode: 'EUR',
-        eurRate: rate,
-      },
-      { markDirty: false }
-    );
-  }
-
-  setFxRateError(message?: string): void {
-    this.fxRateStateSignal.set({
-      status: 'error',
-      manualOverride: this.fxRateStateSignal().manualOverride,
-      rate: this.fxRateStateSignal().rate,
-      sourceDate: this.fxRateStateSignal().sourceDate,
-      message,
-    });
-  }
-
-  toggleFxManualOverride(override: FxRateOverride): void {
-    this.fxRateStateSignal.update((current) => ({
-      ...current,
-      manualOverride: override.enabled,
-      status: override.enabled ? 'loaded' : current.status,
-      message: undefined,
-      rate: override.enabled ? override.rate : current.rate,
-    }));
-
-    this.patchForm(
-      {
-        currencyCode: override.enabled
-          ? 'EUR'
-          : this.formModelSignal().currencyCode,
-        eurRate: override.enabled
-          ? override.rate
-          : this.formModelSignal().eurRate,
-      },
-      { markDirty: true }
-    );
-  }
-
   setImportState(state: ImportPanelState): void {
     this.importPanelStateSignal.set({ ...state });
   }
@@ -232,7 +141,6 @@ export class OrdersNewStore {
     this.dirtySignal.set(false);
     this.submittingSignal.set(false);
     this.serverErrorsSignal.set(null);
-    this.fxRateStateSignal.set({ ...DEFAULT_FX_STATE });
     this.importPanelStateSignal.set({ ...DEFAULT_IMPORT_STATE });
     this.lastResponseSignal.set(undefined);
   }

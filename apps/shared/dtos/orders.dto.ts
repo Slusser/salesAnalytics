@@ -14,14 +14,11 @@ export interface OrderListItemDto {
   orderDate: OrderRow["order_date"]
   itemName: OrderRow["item_name"]
   quantity: OrderRow["quantity"]
-  isEur: OrderRow["is_eur"]
-  eurRate: OrderRow["eur_rate"]
   producerDiscountPct: OrderRow["producer_discount_pct"]
   distributorDiscountPct: OrderRow["distributor_discount_pct"]
   vatRatePct: OrderRow["vat_rate_pct"]
   totalNetPln: OrderRow["total_net_pln"]
   totalGrossPln: OrderRow["total_gross_pln"]
-  totalGrossEur: OrderRow["total_gross_eur"]
   createdBy: OrderRow["created_by"]
   createdAt: OrderRow["created_at"]
   updatedAt: OrderRow["updated_at"]
@@ -40,14 +37,12 @@ export interface ListOrdersQuery {
   orderNo?: string
   dateFrom?: string
   dateTo?: string
-  isEur?: boolean
   sort?: string
   includeDeleted?: boolean
 }
 
 export interface OrderDetailDto extends OrderListItemDto {
   comment: OrderRow["comment"]
-  currencyCode: OrderRow["currency_code"]
 }
 
 export interface OrderAuditEntryDto {
@@ -68,14 +63,11 @@ export interface BaseOrderCommand {
   orderDate: OrderRow["order_date"]
   itemName: OrderRow["item_name"]
   quantity: OrderRow["quantity"]
-  isEur: OrderRow["is_eur"]
-  eurRate?: OrderRow["eur_rate"]
   producerDiscountPct: OrderRow["producer_discount_pct"]
   distributorDiscountPct: OrderRow["distributor_discount_pct"]
   vatRatePct: OrderRow["vat_rate_pct"]
   totalNetPln: OrderRow["total_net_pln"]
   totalGrossPln: OrderRow["total_gross_pln"]
-  totalGrossEur?: OrderRow["total_gross_eur"]
   comment?: OrderRow["comment"]
 }
 

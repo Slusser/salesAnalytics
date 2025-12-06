@@ -56,9 +56,7 @@ export class TrendBarChartComponent {
 
   protected readonly hasData = computed(() => (this.data()?.length ?? 0) > 0);
   protected readonly emptyTitle = computed(() =>
-    this.hasError()
-      ? 'Nie udało się pobrać trendu'
-      : 'Brak danych trendu'
+    this.hasError() ? 'Nie udało się pobrać trendu' : 'Brak danych trendu'
   );
   protected readonly emptyDescription = computed(() =>
     this.hasError()
@@ -119,8 +117,10 @@ export class TrendBarChartComponent {
       return;
     }
 
-    const picked = entries.find((entry) => this.formatTick(entry) === event.name);
-    if (!picked || picked.valuePln == null) {
+    const picked = entries.find(
+      (entry) => this.formatTick(entry) === event.name
+    );
+    if (picked?.valuePln == null) {
       return;
     }
 
@@ -147,7 +147,9 @@ export class TrendBarChartComponent {
   }
 
   private formatMonthLabel(year: number, month: number): string {
-    return this.monthLabelFormatter.format(new Date(Date.UTC(year, month - 1, 1)));
+    return this.monthLabelFormatter.format(
+      new Date(Date.UTC(year, month - 1, 1))
+    );
   }
 
   private resolveBarColor(entry: TrendPointViewModel): string {
@@ -166,5 +168,3 @@ export class TrendBarChartComponent {
     return this.currencyFormatter.format(value);
   }
 }
-
-

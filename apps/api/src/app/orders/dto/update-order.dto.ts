@@ -33,15 +33,6 @@ export class UpdateOrderDto
   })
   declare quantity: number;
 
-  @ApiProperty({ description: 'Czy zamówienie rozliczane jest w EUR.' })
-  declare isEur: boolean;
-
-  @ApiPropertyOptional({
-    description: 'Kurs EUR zastosowany w zamówieniu.',
-    type: Number,
-  })
-  declare eurRate?: number;
-
   @ApiProperty({ description: 'Rabat producenta w procentach.', type: Number })
   declare producerDiscountPct: number;
 
@@ -59,12 +50,6 @@ export class UpdateOrderDto
 
   @ApiProperty({ description: 'Suma brutto w PLN.', type: Number })
   declare totalGrossPln: number;
-
-  @ApiPropertyOptional({
-    description: 'Suma brutto w EUR (jeśli dotyczy).',
-    type: Number,
-  })
-  declare totalGrossEur?: number;
 
   @ApiPropertyOptional({ description: 'Dodatkowy komentarz do zamówienia.' })
   declare comment?: string;
