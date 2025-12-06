@@ -1,0 +1,39 @@
+<div class="trend-chart">
+  <div class="trend-chart__header">
+    <div>
+      <h3>Trend miesiąc do miesiąca</h3>
+      <p>Wybierz słupek, aby zobaczyć dzienny rozkład.</p>
+    </div>
+
+    @if (selectedMonth()) {
+      <button nz-button nzType="default" (click)="onClearClick()">
+        Wyczyść wybór
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="trend-chart__skeleton">
+      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 4 }" />
+    </div>
+  } @else if (hasData()) {
+    <div
+      echarts
+      class="trend-chart__canvas"
+      [options]="chartOptions()"
+      (chartClick)="onChartClick($event)"
+    ></div>
+  } @else {
+    <app-empty-state
+      class="trend-chart__empty"
+      icon="📉"
+      [title]="emptyTitle()"
+      [description]="emptyDescription()"
+      [actionLabel]="emptyActionLabel()"
+      actionType="primary"
+      (action)="onEmptyAction()"
+    />
+  }
+</div>
+
+

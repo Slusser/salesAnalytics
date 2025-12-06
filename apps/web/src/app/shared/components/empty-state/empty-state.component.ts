@@ -16,16 +16,21 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EmptyStateComponent {
+  readonly icon = input<string>('😕');
   readonly title = input<string>('Brak wyników');
   readonly description = input<string>(
     'Spróbuj zmienić filtry lub parametry wyszukiwania.'
   );
-  readonly hasCta = input<boolean>(false);
+  readonly actionLabel = input<string | null>(null);
+  readonly actionType = input<'default' | 'primary'>('default');
+  readonly actionLoading = input<boolean>(false);
 
-  readonly clear = output<void>();
+  readonly action = output<void>();
 
-  protected onClear(): void {
-    if (!this.hasCta()) return;
-    this.clear.emit();
+  protected onAction(): void {
+    if (!this.actionLabel()) {
+      return;
+    }
+    this.action.emit();
   }
 }

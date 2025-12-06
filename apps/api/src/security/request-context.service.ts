@@ -1,14 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { CustomerMutatorContext } from '@shared/dtos/customers.dto';
 import type { UserRoleValue } from '@shared/dtos/user-roles.dto';
-import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database, Tables } from '@db/database.types';
 
 import { SupabaseFactory } from '../supabase/supabase.factory';
 
 interface UserRolesResponse {
   role: UserRoleValue;
 }
+
+type CustomerScopeRow = Pick<Tables<'customers'>, 'id'>;
 
 @Injectable()
 export class RequestContextService {
@@ -42,15 +45,18 @@ export class RequestContextService {
       return undefined;
     }
 
+    const customerIds = await this.fetchCustomerScope(supabase, userId);
+
     return {
       actorId: userId,
       actorRoles: userRoles,
       accessToken,
+      customerIds,
     };
   }
 
   private async fetchUserRoles(
-    supabase: SupabaseClient,
+    supabase: SupabaseClient<Database>,
     userId: string
   ): Promise<UserRoleValue[] | undefined> {
     let { data, error } = await supabase
@@ -87,4 +93,52 @@ export class RequestContextService {
 
     return roles;
   }
+
+  private async fetchCustomerScope(
+    supabase: SupabaseClient<Database>,
+    userId: string
+  ): Promise<string[] | undefined> {
+    let { data, error } = await supabase.from('customers').select('id');
+
+    if (error) {
+      this.logger.error(
+        `Błąd pobierania zakresu klientów użytkownika ${userId}`,
+        error
+      );
+      return undefined;
+    }
+
+    if (!data || data.length === 0) {
+      this.logger.warn(
+        `Użytkownik ${userId} nie ma przypisanych klientów (token użytkownika). Próbuję odczytu z kluczem serwisowym.`
+      );
+
+      const serviceClient = this.supabaseFactory.create(undefined, {
+        serviceRole: true,
+      });
+
+      ({ data, error } = await serviceClient.from('customers').select('id'));
+
+      if (error) {
+        this.logger.error(
+          `Błąd fallbackowego pobierania klientów użytkownika ${userId}`,
+          error
+        );
+        return undefined;
+      }
+    }
+
+    const ids =
+      data?.map((row: CustomerScopeRow) => row.id).filter(Boolean) ?? [];
+
+    if (ids.length === 0) {
+      this.logger.warn(
+        `Brak klientów w systemie – zakres użytkownika ${userId} pozostaje pusty.`
+      );
+      return undefined;
+    }
+
+    return ids;
+  }
 }
+

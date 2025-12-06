@@ -1,0 +1,72 @@
+<form
+  nz-form
+  class="dashboard-filter-bar"
+  [formGroup]="form"
+  (ngSubmit)="onSubmit()"
+>
+  <div class="dashboard-filter-bar__fields">
+    <nz-form-item class="dashboard-filter-bar__field">
+      <nz-form-label [nzFor]="'customerId'">Kontrahent</nz-form-label>
+      <nz-form-control>
+        <nz-select
+          id="customerId"
+          nzShowSearch
+          nzAllowClear
+          nzPlaceHolder="Wszyscy kontrahenci"
+          formControlName="customerId"
+          [disabled]="customerSelectDisabled()"
+          [nzLoading]="isLoading()"
+        >
+          @for (option of customerOptions(); track option.value) {
+            <nz-option [nzLabel]="option.label" [nzValue]="option.value" />
+          }
+        </nz-select>
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item class="dashboard-filter-bar__field">
+      <nz-form-label [nzFor]="'dateRange'">Zakres (miesiące)</nz-form-label>
+      <nz-form-control nzHasFeedback>
+        <nz-range-picker
+          id="dateRange"
+          formControlName="dateRange"
+          nzMode="month"
+          nzFormat="YYYY-MM"
+          nzSeparator="→"
+          nzDropdownClassName="dashboard-filter-bar__picker"
+          nzAllowClear="false"
+          [nzPlaceHolder]="['Od', 'Do']"
+          [disabled]="isDisabled()"
+        />
+        @if (form.controls.dateRange.invalid && form.controls.dateRange.touched) {
+          <div class="dashboard-filter-bar__error">
+            Wybierz pełny zakres miesięcy.
+          </div>
+        }
+      </nz-form-control>
+    </nz-form-item>
+  </div>
+
+  <div class="dashboard-filter-bar__actions">
+    <button
+      nz-button
+      nzType="default"
+      type="button"
+      (click)="onResetClick()"
+      [disabled]="isDisabled()"
+    >
+      Reset
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      type="submit"
+      [disabled]="isApplyDisabled()"
+      [nzLoading]="isLoading()"
+    >
+      Zastosuj
+    </button>
+  </div>
+</form>
+
+

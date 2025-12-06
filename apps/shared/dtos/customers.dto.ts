@@ -64,5 +64,6 @@ export interface CustomerMutatorContext {
   actorId: string
   actorRoles: UserRoleValue[]
   accessToken: string
+  customerIds?: string[]
 }
 

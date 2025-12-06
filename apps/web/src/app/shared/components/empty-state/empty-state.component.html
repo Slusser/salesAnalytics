@@ -1,12 +1,17 @@
 <div class="empty-state">
-  <div class="empty-state__icon" aria-hidden="true">😕</div>
+  <div class="empty-state__icon" aria-hidden="true">{{ icon() }}</div>
   <h3 nz-typography>{{ title() }}</h3>
   <p nz-typography nzType="secondary">{{ description() }}</p>
 
-  @if (hasCta()) {
-    <button nz-button nzType="default" (click)="onClear()">Wyczyść filtr</button>
+  @if (actionLabel()) {
+    <button
+      nz-button
+      class="empty-state__action"
+      [nzType]="actionType()"
+      [nzLoading]="actionLoading()"
+      (click)="onAction()"
+    >
+      {{ actionLabel() }}
+    </button>
   }
 </div>
-
-
-

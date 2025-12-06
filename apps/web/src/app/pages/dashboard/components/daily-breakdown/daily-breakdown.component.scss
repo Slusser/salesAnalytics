@@ -1,0 +1,71 @@
+.daily-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.daily-breakdown__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #0f172a;
+
+    span {
+      font-weight: 400;
+      color: rgba(15, 23, 42, 0.7);
+    }
+  }
+
+  p {
+    margin: 4px 0 0;
+    color: rgba(15, 23, 42, 0.65);
+  }
+}
+
+.daily-breakdown__content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 24px;
+}
+
+.daily-breakdown__chart {
+  width: 100%;
+  height: 360px;
+}
+
+.daily-breakdown__skeleton {
+  min-height: 360px;
+  display: flex;
+  align-items: center;
+}
+
+.daily-breakdown__table {
+  max-height: 360px;
+  overflow-y: auto;
+
+  th {
+    white-space: nowrap;
+  }
+
+  td {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 992px) {
+  .daily-breakdown__content {
+    grid-template-columns: 1fr;
+  }
+
+  .daily-breakdown__chart {
+    height: 320px;
+  }
+}
+
+

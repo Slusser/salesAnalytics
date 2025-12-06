@@ -1,0 +1,34 @@
+<div class="kpi-cards">
+  @if (showSkeletons()) {
+    @for (idx of [0, 1, 2]; track idx) {
+      <nz-card class="kpi-cards__card skeleton" nzSize="small">
+        <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 2 }" />
+      </nz-card>
+    }
+  } @else if (shouldShowEmpty()) {
+    <app-empty-state
+      icon="📊"
+      title="Brak danych KPI"
+      description="Wybierz inny zakres dat lub kontrahenta."
+    />
+  } @else {
+    @for (card of cards(); track card.key) {
+      <nz-card class="kpi-cards__card" nzSize="small">
+        <div class="kpi-cards__label">
+          {{ card.label }}
+          @if (card.tooltip) {
+            <span nz-tooltip [nzTooltipTitle]="card.tooltip">ℹ️</span>
+          }
+        </div>
+        <div class="kpi-cards__value">
+          {{ card.value }}
+        </div>
+        @if (hasError()) {
+          <div class="kpi-cards__error">Brak danych</div>
+        }
+      </nz-card>
+    }
+  }
+</div>
+
+

@@ -47,8 +47,8 @@
     <app-empty-state
       title="Brak zamówień"
       description="Nie znaleziono zamówień dla podanych filtrów."
-      [hasCta]="true"
-      (clear)="onFiltersReset()"
+      actionLabel="Resetuj filtry"
+      (action)="onFiltersReset()"
     />
   } @else {
     <app-orders-data-table

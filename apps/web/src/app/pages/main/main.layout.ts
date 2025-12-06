@@ -22,6 +22,11 @@ export class MainLayoutComponent {
 
   protected readonly navigation: NavigationItem[] = [
     {
+      label: 'Dashboard',
+      route: '/dashboard',
+      exact: true,
+    },
+    {
       label: 'Kontrahenci',
       route: '/customers',
       exact: true,

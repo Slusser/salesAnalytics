@@ -269,12 +269,12 @@
   - Query Params: `dateFrom`, `dateTo`, `customerId`
   - Response Body: array of `{ "period": "YYYY-MM", "sumNetPln": 0.0 }`.
   - Success: `200 OK`
-- **GET /analytics/orders/daily**
+- **GET /analytics/daily**
   - Description: Daily breakdown for selected month.
   - Query Params: `year`, `month`, `customerId`
   - Response Body: array of `{ "date": "YYYY-MM-DD", "sumNetPln": 0.0, "ordersCount": 0 }`.
   - Success: `200 OK`
-- Errors: `400 Bad Request` (invalid range), `403 Forbidden` (viewer-only restrictions handled via permissions)
+- Errors: `400 Bad Request` (invalid range)
 
 ### 2.9 FX Rates
 - **GET /fx-rates/eur**

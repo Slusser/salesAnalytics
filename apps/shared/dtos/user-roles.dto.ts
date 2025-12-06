@@ -10,7 +10,7 @@ type UserRoleRow = Tables<"user_roles">
  */
 export type AppRole = "owner" | "editor" | "viewer"
 
-export type UserRoleValue = Extract<UserRoleRow["role"], AppRole>
+export type UserRoleValue = Extract<AppRole, UserRoleRow["role"]>
 
 /**
  * Pojedyncze przypisanie roli bazujące na wierszu `user_roles`.

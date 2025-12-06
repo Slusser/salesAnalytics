@@ -1,4 +1,5 @@
 import type { UUID } from "./common.dto"
+import type { CustomerMutatorContext } from "./customers.dto"
 
 export interface AnalyticsRangeQuery {
   dateFrom?: string
@@ -14,7 +15,7 @@ export interface AnalyticsKpiDto {
 
 export interface AnalyticsTrendEntryDto {
   period: string
-  sumNetPln: number
+  sumNetPln: number | null
 }
 
 export interface AnalyticsDailyEntryDto {
@@ -28,4 +29,17 @@ export interface AnalyticsDailyQuery {
   month: number
   customerId?: UUID
 }
+
+export interface AnalyticsTrendCommand extends AnalyticsRangeQuery {
+  dateFrom: string
+  dateTo: string
+  customerId?: UUID
+  requester: CustomerMutatorContext
+}
+
+export type AnalyticsKpiResponseDto = AnalyticsKpiDto
+export type AnalyticsTrendEntryResponseDto = AnalyticsTrendEntryDto
+export type AnalyticsTrendResponseDto = AnalyticsTrendEntryResponseDto[]
+export type DailyOrdersAnalyticsItemDto = AnalyticsDailyEntryDto
+export type AnalyticsDailyResponseDto = AnalyticsDailyEntryDto[]
 

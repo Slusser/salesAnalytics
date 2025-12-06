@@ -250,7 +250,11 @@ describe('AuthService', () => {
       2,
       session.access_token
     );
-    expect(supabaseFactoryMock.create.mock.calls[2]).toEqual([]);
+    expect(supabaseFactoryMock.create).toHaveBeenNthCalledWith(
+      3,
+      undefined,
+      { serviceRole: true }
+    );
     expect(mapperMock.toLoginResponse).toHaveBeenCalledWith(session, ['editor']);
   });
 

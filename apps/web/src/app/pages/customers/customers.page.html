@@ -42,8 +42,8 @@
     <app-empty-state
       title="Brak kontrahentów"
       description="Nie znaleziono kontrahentów dla podanych filtrów."
-      [hasCta]="true"
-      (clear)="onClearFilters()"
+      actionLabel="Resetuj filtry"
+      (action)="onClearFilters()"
     />
   } @else {
     <app-customers-table

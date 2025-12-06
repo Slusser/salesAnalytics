@@ -1,0 +1,126 @@
+<section class="dashboard-page">
+  <header class="dashboard-page__header">
+    <div>
+      <h1 nz-typography>{{ pageTitle }}</h1>
+      <p nz-typography nzType="secondary">{{ subtitle }}</p>
+    </div>
+
+    <div class="dashboard-page__refresh">
+      <app-manual-refresh-button
+        [disabled]="manualRefreshState().isRefreshing"
+        [refreshing]="manualRefreshState().isRefreshing"
+        [lastRefreshedAt]="manualRefreshState().lastRefreshedAt"
+        [ttlMs]="manualRefreshState().ttlMs"
+        [errorMessage]="manualRefreshState().error ?? null"
+        (clicked)="onManualRefresh()"
+      />
+    </div>
+  </header>
+
+  @if (manualRefreshError()) {
+    <nz-alert
+      class="dashboard-page__global-alert"
+      nzType="error"
+      nzMessage="Nie udało się odświeżyć wszystkich danych"
+      [nzDescription]="manualRefreshError()"
+      nzShowIcon
+      nzCloseable
+      (nzOnClose)="onManualErrorDismiss()"
+    >
+      <ng-template #nzAction>
+        <button nz-button nzType="primary" nzSize="small" (click)="onRetryAll()">
+          Spróbuj ponownie
+        </button>
+      </ng-template>
+    </nz-alert>
+  }
+
+  <main class="dashboard-page__content">
+    <nz-card class="dashboard-page__block">
+      <app-dashboard-filter-bar
+        [value]="filters()"
+        [customerOptions]="customerOptions()"
+        [isLoading]="customerOptionsLoading()"
+        [canFilterByCustomer]="canFilterByCustomer()"
+        (filtersChanged)="onFiltersChange($event)"
+        (filtersSubmitted)="onFiltersSubmit($event)"
+        (filtersReset)="onFiltersReset()"
+      />
+    </nz-card>
+
+    <nz-divider nzText="KPI"></nz-divider>
+    <section class="dashboard-page__block dashboard-page__block--stacked">
+      @if (hasKpiError()) {
+        <nz-alert
+          nzType="error"
+          nzMessage="Nie udało się pobrać KPI"
+          nzDescription="Sprawdź połączenie lub odśwież dane."
+          nzShowIcon
+          class="dashboard-page__alert"
+        >
+          <ng-template #nzAction>
+            <button nz-button nzType="primary" nzSize="small" (click)="onRetryAll()">
+              Spróbuj ponownie
+            </button>
+          </ng-template>
+        </nz-alert>
+      }
+      @if (showKpiEmpty()) {
+        <app-empty-state
+          icon="📊"
+          title="Brak danych KPI"
+          description="Brak zamówień w wybranym zakresie dat."
+        />
+      } @else {
+        <app-dashboard-kpi-cards
+          [data]="kpiViewModel()"
+          [isLoading]="kpiState().isLoading"
+          [hasError]="hasKpiError()"
+          [showEmpty]="showKpiEmpty()"
+        />
+      }
+    </section>
+
+    <nz-divider nzText="Trend miesięczny"></nz-divider>
+    <section class="dashboard-page__block dashboard-page__block--stacked">
+      @if (hasTrendError()) {
+        <nz-alert
+          nzType="error"
+          nzMessage="Trend miesięczny jest niedostępny"
+          nzDescription="Spróbuj odświeżyć dane lub zmienić filtry."
+          nzShowIcon
+          class="dashboard-page__alert"
+        >
+          <ng-template #nzAction>
+            <button nz-button nzType="default" nzSize="small" (click)="onRetryAll()">
+              Odśwież dane
+            </button>
+          </ng-template>
+        </nz-alert>
+      }
+      <app-dashboard-trend-bar-chart
+        [data]="trendViewModel()"
+        [isLoading]="trendState().isLoading"
+        [hasError]="hasTrendError()"
+        [selectedMonth]="activeMonth()"
+        (monthSelect)="onMonthSelect($event)"
+        (clearSelection)="onMonthClear()"
+        (retry)="onRetryAll()"
+      />
+    </section>
+
+    <nz-divider nzText="Rozkład dzienny"></nz-divider>
+    <section class="dashboard-page__block">
+      <app-dashboard-daily-breakdown
+        [selectedMonth]="activeMonth()"
+        [data]="dailyViewModel()"
+        [isLoading]="dailyState().isLoading"
+        [hasError]="hasDailyError()"
+        (clear)="onMonthClear()"
+        (retry)="onDailyRetry()"
+      />
+    </section>
+  </main>
+</section>
+
+
