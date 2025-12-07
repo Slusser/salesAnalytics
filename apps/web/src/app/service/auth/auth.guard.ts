@@ -17,6 +17,11 @@ export const authGuard: CanActivateFn = (
   const session = inject(AuthSessionService);
   const router = inject(Router);
 
+  // During SSR/prerendering, allow route - client will re-validate
+  if (!session.isBrowser) {
+    return true;
+  }
+
   if (session.isLoggedIn()) {
     return true;
   }

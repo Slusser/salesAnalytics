@@ -1,5 +1,12 @@
-import { DOCUMENT } from '@angular/common';
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import {
+  Injectable,
+  PLATFORM_ID,
+  Signal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { NavigationExtras, Router } from '@angular/router';
 
 import type {
@@ -25,10 +32,13 @@ const STORAGE_KEY = 'salesAnalysis:auth';
 export class AuthSessionService {
   private readonly document = inject(DOCUMENT);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly state = signal<SessionState>({ tokens: null, user: null });
   private isSessionInitialized = false;
   private storageRef: Storage | null | undefined;
+
+  readonly isBrowser = isPlatformBrowser(this.platformId);
 
   readonly user: Signal<AuthenticatedUserDto | null> = computed(
     () => {
@@ -48,8 +58,10 @@ export class AuthSessionService {
   });
 
   constructor() {
-    // eslint-disable-next-line no-console
-    console.log('AuthSessionService ctor');
+    // Eagerly restore session on browser to ensure guards have access to auth state
+    if (this.isBrowser) {
+      this.ensureSessionRestored();
+    }
   }
 
   setSession(response: AuthLoginResponse): void {

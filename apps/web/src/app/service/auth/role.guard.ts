@@ -11,6 +11,11 @@ export const roleGuard =
     const session = inject(AuthSessionService);
     const router = inject(Router);
 
+    // During SSR/prerendering, allow route - client will re-validate
+    if (!session.isBrowser) {
+      return true;
+    }
+
     if (requiredRoles.length === 0) {
       return true;
     }
