@@ -20,6 +20,7 @@ interface InsertCustomerParams {
   name: string;
   isActive: boolean;
   actorId: string;
+  defaultDistributorDiscountPct: number;
 }
 
 interface ListParams
@@ -66,6 +67,7 @@ export class CustomersRepository {
     const payload: TablesInsert<'customers'> = {
       name: customer.name,
       is_active: customer.isActive,
+      default_distributor_discount_pct: customer.defaultDistributorDiscountPct,
     };
 
     const { data, error } = await client
@@ -95,7 +97,9 @@ export class CustomersRepository {
   }> {
     const { data, error } = await client
       .from('customers')
-      .select('id, name, is_active, created_at, updated_at, deleted_at')
+      .select(
+        'id, name, is_active, default_distributor_discount_pct, created_at, updated_at, deleted_at'
+      )
       .eq('id', customerId)
       .maybeSingle();
 
@@ -146,7 +150,9 @@ export class CustomersRepository {
       .from('customers')
       .update(payload)
       .eq('id', params.customerId)
-      .select('id, name, is_active, created_at, updated_at, deleted_at')
+      .select(
+        'id, name, is_active, default_distributor_discount_pct, created_at, updated_at, deleted_at'
+      )
       .maybeSingle();
 
     if (error) {
@@ -185,11 +191,18 @@ export class CustomersRepository {
       payload.deleted_at = params.deletedAt;
     }
 
+    if (params.defaultDistributorDiscountPct !== undefined) {
+      payload.default_distributor_discount_pct =
+        params.defaultDistributorDiscountPct;
+    }
+
     const { data, error } = await client
       .from('customers')
       .update(payload)
       .eq('id', params.customerId)
-      .select('id, name, is_active, created_at, updated_at, deleted_at')
+      .select(
+        'id, name, is_active, default_distributor_discount_pct, created_at, updated_at, deleted_at'
+      )
       .maybeSingle();
 
     if (error) {
@@ -216,9 +229,12 @@ export class CustomersRepository {
 
     let query = client
       .from('customers')
-      .select('id, name, is_active, created_at, updated_at, deleted_at', {
-        count: 'exact',
-      })
+      .select(
+        'id, name, is_active, default_distributor_discount_pct, created_at, updated_at, deleted_at',
+        {
+          count: 'exact',
+        }
+      )
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 

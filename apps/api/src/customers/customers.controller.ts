@@ -440,7 +440,11 @@ export class CustomersController {
     @Res({ passthrough: true }) res: Response
   ): Promise<CustomerDto> {
     const context = 'CustomersController#create';
-    const { name, isActive = true } = createCustomerDto;
+    const {
+      name,
+      isActive = true,
+      defaultDistributorDiscountPct,
+    } = createCustomerDto;
     const actorRoles = currentUser.actorRoles?.join(', ') ?? 'n/a';
 
     this.logger.debug(
@@ -449,13 +453,14 @@ export class CustomersController {
       } (role: ${actorRoles}) z payloadem ${JSON.stringify({
         name,
         isActive,
+        defaultDistributorDiscountPct,
       })}.`,
       context
     );
 
     try {
       const result = await this.customersService.create(
-        { name, isActive },
+        { name, isActive, defaultDistributorDiscountPct },
         currentUser
       );
 

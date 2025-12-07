@@ -70,6 +70,7 @@ describe('CustomerFormComponent', () => {
       name: 'ACME Sp. z o.o.',
       isActive: false,
       comment: 'Ważny kontrahent',
+      defaultDistributorDiscountPct: 10,
     };
 
     setInput('initialValue', initialValue);
@@ -106,6 +107,7 @@ describe('CustomerFormComponent', () => {
       name: 'Nowy kontrahent',
       isActive: false,
       comment: 'Komentarz testowy',
+      defaultDistributorDiscountPct: 0,
     });
   });
 

@@ -18,6 +18,7 @@ import {
 } from '@angular/forms';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -32,6 +33,8 @@ import { LoaderButtonComponent } from '../../loader-button/loader-button.compone
 
 const CUSTOMER_NAME_MAX_LENGTH = 120;
 
+const PERCENTAGE_RANGE = { min: 0, max: 100 } as const;
+
 @Component({
   selector: 'app-customer-form',
   standalone: true,
@@ -40,6 +43,7 @@ const CUSTOMER_NAME_MAX_LENGTH = 120;
     ReactiveFormsModule,
     NzFormModule,
     NzInputModule,
+    NzInputNumberModule,
     NzCheckboxModule,
     NzAlertModule,
     NzButtonModule,
@@ -58,6 +62,7 @@ export class CustomerFormComponent {
     name: '',
     isActive: true,
     comment: '',
+    defaultDistributorDiscountPct: 0,
   });
   readonly submitting = input(false);
   readonly isReadonly = input(false);
@@ -111,6 +116,25 @@ export class CustomerFormComponent {
 
     return '';
   });
+  protected readonly defaultDiscountError = computed(() => {
+    const control = this.form.controls.defaultDistributorDiscountPct;
+    const serverError = control.getError('server');
+    const shouldShow = control.touched || control.dirty || !!serverError;
+
+    if (!shouldShow) {
+      return '';
+    }
+
+    if (control.hasError('min') || control.hasError('max')) {
+      return 'Rabat musi mieścić się w zakresie 0-100%.';
+    }
+
+    if (serverError) {
+      return serverError;
+    }
+
+    return '';
+  });
   protected readonly isActiveError = computed(() => {
     const control = this.form.controls.isActive;
     const serverError = control.getError('server');
@@ -146,6 +170,9 @@ export class CustomerFormComponent {
     }),
     isActive: this.fb.control(true),
     comment: this.fb.control(''),
+    defaultDistributorDiscountPct: this.fb.control(0, {
+      validators: [Validators.min(PERCENTAGE_RANGE.min), Validators.max(PERCENTAGE_RANGE.max)],
+    }),
   });
 
   constructor() {
@@ -173,6 +200,8 @@ export class CustomerFormComponent {
       name: this.form.controls.name.value,
       isActive: this.form.controls.isActive.value,
       comment: this.form.controls.comment.value,
+      defaultDistributorDiscountPct:
+        Number(this.form.controls.defaultDistributorDiscountPct.value) || 0,
     };
 
     this.submitted.emit(value);
@@ -221,6 +250,7 @@ export class CustomerFormComponent {
         this.form.setErrors(null);
         this.form.controls.name.setErrors(null);
         this.form.controls.isActive.setErrors(null);
+        this.form.controls.defaultDistributorDiscountPct.setErrors(null);
 
         if (!errors) {
           return;
@@ -235,6 +265,12 @@ export class CustomerFormComponent {
         if (errors.fieldErrors?.isActive) {
           this.form.controls.isActive.setErrors({
             server: errors.fieldErrors.isActive,
+          });
+        }
+
+        if (errors.fieldErrors?.defaultDistributorDiscountPct) {
+          this.form.controls.defaultDistributorDiscountPct.setErrors({
+            server: errors.fieldErrors.defaultDistributorDiscountPct,
           });
         }
 
@@ -304,6 +340,22 @@ export class CustomerFormComponent {
         const currentErrors = control.errors ?? {};
         if (currentErrors['server']) {
           const rest = { ...this.form.errors };
+          delete rest['server'];
+          control.setErrors(Object.keys(rest).length ? rest : null);
+        }
+
+        this.serverErrorsSignal.set(null);
+      });
+    this.form.controls.defaultDistributorDiscountPct.valueChanges
+      .pipe(
+        filter(() => !!this.serverErrorsSignal()),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        const control = this.form.controls.defaultDistributorDiscountPct;
+        const currentErrors = control.errors ?? {};
+        if (currentErrors['server']) {
+          const rest = { ...control.errors };
           delete rest['server'];
           control.setErrors(Object.keys(rest).length ? rest : null);
         }

@@ -15,6 +15,13 @@ export class CustomerResponseDto implements CustomerDto {
   @ApiProperty({ description: 'Czy klient jest aktywny.' })
   isActive!: boolean;
 
+  @ApiProperty({
+    description: 'Domyślny rabat dystrybutora (w %).',
+    minimum: 0,
+    maximum: 100,
+  })
+  defaultDistributorDiscountPct!: number;
+
   @ApiProperty({ description: 'Data utworzenia rekordu.', format: 'date-time' })
   createdAt!: string;
 

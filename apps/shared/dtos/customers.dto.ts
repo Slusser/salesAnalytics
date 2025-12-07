@@ -12,6 +12,7 @@ export interface CustomerDto {
   id: CustomerRow["id"]
   name: CustomerRow["name"]
   isActive: CustomerRow["is_active"]
+  defaultDistributorDiscountPct: CustomerRow["default_distributor_discount_pct"]
   createdAt: CustomerRow["created_at"]
   updatedAt: CustomerRow["updated_at"]
   deletedAt: CustomerRow["deleted_at"]
@@ -32,11 +33,13 @@ export type ListCustomersResponse = PaginatedResponse<CustomerDto>
 export interface CreateCustomerCommand {
   name: CustomerRow["name"]
   isActive: CustomerRow["is_active"]
+  defaultDistributorDiscountPct?: CustomerRow["default_distributor_discount_pct"]
 }
 
 export interface UpdateCustomerCommand {
   name?: CustomerRow["name"]
   isActive?: CustomerRow["is_active"]
+  defaultDistributorDiscountPct?: CustomerRow["default_distributor_discount_pct"]
   deletedAt?: CustomerRow["deleted_at"]
 }
 

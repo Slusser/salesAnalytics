@@ -63,6 +63,28 @@
     </div>
   }
 
+  <div nz-form-item nz-row class="customer-form__field">
+    <div nz-form-label nz-col [nzSm]="6" [nzXs]="24">
+      <label for="customer-default-discount">Domyślny rabat (%)</label>
+    </div>
+    <div nz-form-control nz-col [nzSm]="18" [nzXs]="24" nzHasFeedback>
+      <nz-input-number
+        id="customer-default-discount"
+        formControlName="defaultDistributorDiscountPct"
+        [nzMin]="0"
+        [nzMax]="100"
+        [nzStep]="0.5"
+        [nzDisabled]="isReadonly()"
+        [nzPrecision]="2"
+      ></nz-input-number>
+      @if (defaultDiscountError()) {
+        <div class="customer-form__error" nz-form-explain>
+          {{ defaultDiscountError() }}
+        </div>
+      }
+    </div>
+  </div>
+
   <div class="customer-form__actions">
     <app-loader-button
       label="Zapisz"

@@ -133,6 +133,19 @@ export class CustomersService {
     }
 
     const isActive = command.isActive ?? true;
+    const defaultDiscount = this.parseDiscountOrDefault(
+      command.defaultDistributorDiscountPct,
+      () => {
+        throw new BadRequestException({
+          code: 'CUSTOMER_VALIDATION_ERROR',
+          message:
+            'Domyślny rabat dystrybutora musi być liczbą w zakresie 0-100%.',
+          details: [
+            'Pole defaultDistributorDiscountPct musi być liczbą w zakresie 0-100%.',
+          ],
+        });
+      }
+    );
     const supabase = this.getSupabaseClientOrThrow(
       context.accessToken,
       () => {
@@ -157,6 +170,9 @@ export class CustomersService {
       );
       this.logger.debug(`Actor roles: ${context.actorRoles?.join(', ')}`);
       this.logger.debug(`Is active: ${isActive}`);
+      this.logger.debug(
+        `Default distributor discount: ${defaultDiscount.toFixed(2)}`
+      );
       this.logger.debug(`Command: ${JSON.stringify(command)}`);
       this.logger.debug(`Context: ${JSON.stringify(context)}`);
 
@@ -164,6 +180,7 @@ export class CustomersService {
         name: trimmedName,
         isActive,
         actorId: context.actorId,
+        defaultDistributorDiscountPct: defaultDiscount,
       });
 
       this.logger.debug(`Result: ${JSON.stringify(result)}`);
@@ -418,6 +435,19 @@ export class CustomersService {
     const requestedDeletedAt = command.deletedAt;
     const nextDeletedAtCandidate =
       requestedDeletedAt ?? currentCustomer.deleted_at;
+    const nextDefaultDiscount = this.parseDiscountOptional(
+      command.defaultDistributorDiscountPct,
+      () => {
+        throw new BadRequestException({
+          code: 'CUSTOMERS_UPDATE_VALIDATION',
+          message:
+            'Domyślny rabat dystrybutora musi być liczbą w zakresie 0-100%.',
+          details: [
+            'Pole defaultDistributorDiscountPct musi być liczbą w zakresie 0-100%.',
+          ],
+        });
+      }
+    );
 
     if (nextName === '') {
       throw new BadRequestException({
@@ -470,6 +500,9 @@ export class CustomersService {
       name: nextName ?? undefined,
       isActive: command.isActive,
       deletedAt: shouldUpdateDeletedAt ? computedDeletedAt : undefined,
+      ...(nextDefaultDiscount !== undefined
+        ? { defaultDistributorDiscountPct: nextDefaultDiscount }
+        : {}),
     };
 
     const result = await this.repository.update(supabase, {
@@ -498,6 +531,52 @@ export class CustomersService {
     this.logger.debug(`Pomyślnie zaktualizowano klienta ${customerId}`);
 
     return result.data;
+  }
+
+  private validateDiscount(
+    value: number,
+    onInvalid: () => never
+  ): number {
+    if (typeof value !== 'number' || Number.isNaN(value) || !Number.isFinite(value)) {
+      onInvalid();
+    }
+
+    if (value < 0 || value > 100) {
+      onInvalid();
+    }
+
+    return Number(value);
+  }
+
+  private parseDiscountOrDefault(
+    value: number | undefined,
+    onInvalid: () => never,
+    defaultValue = 0
+  ): number {
+    if (value === undefined) {
+      return defaultValue;
+    }
+
+    if (value === null) {
+      onInvalid();
+    }
+
+    return this.validateDiscount(value as number, onInvalid);
+  }
+
+  private parseDiscountOptional(
+    value: number | undefined,
+    onInvalid: () => never
+  ): number | undefined {
+    if (value === undefined) {
+      return undefined;
+    }
+
+    if (value === null) {
+      onInvalid();
+    }
+
+    return this.validateDiscount(value as number, onInvalid);
   }
 
   private handleInsertError(error: PostgrestError): never {

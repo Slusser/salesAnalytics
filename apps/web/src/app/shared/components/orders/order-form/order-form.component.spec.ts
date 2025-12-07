@@ -94,9 +94,24 @@ describe('OrderFormComponent', () => {
 
   it('ładuje i sortuje aktywnych kontrahentów', () => {
     const customers = [
-      { id: '2', name: 'Beta', isActive: true },
-      { id: '3', name: 'Nieaktywny', isActive: false },
-      { id: '1', name: 'alpha', isActive: true },
+      {
+        id: '2',
+        name: 'Beta',
+        isActive: true,
+        defaultDistributorDiscountPct: 5,
+      },
+      {
+        id: '3',
+        name: 'Nieaktywny',
+        isActive: false,
+        defaultDistributorDiscountPct: 10,
+      },
+      {
+        id: '1',
+        name: 'alpha',
+        isActive: true,
+        defaultDistributorDiscountPct: 3,
+      },
     ];
     customersService.get.mockReturnValue(of(customers as any));
 
@@ -314,6 +329,24 @@ describe('OrderFormComponent', () => {
     expect(recalcSpy).toHaveBeenCalledWith(expected);
 
     vi.useRealTimers();
+  });
+
+  it('ustawia domyślny rabat dystrybutora po wyborze kontrahenta', () => {
+    const customers = [
+      {
+        id: 'alpha',
+        name: 'Alpha',
+        isActive: true,
+        defaultDistributorDiscountPct: 7.5,
+      },
+    ];
+    customersService.get.mockReturnValue(of(customers as any));
+
+    createComponent({ ...baseModel, customerId: '' });
+
+    componentApi.form.controls.customerId.setValue('alpha');
+
+    expect(componentApi.form.controls.distributorDiscountPct.value).toBe(7.5);
   });
 });
 

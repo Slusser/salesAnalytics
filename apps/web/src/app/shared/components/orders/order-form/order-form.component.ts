@@ -36,6 +36,7 @@ import type {
 } from '../../../../pages/orders/new/orders-new.types';
 import { LoaderButtonComponent } from '../../loader-button/loader-button.component';
 import { CustomersService } from '../../../../service/customers/customers.service';
+import type { CustomerDto } from '@shared/dtos/customers.dto';
 
 const ORDER_NO_MAX_LENGTH = 64;
 const ITEM_NAME_MAX_LENGTH = 120;
@@ -92,6 +93,7 @@ export class OrderFormComponent {
   private readonly customersService = inject(CustomersService);
 
   protected readonly customersOptions = signal<{ label: string; value: string }[]>([]);
+  private readonly customersLookup = signal<Record<string, CustomerDto>>({});
 
   readonly submitted = output<OrderFormModel>();
   readonly cancelled = output<void>();
@@ -150,6 +152,7 @@ export class OrderFormComponent {
     this.setupDirtyTracking();
     this.setupRecalculationEffect();
     this.setupCalculationSyncEffect();
+    this.setupCustomerDefaultDiscountSync();
   }
 
   protected onSubmit(): void {
@@ -196,7 +199,7 @@ export class OrderFormComponent {
       catalogUnitGrossPln: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0)],
       }),
-      producerDiscountPct: this.fb.control(0, {
+      producerDiscountPct: this.fb.control(35, {
         validators: PERCENT_VALIDATORS,
       }),
       distributorDiscountPct: this.fb.control(0, {
@@ -361,8 +364,8 @@ export class OrderFormComponent {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (customers) => {
-          const options = customers
-            .filter((customer) => customer.isActive)
+          const activeCustomers = customers.filter((customer) => customer.isActive);
+          const options = activeCustomers
             .map((customer) => ({
               label: customer.name,
               value: customer.id,
@@ -370,11 +373,45 @@ export class OrderFormComponent {
             .sort((a, b) => a.label.localeCompare(b.label, 'pl', { sensitivity: 'base' }));
 
           this.customersOptions.set(options);
+          const lookup = activeCustomers.reduce<Record<string, CustomerDto>>(
+            (acc, customer) => {
+              acc[customer.id] = customer;
+              return acc;
+            },
+            {},
+          );
+          this.customersLookup.set(lookup);
         },
         error: (error) => {
           console.error('Nie udało się pobrać listy kontrahentów.', error);
           this.customersOptions.set([]);
+          this.customersLookup.set({});
         },
+      });
+  }
+
+  private setupCustomerDefaultDiscountSync(): void {
+    this.form.controls.customerId.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((customerId) => {
+        if (!customerId) {
+          return;
+        }
+
+        const customer = this.customersLookup()[customerId];
+        if (!customer) {
+          return;
+        }
+
+        const targetValue = Number(customer.defaultDistributorDiscountPct) || 0;
+        const control = this.form.controls.distributorDiscountPct;
+        const currentValue = Number(control.value) || 0;
+
+        if (currentValue === targetValue) {
+          return;
+        }
+
+        control.setValue(targetValue);
       });
   }
 

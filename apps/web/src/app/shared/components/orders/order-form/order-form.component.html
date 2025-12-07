@@ -1,12 +1,4 @@
 <form nz-form [formGroup]="form" class="order-form" (ngSubmit)="onSubmit()">
-  <nz-alert
-    *ngIf="generalError"
-    nzType="error"
-    [nzMessage]="generalError()"
-    nzShowIcon
-    class="order-form__alert"
-  />
-
   <div class="order-form__grid">
     <nz-form-item>
       <nz-form-label nzRequired for="orderNo">Numer zamówienia</nz-form-label>

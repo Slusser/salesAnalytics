@@ -4,10 +4,13 @@ import {
   IsBoolean,
   IsDateString,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
+  Max,
   MaxLength,
+  Min,
 } from 'class-validator';
 
 const CUSTOMER_NAME_MAX_LENGTH = 120;
@@ -96,6 +99,33 @@ const transformOptionalDate = ({
   return value as string;
 };
 
+const transformOptionalNumber = ({
+  value,
+}: {
+  value: unknown;
+}): number | undefined => {
+  if (value === undefined || value === null || value === '') {
+    return undefined;
+  }
+
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  if (typeof value === 'string') {
+    const normalized = value.trim().replace(',', '.');
+    if (!normalized) {
+      return undefined;
+    }
+    const parsed = Number(normalized);
+    if (Number.isFinite(parsed)) {
+      return parsed;
+    }
+  }
+
+  return value as number;
+};
+
 export class UpdateCustomerDto {
   @ApiPropertyOptional({
     description: 'Zaktualizowana nazwa klienta.',
@@ -137,4 +167,25 @@ export class UpdateCustomerDto {
     { message: 'Pole deletedAt musi być poprawną datą w formacie ISO 8601.' }
   )
   readonly deletedAt?: string | null;
+
+  @ApiPropertyOptional({
+    description:
+      'Domyślny rabat dystrybutora (w %) stosowany przy nowych zamówieniach.',
+    example: 7.5,
+    minimum: 0,
+    maximum: 100,
+  })
+  @IsOptional()
+  @Transform(transformOptionalNumber)
+  @IsNumber(
+    { allowNaN: false, allowInfinity: false },
+    { message: 'Pole defaultDistributorDiscountPct musi być liczbą.' },
+  )
+  @Min(0, {
+    message: 'Domyślny rabat dystrybutora nie może być mniejszy niż 0%.',
+  })
+  @Max(100, {
+    message: 'Domyślny rabat dystrybutora nie może przekraczać 100%.',
+  })
+  readonly defaultDistributorDiscountPct?: number;
 }

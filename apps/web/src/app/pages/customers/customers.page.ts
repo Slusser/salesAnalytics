@@ -61,6 +61,7 @@ export class CustomersPage {
       id: item.id,
       name: item.name,
       isActive: item.isActive,
+      defaultDistributorDiscountPct: item.defaultDistributorDiscountPct,
       deleted: Boolean(item.deletedAt),
       deletedAt: item.deletedAt,
       createdAt: item.createdAt,

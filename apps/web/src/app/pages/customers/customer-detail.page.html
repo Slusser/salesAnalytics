@@ -27,20 +27,20 @@
           }
           </div>
           <div class="customer-detail__meta-item">
-            <span class="customer-detail__meta-label">ID:</span>
+            <span class="customer-detail__meta-label">ID: </span>
             <span>{{ customer()?.id }}</span>
           </div>
           <div class="customer-detail__meta-item">
-            <span class="customer-detail__meta-label">Utworzono:</span>
+            <span class="customer-detail__meta-label">Utworzono: </span>
             <span>{{ customer()?.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
           </div>
           <div class="customer-detail__meta-item">
-            <span class="customer-detail__meta-label">Ostatnia aktualizacja:</span>
+            <span class="customer-detail__meta-label">Ostatnia aktualizacja: </span>
             <span>{{ customer()?.updatedAt | date:'dd.MM.yyyy HH:mm' }}</span>
           </div>
           @if (customer()?.deletedAt) {
             <div class="customer-detail__meta-item">
-              <span class="customer-detail__meta-label">Usunięto:</span>
+              <span class="customer-detail__meta-label">Usunięto: </span>
               <span>{{ customer()?.deletedAt | date:'dd.MM.yyyy HH:mm' }}</span>
             </div>
           }

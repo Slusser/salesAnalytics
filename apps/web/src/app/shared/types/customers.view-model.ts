@@ -5,6 +5,7 @@ export interface CustomerViewModel {
   id: string;
   name: string;
   isActive: boolean;
+  defaultDistributorDiscountPct: number;
   createdAt: string;
   updatedAt: string;
   deletedAt: string | null;
@@ -35,6 +36,7 @@ export function mapToViewModel(
     id: customer.id,
     name: customer.name,
     isActive: customer.isActive,
+    defaultDistributorDiscountPct: customer.defaultDistributorDiscountPct,
     createdAt: customer.createdAt,
     updatedAt: customer.updatedAt,
     deletedAt: customer.deletedAt,

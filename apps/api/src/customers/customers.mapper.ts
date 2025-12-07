@@ -9,6 +9,7 @@ export class CustomerMapper {
       id: row.id,
       name: row.name,
       isActive: row.is_active,
+      defaultDistributorDiscountPct: row.default_distributor_discount_pct,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
       deletedAt: row.deleted_at,

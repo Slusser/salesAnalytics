@@ -9,6 +9,7 @@ export interface CustomerRowVm {
   id: string;
   name: string;
   isActive: boolean;
+  defaultDistributorDiscountPct: number;
   deleted: boolean;
   deletedAt?: string | null;
   createdAt: string;
@@ -33,4 +34,5 @@ export interface ConfirmationState {
 export interface CreateCustomerRequest {
   name: string;
   isActive?: boolean;
+  defaultDistributorDiscountPct: number;
 }

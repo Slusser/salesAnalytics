@@ -58,6 +58,7 @@ const createCustomerRow = (overrides: Partial<CustomerRow> = {}): CustomerRow =>
   id: 'customer-1',
   name: 'ACME',
   is_active: true,
+  default_distributor_discount_pct: 0,
   created_at: '2024-01-01T00:00:00.000Z',
   updated_at: '2024-01-01T00:00:00.000Z',
   deleted_at: null,
@@ -68,6 +69,7 @@ const createCustomerDto = (overrides: Partial<CustomerDto> = {}): CustomerDto =>
   id: 'customer-1',
   name: 'ACME',
   isActive: true,
+  defaultDistributorDiscountPct: 0,
   createdAt: '2024-01-01T00:00:00.000Z',
   updatedAt: '2024-01-01T00:00:00.000Z',
   deletedAt: null,
@@ -223,7 +225,46 @@ describe('CustomersService', () => {
         name: 'ACME',
         isActive: true,
         actorId: editorContext.actorId,
+        defaultDistributorDiscountPct: 0,
       });
+    });
+
+    it('przekazuje domyślny rabat, jeśli został podany', async () => {
+      const command: CreateCustomerCommand = {
+        name: 'Klient X',
+        isActive: false,
+        defaultDistributorDiscountPct: 12.5,
+      };
+      const dto = createCustomerDto({
+        name: 'Klient X',
+        isActive: false,
+        defaultDistributorDiscountPct: 12.5,
+      });
+      repository.isActiveNameTaken.mockResolvedValue(false);
+      repository.insert.mockResolvedValue({ data: dto });
+
+      const result = await service.create(command, ownerContext);
+
+      expect(result).toBe(dto);
+      expect(repository.insert).toHaveBeenCalledWith(supabaseClient, {
+        name: 'Klient X',
+        isActive: false,
+        actorId: ownerContext.actorId,
+        defaultDistributorDiscountPct: 12.5,
+      });
+    });
+
+    it('rzuca BadRequestException, gdy rabat wykracza poza zakres', async () => {
+      repository.isActiveNameTaken.mockResolvedValue(false);
+
+      await expect(
+        service.create(
+          { ...baseCommand, defaultDistributorDiscountPct: 150 },
+          ownerContext
+        )
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(repository.insert).not.toHaveBeenCalled();
     });
 
     it('rzuca CustomerDuplicateNameError, gdy insert kończy się błędem unikalności', async () => {
@@ -477,6 +518,18 @@ describe('CustomersService', () => {
       ).rejects.toBeInstanceOf(BadRequestException);
     });
 
+    it('rzuca BadRequestException, gdy domyślny rabat wykracza poza zakres', async () => {
+      repository.findById.mockResolvedValue({ data: row });
+
+      await expect(
+        service.update(
+          customerId,
+          { defaultDistributorDiscountPct: 150 },
+          ownerContext
+        )
+      ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
     it('ustawia deletedAt na bieżący czas przy zamknięciu klienta', async () => {
       vi.useFakeTimers();
       const now = new Date('2024-04-10T09:30:00.000Z');
@@ -564,6 +617,28 @@ describe('CustomersService', () => {
         name: 'Nowa nazwa',
         isActive: undefined,
         deletedAt: undefined,
+      });
+      expect(result).toBe(dto);
+    });
+
+    it('aktualizuje domyślny rabat dystrybutora', async () => {
+      repository.findById.mockResolvedValue({ data: row });
+      repository.isActiveNameTakenByOther.mockResolvedValue(false);
+      const dto = createCustomerDto({ defaultDistributorDiscountPct: 7.5 });
+      repository.update.mockResolvedValue({ data: dto });
+
+      const result = await service.update(
+        customerId,
+        { defaultDistributorDiscountPct: 7.5 },
+        ownerContext
+      );
+
+      expect(repository.update).toHaveBeenCalledWith(supabaseClient, {
+        customerId,
+        name: undefined,
+        isActive: undefined,
+        deletedAt: undefined,
+        defaultDistributorDiscountPct: 7.5,
       });
       expect(result).toBe(dto);
     });

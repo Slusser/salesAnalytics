@@ -17,7 +17,7 @@ const DEFAULT_FORM_MODEL: OrderFormModel = {
   itemName: '',
   quantity: 1,
   catalogUnitGrossPln: 0,
-  producerDiscountPct: 0,
+  producerDiscountPct: 35,
   distributorDiscountPct: 0,
   vatRatePct: 23,
   totalNetPln: 0,

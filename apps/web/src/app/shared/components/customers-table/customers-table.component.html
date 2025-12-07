@@ -8,6 +8,7 @@
     <tr>
       <th>Nazwa</th>
       <th>Status</th>
+      <th>Domyślny rabat (%)</th>
       <th>Utworzono</th>
       <th>Aktualizacja</th>
       <th class="customers-table__actions">Akcje</th>
@@ -31,6 +32,9 @@
           } @else {
             <nz-tag nzColor="default">Nieaktywny</nz-tag>
           }
+        </td>
+        <td>
+          {{ item.defaultDistributorDiscountPct | number: '1.0-2' }}%
         </td>
         <td>{{ item.createdAt | date: 'short' }}</td>
         <td>{{ item.updatedAt | date: 'short' }}</td>
@@ -66,7 +70,7 @@
       </tr>
     } @empty {
       <tr>
-        <td colspan="5" class="customers-table__empty">
+        <td colspan="6" class="customers-table__empty">
           Brak danych
         </td>
       </tr>

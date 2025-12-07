@@ -113,6 +113,8 @@ export class CustomerDetailPage {
     name: this.customer()?.name ?? '',
     isActive: this.customer()?.isActive ?? true,
     comment: '',
+    defaultDistributorDiscountPct:
+      this.customer()?.defaultDistributorDiscountPct ?? 0,
   }));
 
   constructor() {
@@ -139,8 +141,17 @@ export class CustomerDetailPage {
     const currentIsActive = this.customer()!.isActive;
     const shouldUpdateName = trimmedName !== this.customer()!.name;
     const shouldUpdateIsActive = payload.isActive !== currentIsActive;
+    const currentDefaultDiscount =
+      this.customer()?.defaultDistributorDiscountPct ?? 0;
+    const shouldUpdateDefaultDiscount =
+      Number(payload.defaultDistributorDiscountPct) !==
+      Number(currentDefaultDiscount);
 
-    if (!shouldUpdateName && !shouldUpdateIsActive) {
+    if (
+      !shouldUpdateName &&
+      !shouldUpdateIsActive &&
+      !shouldUpdateDefaultDiscount
+    ) {
       this.message.info('Brak zmian do zapisania.');
       return;
     }
@@ -148,6 +159,12 @@ export class CustomerDetailPage {
     const command: UpdateCustomerCommand = {
       ...(shouldUpdateName ? { name: trimmedName } : {}),
       ...(shouldUpdateIsActive ? { isActive: payload.isActive } : {}),
+      ...(shouldUpdateDefaultDiscount
+        ? {
+            defaultDistributorDiscountPct:
+              payload.defaultDistributorDiscountPct,
+          }
+        : {}),
     };
     this.patchState({ saving: true, error: null, formErrors: null });
 
@@ -378,8 +395,8 @@ export class CustomerDetailPage {
     }
 
     if (apiError.code === 'CUSTOMERS_UPDATE_VALIDATION') {
-      const fieldErrors: Partial<
-        Record<'name' | 'isActive' | 'comment', string>
+      const fieldErrors: NonNullable<
+        ServerValidationErrors['fieldErrors']
       > = {};
       const details: string[] = Array.isArray(apiError.details)
         ? apiError.details
@@ -392,6 +409,9 @@ export class CustomerDetailPage {
         }
         if (normalized.includes('active')) {
           fieldErrors['isActive'] = detail;
+        }
+        if (normalized.includes('defaultdistributordiscountpct')) {
+          fieldErrors['defaultDistributorDiscountPct'] = detail;
         }
       });
 

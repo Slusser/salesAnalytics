@@ -44,6 +44,7 @@ export class CustomersNewPageComponent {
     name: '',
     isActive: true,
     comment: '',
+    defaultDistributorDiscountPct: 0,
   });
 
   protected readonly hasServerErrors = computed(() => !!this.serverErrors());
@@ -71,6 +72,7 @@ export class CustomersNewPageComponent {
     const payload: CreateCustomerRequest = {
       name: model.name,
       isActive: model.isActive,
+      defaultDistributorDiscountPct: model.defaultDistributorDiscountPct,
     };
 
     this.submitting.set(true);
@@ -120,6 +122,9 @@ export class CustomersNewPageComponent {
       details.forEach((detail: string) => {
         if (detail.toLowerCase().includes('name')) {
           fieldErrors['name'] = detail;
+        }
+        if (detail.toLowerCase().includes('defaultdistributordiscountpct')) {
+          fieldErrors['defaultDistributorDiscountPct'] = detail;
         }
       });
 
