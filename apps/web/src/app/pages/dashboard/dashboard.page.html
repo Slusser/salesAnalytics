@@ -4,36 +4,7 @@
       <h1 nz-typography>{{ pageTitle }}</h1>
       <p nz-typography nzType="secondary">{{ subtitle }}</p>
     </div>
-
-    <div class="dashboard-page__refresh">
-      <app-manual-refresh-button
-        [disabled]="manualRefreshState().isRefreshing"
-        [refreshing]="manualRefreshState().isRefreshing"
-        [lastRefreshedAt]="manualRefreshState().lastRefreshedAt"
-        [ttlMs]="manualRefreshState().ttlMs"
-        [errorMessage]="manualRefreshState().error ?? null"
-        (clicked)="onManualRefresh()"
-      />
-    </div>
   </header>
-
-  @if (manualRefreshError()) {
-    <nz-alert
-      class="dashboard-page__global-alert"
-      nzType="error"
-      nzMessage="Nie udało się odświeżyć wszystkich danych"
-      [nzDescription]="manualRefreshError()"
-      nzShowIcon
-      nzCloseable
-      (nzOnClose)="onManualErrorDismiss()"
-    >
-      <ng-template #nzAction>
-        <button nz-button nzType="primary" nzSize="small" (click)="onRetryAll()">
-          Spróbuj ponownie
-        </button>
-      </ng-template>
-    </nz-alert>
-  }
 
   <main class="dashboard-page__content">
     <nz-card class="dashboard-page__block">

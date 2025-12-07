@@ -35,6 +35,7 @@ describe('roleGuard', () => {
         {
           provide: AuthSessionService,
           useValue: {
+            isBrowser: true,
             isLoggedIn: isLoggedInMock as unknown,
             user: userMock as unknown,
           },

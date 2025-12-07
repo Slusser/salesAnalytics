@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, ParamMap, Router, convertToParamMap } from '@angular/router';
-import { BehaviorSubject, of, throwError } from 'rxjs';
+import { BehaviorSubject, Subject, of } from 'rxjs';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 
 import { NzNotificationService } from 'ng-zorro-antd/notification';
@@ -90,39 +90,44 @@ describe('DashboardStoreService', () => {
     );
   });
 
-  it('sets manual refresh error when refreshAll fails', async () => {
-    api.fetchKpi.mockReturnValueOnce(throwError(() => new Error('boom')));
-
-    await service.refreshAll(true);
-
-    expect(service.manualRefreshState().error).toContain('Nie udało');
-    expect(notification.error).toHaveBeenCalled();
-  });
-
-  it('skips refresh when TTL not expired unless forced', async () => {
+  it('forces KPI and trend reload when requested', async () => {
     api.fetchKpi.mockClear();
     api.fetchTrend.mockClear();
 
     await service.refreshAll(true);
 
+    expect(api.fetchKpi).toHaveBeenCalledTimes(1);
+    expect(api.fetchTrend).toHaveBeenCalledTimes(1);
+  });
+
+  it('prevents overlapping refreshAll calls', async () => {
     api.fetchKpi.mockClear();
     api.fetchTrend.mockClear();
 
-    await service.refreshAll();
+    const kpiSubject = new Subject<any>();
+    api.fetchKpi.mockReturnValue(kpiSubject.asObservable());
 
-    expect(api.fetchKpi).not.toHaveBeenCalled();
-    expect(api.fetchTrend).not.toHaveBeenCalled();
-  });
+    api.fetchTrend.mockReturnValue(of([]));
 
-  it('clears manual refresh error', async () => {
-    api.fetchKpi.mockReturnValueOnce(throwError(() => new Error('boom')));
+    const first = service.refreshAll(true);
+    await Promise.resolve();
 
     await service.refreshAll(true);
-    expect(service.manualRefreshState().error).not.toBeNull();
+    expect(api.fetchKpi).toHaveBeenCalledTimes(1);
 
-    service.clearManualRefreshError();
+    kpiSubject.next({
+      sumNetPln: 0,
+      sumGrossPln: 0,
+      sumDistributorPln: 0,
+      sumCustomerPln: 0,
+      sumProfitPln: 0,
+      ordersCount: 0,
+      avgOrderValue: 0,
+      avgMarginPct: 0,
+    });
+    kpiSubject.complete();
 
-    expect(service.manualRefreshState().error).toBeNull();
+    await first;
   });
 });
 

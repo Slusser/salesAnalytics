@@ -76,20 +76,12 @@ export type DataState<T> = {
   error?: string | null;
 };
 
-export type ManualRefreshState = {
-  lastRefreshedAt?: Date;
-  isRefreshing: boolean;
-  ttlMs: number;
-  error?: string | null;
-};
-
 export type DashboardState = {
   filters: DashboardFilters;
   kpi: DataState<AnalyticsKpiResponseDto>;
   trend: DataState<AnalyticsTrendResponseDto>;
   daily: DataState<DailyOrdersAnalyticsItemDto[]>;
   activeMonth?: MonthSelection;
-  lastRefreshedAt?: Date;
 };
 
 export type DashboardStoreSnapshot = {

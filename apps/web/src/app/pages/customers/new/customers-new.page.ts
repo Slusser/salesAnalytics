@@ -154,6 +154,6 @@ export class CustomersNewPageComponent {
   }
 
   private navigateToList(): void {
-    this.router.navigate(['/customers'], { state: { refresh: true } });
+    void this.router.navigate(['/customers']);
   }
 }

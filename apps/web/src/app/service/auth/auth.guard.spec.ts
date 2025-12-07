@@ -42,6 +42,7 @@ describe('authGuard', () => {
         {
           provide: AuthSessionService,
           useValue: {
+            isBrowser: true,
             isLoggedIn: isLoggedInMock,
           },
         },

@@ -17,7 +17,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { provideEcharts } from 'ngx-echarts';
 
-import { ManualRefreshButtonComponent } from '../../shared/components/manual-refresh-button/manual-refresh-button.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import {
   DashboardFilters,
@@ -41,7 +40,6 @@ import { DailyBreakdownComponent } from './components/daily-breakdown/daily-brea
     NzDividerModule,
     NzSpinModule,
     NzAlertModule,
-    ManualRefreshButtonComponent,
     EmptyStateComponent,
     DashboardFilterBarComponent,
     KpiCardsComponent,
@@ -66,7 +64,6 @@ export class DashboardPageComponent {
   protected readonly trendState = this.store.trendState;
   protected readonly dailyState = this.store.dailyState;
   protected readonly activeMonth = this.store.activeMonth;
-  protected readonly manualRefreshState = this.store.manualRefreshState;
   protected readonly canFilterByCustomer = this.store.canFilterByCustomer;
   protected readonly kpiViewModel = this.store.kpiViewModel;
   protected readonly trendViewModel = this.store.trendViewModel;
@@ -87,9 +84,6 @@ export class DashboardPageComponent {
       !this.hasKpiError() &&
       !this.kpiState().data
   );
-  protected readonly manualRefreshError = computed(
-    () => this.manualRefreshState().error ?? null
-  );
   protected readonly customerOptions = this.customerOptionsSignal.asReadonly();
   protected readonly customerOptionsLoading =
     this.customerOptionsLoadingSignal.asReadonly();
@@ -108,6 +102,7 @@ export class DashboardPageComponent {
 
   constructor() {
     this.registerCustomerOptionsWatcher();
+    this.refreshOnViewEnter();
   }
 
   protected onFiltersChange(filters: DashboardFilters): void {
@@ -130,20 +125,12 @@ export class DashboardPageComponent {
     this.store.clearMonth();
   }
 
-  protected onManualRefresh(): void {
-    this.store.refreshAll(true);
-  }
-
   protected onRetryAll(): void {
     this.store.refreshAll(true);
   }
 
   protected onDailyRetry(): void {
     void this.store.refreshDaily(true);
-  }
-
-  protected onManualErrorDismiss(): void {
-    this.store.clearManualRefreshError();
   }
 
   private registerCustomerOptionsWatcher(): void {
@@ -188,6 +175,16 @@ export class DashboardPageComponent {
           this.customerOptionsSignal.set([]);
         },
       });
+  }
+
+  private refreshOnViewEnter(): void {
+    if (this.isInitialLoading()) {
+      return;
+    }
+
+    queueMicrotask(() => {
+      void this.store.refreshAll(true);
+    });
   }
 }
 

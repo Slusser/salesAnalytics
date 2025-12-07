@@ -15,7 +15,6 @@ import type {
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { FilterBarComponent } from '../../shared/components/filter-bar/filter-bar.component';
-import { ManualRefreshButtonComponent } from '../../shared/components/manual-refresh-button/manual-refresh-button.component';
 import { CustomersTableComponent } from '../../shared/components/customers-table/customers-table.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
@@ -29,7 +28,6 @@ import { PaginationComponent } from '../../shared/components/pagination/paginati
     CommonModule,
     NzButtonModule,
     FilterBarComponent,
-    ManualRefreshButtonComponent,
     CustomersTableComponent,
     EmptyStateComponent,
     ConfirmDialogComponent,
@@ -86,11 +84,7 @@ export class CustomersPage {
   protected readonly confirmDialogLoading = this.service.confirmDialogLoading;
 
   constructor() {
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state?.['refresh']) {
-      queueMicrotask(() => this.service.refetch());
-    }
-
+    this.refreshOnViewEnter();
     effect(() => {
       if (this.showError()) {
         console.error('Customers list error', this.error());
@@ -102,10 +96,6 @@ export class CustomersPage {
     partial: Partial<Pick<CustomersQueryParamsVm, 'search' | 'includeInactive'>>
   ): void {
     this.service.setParams(partial, { resetPage: true });
-  }
-
-  protected onManualRefresh(): void {
-    this.service.refetch();
   }
 
   protected onClearFilters(): void {
@@ -154,5 +144,13 @@ export class CustomersPage {
     }
 
     this.router.navigate(['/customers/new']);
+  }
+
+  private refreshOnViewEnter(): void {
+    if (this.service.loading()) {
+      return;
+    }
+
+    queueMicrotask(() => this.service.refetch());
   }
 }

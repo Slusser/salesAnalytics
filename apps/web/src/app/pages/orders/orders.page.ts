@@ -14,7 +14,6 @@ import { OrdersListService } from '../../service/orders/orders-list.service';
 import { OrdersToolbarComponent } from './shared/orders-toolbar/orders-toolbar.component';
 import { OrdersDataTableComponent } from './shared/orders-data-table/orders-data-table.component';
 import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
-import { ManualRefreshButtonComponent } from '../../shared/components/manual-refresh-button/manual-refresh-button.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/confirm-dialog.component';
 
@@ -28,7 +27,6 @@ import { ConfirmDialogComponent } from '../../shared/components/confirm-dialog/c
     OrdersToolbarComponent,
     OrdersDataTableComponent,
     PaginationComponent,
-    ManualRefreshButtonComponent,
     EmptyStateComponent,
     ConfirmDialogComponent,
   ],
@@ -66,11 +64,7 @@ export class OrdersPage {
   protected readonly exportInProgress = this.ordersService.exportInProgress;
 
   constructor() {
-    const navigation = this.router.getCurrentNavigation();
-    if (navigation?.extras.state?.['refresh']) {
-      queueMicrotask(() => this.ordersService.refetch());
-    }
-
+    this.refreshOnViewEnter();
     effect(() => {
       if (this.showError()) {
         console.error('Orders list error', this.error());
@@ -90,10 +84,6 @@ export class OrdersPage {
 
   protected onIncludeDeletedToggle(include: boolean): void {
     this.ordersService.toggleIncludeDeleted(include);
-  }
-
-  protected onManualRefresh(): void {
-    this.ordersService.refetch();
   }
 
   protected onSortChange(
@@ -163,5 +153,13 @@ export class OrdersPage {
 
   protected onRetry(): void {
     this.ordersService.refetch();
+  }
+
+  private refreshOnViewEnter(): void {
+    if (this.ordersService.loading()) {
+      return;
+    }
+
+    queueMicrotask(() => this.ordersService.refetch());
   }
 }

@@ -41,7 +41,6 @@ import {
   DataState,
   DailyPointViewModel,
   KpiViewModel,
-  ManualRefreshState,
   MonthSelection,
   TrendPointViewModel,
 } from './dashboard-store.types';
@@ -58,8 +57,6 @@ type LoadOptions = {
 const DEFAULT_TTL_MS = 90_000;
 const FILTERS_DEBOUNCE_MS = 300;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
-const MANUAL_REFRESH_ERROR =
-  'Nie udało się odświeżyć wszystkich danych. Spróbuj ponownie.';
 
 const MONTH_LABEL_FORMATTER = new Intl.DateTimeFormat('pl-PL', {
   month: 'long',
@@ -116,12 +113,7 @@ export class DashboardStoreService {
       error: null,
     }
   );
-  private readonly manualRefreshStateSignal = signal<ManualRefreshState>({
-    lastRefreshedAt: undefined,
-    isRefreshing: false,
-    ttlMs: DEFAULT_TTL_MS,
-    error: null,
-  });
+  private readonly refreshInProgressSignal = signal(false);
   private readonly canFilterByCustomerSignal = computed(() =>
     this.hasCustomerFilterPermission()
   );
@@ -131,7 +123,6 @@ export class DashboardStoreService {
   readonly kpiState = this.kpiStateSignal.asReadonly();
   readonly trendState = this.trendStateSignal.asReadonly();
   readonly dailyState = this.dailyStateSignal.asReadonly();
-  readonly manualRefreshState = this.manualRefreshStateSignal.asReadonly();
   readonly canFilterByCustomer = this.canFilterByCustomerSignal;
 
   readonly state = computed<DashboardState>(() => ({
@@ -140,7 +131,6 @@ export class DashboardStoreService {
     trend: this.trendStateSignal(),
     daily: this.dailyStateSignal(),
     activeMonth: this.activeMonthSignal(),
-    lastRefreshedAt: this.manualRefreshStateSignal().lastRefreshedAt,
   }));
 
   readonly kpiViewModel = computed<KpiViewModel[]>(() =>
@@ -204,55 +194,23 @@ export class DashboardStoreService {
   }
 
   async refreshAll(force = false): Promise<void> {
-    const manualState = this.manualRefreshStateSignal();
-    if (
-      !force &&
-      manualState.lastRefreshedAt &&
-      Date.now() - manualState.lastRefreshedAt.getTime() < manualState.ttlMs
-    ) {
+    if (this.refreshInProgressSignal()) {
       return;
     }
 
-    if (this.manualRefreshStateSignal().isRefreshing) {
-      return;
-    }
-
-    this.manualRefreshStateSignal.update((state) => ({
-      ...state,
-      isRefreshing: true,
-      error: null,
-    }));
+    this.refreshInProgressSignal.set(true);
 
     const filters = this.filtersSignal();
     const activeMonth = this.activeMonthSignal();
 
-    const results = await Promise.allSettled([
-      this.loadKpi(filters, { force: true }),
-      this.loadTrend(filters, { force: true }),
-      activeMonth ? this.loadDaily(activeMonth, { force: true }) : Promise.resolve(false),
-    ]);
-
-    const anySuccess = results.some(
-      (result) => result.status === 'fulfilled' && result.value
-    );
-    const anyFailure = results.some(
-      (result) => result.status === 'rejected' || (result.status === 'fulfilled' && !result.value)
-    );
-
-    this.manualRefreshStateSignal.update((state) => ({
-      ...state,
-      isRefreshing: false,
-      lastRefreshedAt: anySuccess ? new Date() : state.lastRefreshedAt,
-      error: anyFailure
-        ? MANUAL_REFRESH_ERROR
-        : null,
-    }));
-
-    if (anyFailure) {
-      this.notification.error(
-        'Odświeżanie nie powiodło się',
-        MANUAL_REFRESH_ERROR
-      );
+    try {
+      await Promise.all([
+        this.loadKpi(filters, { force }),
+        this.loadTrend(filters, { force }),
+        activeMonth ? this.loadDaily(activeMonth, { force }) : Promise.resolve(true),
+      ]);
+    } finally {
+      this.refreshInProgressSignal.set(false);
     }
   }
 
@@ -473,8 +431,6 @@ export class DashboardStoreService {
       error: null,
     });
 
-    this.touchLastRefreshed();
-
     return true;
   }
 
@@ -529,8 +485,6 @@ export class DashboardStoreService {
       isLoading: false,
       error: null,
     });
-
-    this.touchLastRefreshed();
 
     return true;
   }
@@ -856,21 +810,6 @@ export class DashboardStoreService {
 
   private createCacheKey(filters: DashboardFilters): string {
     return JSON.stringify(filters);
-  }
-
-  private touchLastRefreshed(): void {
-    this.manualRefreshStateSignal.update((state) => ({
-      ...state,
-      lastRefreshedAt: new Date(),
-      error: null,
-    }));
-  }
-
-  clearManualRefreshError(): void {
-    this.manualRefreshStateSignal.update((state) => ({
-      ...state,
-      error: null,
-    }));
   }
 
   private parsePeriod(

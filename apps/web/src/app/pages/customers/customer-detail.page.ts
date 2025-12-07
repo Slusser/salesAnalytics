@@ -321,7 +321,7 @@ export class CustomerDetailPage {
   }
 
   private redirectToList(): void {
-    void this.router.navigate(['/customers'], { state: { refresh: true } });
+    void this.router.navigate(['/customers']);
   }
 
   private handleMutationError(
