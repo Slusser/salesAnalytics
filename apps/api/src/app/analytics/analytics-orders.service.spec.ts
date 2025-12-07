@@ -89,8 +89,26 @@ describe('AnalyticsOrdersService', () => {
 
   it('zwraca uzupełniony kalendarz i wywołuje repozytorium', async () => {
     repository.fetchDailyBreakdown.mockResolvedValue([
-      { date: '2024-05-01', sumNetPln: 100.129, ordersCount: 1 },
-      { date: '2024-05-03', sumNetPln: 200.0, ordersCount: 2 },
+      {
+        date: '2024-05-01',
+        sumNetPln: 100.129,
+        sumGrossPln: 123.45,
+        sumDistributorPln: 97.11,
+        sumCustomerPln: 88.22,
+        sumProfitPln: 8.89,
+        avgMarginPct: 12.34,
+        ordersCount: 1,
+      },
+      {
+        date: '2024-05-03',
+        sumNetPln: 200.0,
+        sumGrossPln: 246.0,
+        sumDistributorPln: 194.0,
+        sumCustomerPln: 160.0,
+        sumProfitPln: 34.0,
+        avgMarginPct: 17.0,
+        ordersCount: 2,
+      },
     ]);
 
     const result = await service.getDailyBreakdown({
@@ -109,11 +127,21 @@ describe('AnalyticsOrdersService', () => {
     expect(result[0]).toEqual({
       date: '2024-05-01',
       sumNetPln: 100.13,
+      sumGrossPln: 123.45,
+      sumDistributorPln: 97.11,
+      sumCustomerPln: 88.22,
+      sumProfitPln: 8.89,
+      avgMarginPct: 12.34,
       ordersCount: 1,
     });
     expect(result[1]).toEqual({
       date: '2024-05-02',
       sumNetPln: 0,
+      sumGrossPln: 0,
+      sumDistributorPln: 0,
+      sumCustomerPln: 0,
+      sumProfitPln: 0,
+      avgMarginPct: 0,
       ordersCount: 0,
     });
   });

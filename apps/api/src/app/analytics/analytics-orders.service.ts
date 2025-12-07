@@ -169,6 +169,11 @@ export class AnalyticsOrdersService {
       bucket.set(row.date, {
         date: row.date,
         sumNetPln: this.roundCurrency(row.sumNetPln),
+        sumGrossPln: this.roundCurrency(row.sumGrossPln),
+        sumDistributorPln: this.roundCurrency(row.sumDistributorPln),
+        sumCustomerPln: this.roundCurrency(row.sumCustomerPln),
+        sumProfitPln: this.roundCurrency(row.sumProfitPln),
+        avgMarginPct: this.roundCurrency(row.avgMarginPct),
         ordersCount: Math.max(0, Math.trunc(row.ordersCount)),
       });
     }
@@ -184,6 +189,11 @@ export class AnalyticsOrdersService {
         existing ?? {
           date: isoDate,
           sumNetPln: 0,
+          sumGrossPln: 0,
+          sumDistributorPln: 0,
+          sumCustomerPln: 0,
+          sumProfitPln: 0,
+          avgMarginPct: 0,
           ordersCount: 0,
         }
       );

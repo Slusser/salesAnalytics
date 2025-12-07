@@ -8,11 +8,26 @@
   <nz-descriptions-item nzTitle="Data zamówienia" [nzSpan]="1">
     {{ order.orderDate | date : 'yyyy-MM-dd' }}
   </nz-descriptions-item>
+  <nz-descriptions-item nzTitle="Ilość" [nzSpan]="1">
+    {{ order.quantity }}
+  </nz-descriptions-item>
+  <nz-descriptions-item nzTitle="Cena katalogowa brutto" [nzSpan]="1">
+    {{ order.catalogUnitGrossFormatted }}
+  </nz-descriptions-item>
   <nz-descriptions-item nzTitle="Wartość netto" [nzSpan]="1">
     {{ order.netFormatted }}
   </nz-descriptions-item>
   <nz-descriptions-item nzTitle="Wartość brutto" [nzSpan]="1">
     {{ order.grossFormatted }}
+  </nz-descriptions-item>
+  <nz-descriptions-item nzTitle="Cena dystrybutora" [nzSpan]="1">
+    {{ order.distributorPriceFormatted }}
+  </nz-descriptions-item>
+  <nz-descriptions-item nzTitle="Cena kontrahenta" [nzSpan]="1">
+    {{ order.customerPriceFormatted }}
+  </nz-descriptions-item>
+  <nz-descriptions-item nzTitle="Marża" [nzSpan]="1">
+    {{ order.profitFormatted }}
   </nz-descriptions-item>
   <nz-descriptions-item nzTitle="Utworzone" [nzSpan]="1">
     {{ order.createdAt | date : 'yyyy-MM-dd HH:mm' }}

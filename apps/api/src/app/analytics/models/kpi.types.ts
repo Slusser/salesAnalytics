@@ -9,13 +9,22 @@ export interface AnalyticsKpiQuery {
 
 export interface AnalyticsKpiAggregate {
   sumNetPln: number;
+  sumGrossPln: number;
+  sumDistributorPln: number;
+  sumCustomerPln: number;
+  sumProfitPln: number;
   ordersCount: number;
 }
 
 export interface AnalyticsKpiResult {
   sumNetPln: number;
+  sumGrossPln: number;
+  sumDistributorPln: number;
+  sumCustomerPln: number;
+  sumProfitPln: number;
   ordersCount: number;
   avgOrderValue: number;
+  avgMarginPct: number;
 }
 
 

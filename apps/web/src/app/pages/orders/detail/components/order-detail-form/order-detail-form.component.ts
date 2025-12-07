@@ -31,6 +31,7 @@ import { NzDividerModule } from 'ng-zorro-antd/divider';
 import { CustomersService } from '../../../../../service/customers/customers.service';
 import { OrderDetailStore } from '../../../../../service/orders/order-detail.store';
 import { createInitialActionsState } from '../../../../../service/orders/order-detail.mappers';
+import { computeOrderTotals } from '../../../../../shared/utils/order-calculation.util';
 import type {
   OrderActionsStateVm,
   OrderDetailVm,
@@ -39,6 +40,7 @@ import type {
   OrderFormValue,
 } from '../../../../../service/orders/order-detail.types';
 import { OrderActionsPanelComponent } from '../order-actions-panel/order-actions-panel.component';
+import type { OrderCalculationInput } from '../../../new/orders-new.types';
 
 type OrderDetailFormGroup = FormGroup<OrderFormControls>;
 
@@ -165,12 +167,18 @@ export class OrderDetailFormComponent {
           return 'Nazwa produktu jest wymagana.';
         case 'quantity':
           return 'Ilość jest wymagana.';
+        case 'catalogUnitGrossPln':
+          return 'Cena katalogowa brutto jest wymagana.';
         case 'vatRatePct':
           return 'Stawka VAT jest wymagana.';
         case 'totalNetPln':
           return 'Kwota netto PLN jest wymagana.';
         case 'totalGrossPln':
           return 'Kwota brutto PLN jest wymagana.';
+        case 'distributorPricePln':
+          return 'Cena dystrybutora jest wymagana.';
+        case 'customerPricePln':
+          return 'Cena kontrahenta jest wymagana.';
         default:
           break;
       }
@@ -197,6 +205,15 @@ export class OrderDetailFormComponent {
       }
       if (controlName === 'totalGrossPln') {
         return 'Kwota brutto PLN nie może być ujemna.';
+      }
+      if (controlName === 'catalogUnitGrossPln') {
+        return 'Cena katalogowa brutto nie może być ujemna.';
+      }
+      if (controlName === 'distributorPricePln') {
+        return 'Cena dystrybutora nie może być ujemna.';
+      }
+      if (controlName === 'customerPricePln') {
+        return 'Cena kontrahenta nie może być ujemna.';
       }
     }
 
@@ -234,6 +251,9 @@ export class OrderDetailFormComponent {
       quantity: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0.01)],
       }),
+      catalogUnitGrossPln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
       producerDiscountPct: this.fb.control(0, {
         validators: [Validators.min(0), Validators.max(100)],
       }),
@@ -253,6 +273,13 @@ export class OrderDetailFormComponent {
       totalGrossPln: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0)],
       }),
+      distributorPricePln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      customerPricePln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      profitPln: this.fb.control(0),
       comment: this.fb.control<string | null>(null, {
         validators: [Validators.maxLength(COMMENT_MAX_LENGTH)],
       }),
@@ -276,6 +303,7 @@ export class OrderDetailFormComponent {
     this.form.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
+        this.recalculateDerivedFieldsFromForm();
         const value = this.toOrderFormValue();
 
         this.store.updateFormValue(value, { markDirty: this.form.dirty });
@@ -300,15 +328,21 @@ export class OrderDetailFormComponent {
         orderDate: value.orderDate ?? '',
         itemName: value.itemName ?? '',
         quantity: value.quantity ?? 0,
+        catalogUnitGrossPln: value.catalogUnitGrossPln ?? 0,
         producerDiscountPct: value.producerDiscountPct ?? 0,
         distributorDiscountPct: value.distributorDiscountPct ?? 0,
         vatRatePct: value.vatRatePct ?? 0,
         totalNetPln: value.totalNetPln ?? 0,
         totalGrossPln: value.totalGrossPln ?? 0,
+        distributorPricePln: value.distributorPricePln ?? 0,
+        customerPricePln: value.customerPricePln ?? 0,
+        profitPln: value.profitPln ?? 0,
         comment: value.comment ?? null,
       },
       { emitEvent: false }
     );
+
+    this.recalculateDerivedFieldsFromForm();
   }
 
   private syncDisabledState(disabled: boolean): void {
@@ -332,11 +366,15 @@ export class OrderDetailFormComponent {
       orderDate: this.normalizeDate(raw.orderDate),
       itemName: raw.itemName.trim(),
       quantity: Number(raw.quantity) || 0,
+      catalogUnitGrossPln: Number(raw.catalogUnitGrossPln) || 0,
       producerDiscountPct: Number(raw.producerDiscountPct) || 0,
       distributorDiscountPct: Number(raw.distributorDiscountPct) || 0,
       vatRatePct: Number(raw.vatRatePct) || 0,
       totalNetPln: Number(raw.totalNetPln) || 0,
       totalGrossPln: Number(raw.totalGrossPln) || 0,
+      distributorPricePln: Number(raw.distributorPricePln) || 0,
+      customerPricePln: Number(raw.customerPricePln) || 0,
+      profitPln: Number(raw.profitPln) || 0,
       comment: raw.comment?.trim() ? raw.comment.trim() : null,
     };
   }
@@ -348,11 +386,15 @@ export class OrderDetailFormComponent {
       a.orderDate === b.orderDate &&
       a.itemName === b.itemName &&
       Number(a.quantity) === Number(b.quantity) &&
+      Number(a.catalogUnitGrossPln) === Number(b.catalogUnitGrossPln) &&
       Number(a.producerDiscountPct) === Number(b.producerDiscountPct) &&
       Number(a.distributorDiscountPct) === Number(b.distributorDiscountPct) &&
       Number(a.vatRatePct) === Number(b.vatRatePct) &&
       Number(a.totalNetPln) === Number(b.totalNetPln) &&
       Number(a.totalGrossPln) === Number(b.totalGrossPln) &&
+      Number(a.distributorPricePln) === Number(b.distributorPricePln) &&
+      Number(a.customerPricePln) === Number(b.customerPricePln) &&
+      Number(a.profitPln) === Number(b.profitPln) &&
       (a.comment ?? '') === (b.comment ?? '')
     );
   }
@@ -383,6 +425,40 @@ export class OrderDetailFormComponent {
     }
 
     return '';
+  }
+
+  private recalculateDerivedFieldsFromForm(): void {
+    const controls = this.form.controls;
+    const input: OrderCalculationInput = {
+      catalogUnitGrossPln: Number(controls.catalogUnitGrossPln.value) || 0,
+      quantity: Number(controls.quantity.value) || 0,
+      vatRatePct: Number(controls.vatRatePct.value) || 0,
+      producerDiscountPct: Number(controls.producerDiscountPct.value) || 0,
+      distributorDiscountPct: Number(controls.distributorDiscountPct.value) || 0,
+    };
+    const result = computeOrderTotals(input);
+    const current = this.form.getRawValue();
+
+    if (
+      Number(current.totalGrossPln) === result.totalGrossPln &&
+      Number(current.totalNetPln) === result.totalNetPln &&
+      Number(current.distributorPricePln) === result.distributorPricePln &&
+      Number(current.customerPricePln) === result.customerPricePln &&
+      Number(current.profitPln) === result.profitPln
+    ) {
+      return;
+    }
+
+    this.form.patchValue(
+      {
+        totalGrossPln: result.totalGrossPln,
+        totalNetPln: result.totalNetPln,
+        distributorPricePln: result.distributorPricePln,
+        customerPricePln: result.customerPricePln,
+        profitPln: result.profitPln,
+      },
+      { emitEvent: false }
+    );
   }
 
   private computeValidation(value: OrderFormValue): OrderFormValidationVm {

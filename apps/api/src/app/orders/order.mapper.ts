@@ -11,11 +11,15 @@ export interface OrderListRow {
   order_date: string;
   item_name: string;
   quantity: number;
+  catalog_unit_gross_pln: number;
   producer_discount_pct: number;
   distributor_discount_pct: number;
   vat_rate_pct: number;
   total_net_pln: number;
   total_gross_pln: number;
+  distributor_price_pln: number;
+  customer_price_pln: number;
+  profit_pln: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -50,11 +54,15 @@ export class OrderMapper {
       orderDate: row.order_date,
       itemName: row.item_name,
       quantity: row.quantity,
+      catalogUnitGrossPln: row.catalog_unit_gross_pln,
       producerDiscountPct: row.producer_discount_pct,
       distributorDiscountPct: row.distributor_discount_pct,
       vatRatePct: row.vat_rate_pct,
       totalNetPln: row.total_net_pln,
       totalGrossPln: row.total_gross_pln,
+      distributorPricePln: row.distributor_price_pln,
+      customerPricePln: row.customer_price_pln,
+      profitPln: row.profit_pln,
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

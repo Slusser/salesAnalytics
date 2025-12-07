@@ -1,9 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  input,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzStatisticModule } from 'ng-zorro-antd/statistic';
@@ -23,12 +18,13 @@ import { OrdersNewPageComponent } from '../../../../pages/orders/new/orders-new.
 export class OrderCalculationPreviewComponent {
   readonly calculation = input.required<OrderCalculationResult | null>();
 
-  protected readonly statusTag = computed(() => {
+  protected readonly profitState = computed(() => {
     const calc = this.calculation() ?? OrdersNewPageComponent.EMPTY_CALCULATION;
-    if (calc?.withinTolerance) {
-      return { type: 'success', label: 'Wartości w tolerancji' };
+    const profit = calc?.profitPln ?? 0;
+    if (profit >= 0) {
+      return { color: 'green', label: 'Marża dodatnia' };
     }
 
-    return { type: 'error', label: 'Wymagana korekta' };
+    return { color: 'volcano', label: 'Marża ujemna' };
   });
 }

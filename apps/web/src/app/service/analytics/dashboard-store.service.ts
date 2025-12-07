@@ -74,6 +74,11 @@ const CURRENCY_FORMATTER = new Intl.NumberFormat('pl-PL', {
 });
 
 const INTEGER_FORMATTER = new Intl.NumberFormat('pl-PL');
+const PERCENT_FORMATTER = new Intl.NumberFormat('pl-PL', {
+  style: 'percent',
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
 
 @Injectable({ providedIn: 'root' })
 export class DashboardStoreService {
@@ -598,8 +603,11 @@ export class DashboardStoreService {
     if (!data) {
       return [
         { key: 'sumNet', label: 'Suma netto (PLN)', value: '—' },
+        { key: 'sumGross', label: 'Suma brutto (PLN)', value: '—' },
+        { key: 'sumProfit', label: 'Marża łączna (PLN)', value: '—' },
         { key: 'ordersCount', label: 'Liczba zamówień', value: '—' },
         { key: 'avgOrder', label: 'Średnia wartość', value: '—' },
+        { key: 'avgMargin', label: 'Średnia marża (%)', value: '—' },
       ];
     }
 
@@ -609,6 +617,18 @@ export class DashboardStoreService {
         label: 'Suma netto (PLN)',
         value: CURRENCY_FORMATTER.format(data.sumNetPln),
         tooltip: 'Łączna wartość netto zamówień w zadanym zakresie',
+      },
+      {
+        key: 'sumGross',
+        label: 'Suma brutto (PLN)',
+        value: CURRENCY_FORMATTER.format(data.sumGrossPln),
+        tooltip: 'Łączna wartość brutto zamówień w zadanym zakresie',
+      },
+      {
+        key: 'sumProfit',
+        label: 'Marża łączna (PLN)',
+        value: CURRENCY_FORMATTER.format(data.sumProfitPln),
+        tooltip: 'Łączna marża = suma cen dystrybutora - suma cen kontrahenta',
       },
       {
         key: 'ordersCount',
@@ -621,6 +641,12 @@ export class DashboardStoreService {
         label: 'Średnia wartość zamówienia',
         value: CURRENCY_FORMATTER.format(data.avgOrderValue),
         tooltip: 'Średnia wartość = suma netto / liczba zamówień',
+      },
+      {
+        key: 'avgMargin',
+        label: 'Średnia marża (%)',
+        value: PERCENT_FORMATTER.format((data.avgMarginPct ?? 0) / 100),
+        tooltip: 'Średnia marża procentowa względem sumy netto',
       },
     ];
   }
@@ -660,8 +686,20 @@ export class DashboardStoreService {
       date: entry.date,
       day: this.getDayFromDate(entry.date),
       netPln: entry.sumNetPln,
+      grossPln: entry.sumGrossPln ?? 0,
+      distributorPln: entry.sumDistributorPln ?? 0,
+      customerPln: entry.sumCustomerPln ?? 0,
+      profitPln: entry.sumProfitPln ?? 0,
+      avgMarginPct: entry.avgMarginPct ?? 0,
       ordersCount: entry.ordersCount,
       formattedNet: CURRENCY_FORMATTER.format(entry.sumNetPln),
+      formattedGross: CURRENCY_FORMATTER.format(entry.sumGrossPln ?? 0),
+      formattedDistributor: CURRENCY_FORMATTER.format(entry.sumDistributorPln ?? 0),
+      formattedCustomer: CURRENCY_FORMATTER.format(entry.sumCustomerPln ?? 0),
+      formattedProfit: CURRENCY_FORMATTER.format(entry.sumProfitPln ?? 0),
+      formattedAvgMargin: PERCENT_FORMATTER.format(
+        (entry.avgMarginPct ?? 0) / 100
+      ),
     }));
   }
 

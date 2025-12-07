@@ -120,19 +120,32 @@ export class AnalyticsService {
 
   private toResult(raw: AnalyticsKpiAggregate): AnalyticsKpiResult {
     const sumNetPln = this.roundCurrency(raw.sumNetPln);
+    const sumGrossPln = this.roundCurrency(raw.sumGrossPln);
+    const sumDistributorPln = this.roundCurrency(raw.sumDistributorPln);
+    const sumCustomerPln = this.roundCurrency(raw.sumCustomerPln);
+    const sumProfitPln = this.roundCurrency(raw.sumProfitPln);
     const ordersCount = Number.isFinite(raw.ordersCount)
       ? Math.max(0, Math.trunc(raw.ordersCount))
       : 0;
 
     const avgOrderValue =
-      ordersCount > 0
-        ? this.roundCurrency(raw.sumNetPln / ordersCount)
+      ordersCount > 0 ? this.roundCurrency(sumNetPln / ordersCount) : 0;
+    const avgMarginPct =
+      sumNetPln > 0
+        ? this.roundCurrency(
+            ((sumDistributorPln - sumCustomerPln) / sumNetPln) * 100
+          )
         : 0;
 
     return {
       sumNetPln,
+      sumGrossPln,
+      sumDistributorPln,
+      sumCustomerPln,
+      sumProfitPln,
       ordersCount,
       avgOrderValue,
+      avgMarginPct,
     };
   }
 

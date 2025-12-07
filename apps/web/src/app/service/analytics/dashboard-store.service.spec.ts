@@ -32,11 +32,18 @@ describe('DashboardStoreService', () => {
     } as ActivatedRoute;
 
     api = {
-      fetchKpi: vi
-        .fn()
-        .mockReturnValue(
-          of({ sumNetPln: 0, ordersCount: 0, avgOrderValue: 0 })
-        ),
+      fetchKpi: vi.fn().mockReturnValue(
+        of({
+          sumNetPln: 0,
+          sumGrossPln: 0,
+          sumDistributorPln: 0,
+          sumCustomerPln: 0,
+          sumProfitPln: 0,
+          ordersCount: 0,
+          avgOrderValue: 0,
+          avgMarginPct: 0,
+        })
+      ),
       fetchTrend: vi.fn().mockReturnValue(of([])),
       fetchDaily: vi.fn().mockReturnValue(of([])),
     };

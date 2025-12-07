@@ -79,6 +79,36 @@
             </th>
             <th
               nzShowSort
+              nzColumnKey="gross"
+              [nzSortOrder]="sortOrderFor('grossPln')"
+              (nzSortOrderChange)="onSort('grossPln', $event)"
+            >
+              Suma brutto (PLN)
+            </th>
+            <th>
+              Cena dystrybutora (PLN)
+            </th>
+            <th>
+              Cena kontrahenta (PLN)
+            </th>
+            <th
+              nzShowSort
+              nzColumnKey="profit"
+              [nzSortOrder]="sortOrderFor('profitPln')"
+              (nzSortOrderChange)="onSort('profitPln', $event)"
+            >
+              Marża (PLN)
+            </th>
+            <th
+              nzShowSort
+              nzColumnKey="margin"
+              [nzSortOrder]="sortOrderFor('avgMarginPct')"
+              (nzSortOrderChange)="onSort('avgMarginPct', $event)"
+            >
+              Średnia marża (%)
+            </th>
+            <th
+              nzShowSort
               nzColumnKey="orders"
               [nzSortOrder]="sortOrderFor('ordersCount')"
               (nzSortOrderChange)="onSort('ordersCount', $event)"
@@ -92,6 +122,11 @@
             <tr>
               <td>{{ row.day }}</td>
               <td>{{ row.formattedNet }}</td>
+              <td>{{ row.formattedGross }}</td>
+              <td>{{ row.formattedDistributor }}</td>
+              <td>{{ row.formattedCustomer }}</td>
+              <td>{{ row.formattedProfit }}</td>
+              <td>{{ row.formattedAvgMargin }}</td>
               <td>{{ row.ordersCount }}</td>
             </tr>
           }

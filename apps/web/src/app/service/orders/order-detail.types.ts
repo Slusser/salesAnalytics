@@ -37,11 +37,15 @@ export interface OrderFormValue {
   orderDate: string;
   itemName: string;
   quantity: number;
+  catalogUnitGrossPln: number;
   producerDiscountPct: number;
   distributorDiscountPct: number;
   vatRatePct: number;
   totalNetPln: number;
   totalGrossPln: number;
+  distributorPricePln: number;
+  customerPricePln: number;
+  profitPln: number;
   comment?: string | null;
 }
 
@@ -51,11 +55,15 @@ export interface OrderFormControls {
   orderDate: FormControl<string>;
   itemName: FormControl<string>;
   quantity: FormControl<number>;
+  catalogUnitGrossPln: FormControl<number>;
   producerDiscountPct: FormControl<number>;
   distributorDiscountPct: FormControl<number>;
   vatRatePct: FormControl<number>;
   totalNetPln: FormControl<number>;
   totalGrossPln: FormControl<number>;
+  distributorPricePln: FormControl<number>;
+  customerPricePln: FormControl<number>;
+  profitPln: FormControl<number>;
   comment: FormControl<string | null>;
 }
 

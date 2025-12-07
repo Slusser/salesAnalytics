@@ -131,6 +131,10 @@ describe('AnalyticsService', () => {
   it('zwraca zaokrąglone dane KPI, gdy repozytorium zwróci wyniki', async () => {
     repository.fetchKpiAggregates.mockResolvedValue({
       sumNetPln: 123.456,
+      sumGrossPln: 150.789,
+      sumDistributorPln: 110,
+      sumCustomerPln: 95,
+      sumProfitPln: 15,
       ordersCount: 3,
     });
     const requester = createRequester();
@@ -149,8 +153,13 @@ describe('AnalyticsService', () => {
     );
     expect(result).toEqual({
       sumNetPln: 123.46,
+      sumGrossPln: 150.79,
+      sumDistributorPln: 110,
+      sumCustomerPln: 95,
+      sumProfitPln: 15,
       ordersCount: 3,
       avgOrderValue: 41.15,
+      avgMarginPct: 12.15,
     });
   });
 

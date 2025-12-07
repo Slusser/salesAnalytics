@@ -49,11 +49,15 @@ type OrderFormGroup = FormGroup<{
   orderDate: FormControl<string>;
   itemName: FormControl<string>;
   quantity: FormControl<number>;
+  catalogUnitGrossPln: FormControl<number>;
   producerDiscountPct: FormControl<number>;
   distributorDiscountPct: FormControl<number>;
   vatRatePct: FormControl<number>;
   totalNetPln: FormControl<number>;
   totalGrossPln: FormControl<number>;
+  distributorPricePln: FormControl<number>;
+  customerPricePln: FormControl<number>;
+  profitPln: FormControl<number>;
   comment: FormControl<string | null>;
 }>;
 
@@ -122,11 +126,20 @@ export class OrderFormComponent {
   protected readonly quantityError = computed(() =>
     this.resolveErrorMessage('quantity')
   );
+  protected readonly catalogUnitGrossError = computed(() =>
+    this.resolveErrorMessage('catalogUnitGrossPln')
+  );
   protected readonly totalNetError = computed(() =>
     this.resolveErrorMessage('totalNetPln')
   );
   protected readonly totalGrossPlnError = computed(() =>
     this.resolveErrorMessage('totalGrossPln')
+  );
+  protected readonly distributorPriceError = computed(() =>
+    this.resolveErrorMessage('distributorPricePln')
+  );
+  protected readonly customerPriceError = computed(() =>
+    this.resolveErrorMessage('customerPricePln')
   );
 
   constructor() {
@@ -136,6 +149,7 @@ export class OrderFormComponent {
     this.setupServerErrorsEffect();
     this.setupDirtyTracking();
     this.setupRecalculationEffect();
+    this.setupCalculationSyncEffect();
   }
 
   protected onSubmit(): void {
@@ -179,6 +193,9 @@ export class OrderFormComponent {
       quantity: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0.01)],
       }),
+      catalogUnitGrossPln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
       producerDiscountPct: this.fb.control(0, {
         validators: PERCENT_VALIDATORS,
       }),
@@ -194,6 +211,13 @@ export class OrderFormComponent {
       totalGrossPln: this.fb.control(0, {
         validators: [Validators.required, Validators.min(0)],
       }),
+      distributorPricePln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      customerPricePln: this.fb.control(0, {
+        validators: [Validators.required, Validators.min(0)],
+      }),
+      profitPln: this.fb.control(0),
       comment: this.fb.control<string | null>(null, {
         validators: [Validators.maxLength(COMMENT_MAX_LENGTH)],
       }),
@@ -283,14 +307,35 @@ export class OrderFormComponent {
       .subscribe(() => {
         const value = this.toFormModel();
         const input: OrderCalculationInput = {
-          net: value.totalNetPln,
+          catalogUnitGrossPln: value.catalogUnitGrossPln,
+          quantity: value.quantity,
+          vatRatePct: value.vatRatePct,
           producerDiscountPct: value.producerDiscountPct,
           distributorDiscountPct: value.distributorDiscountPct,
-          vatRatePct: value.vatRatePct,
         };
 
         this.recalculate.emit(input);
       });
+  }
+
+  private setupCalculationSyncEffect(): void {
+    effect(() => {
+      const calculation = this.calculation();
+      if (!calculation) {
+        return;
+      }
+
+      this.form.patchValue(
+        {
+          totalGrossPln: calculation.totalGrossPln,
+          totalNetPln: calculation.totalNetPln,
+          distributorPricePln: calculation.distributorPricePln,
+          customerPricePln: calculation.customerPricePln,
+          profitPln: calculation.profitPln,
+        },
+        { emitEvent: false }
+      );
+    });
   }
 
   private clearServerErrors(): void {
@@ -356,10 +401,16 @@ export class OrderFormComponent {
           return 'Nazwa produktu jest wymagana.';
         case 'quantity':
           return 'Ilość jest wymagana.';
+        case 'catalogUnitGrossPln':
+          return 'Cena katalogowa brutto jest wymagana.';
         case 'totalNetPln':
           return 'Kwota netto PLN jest wymagana.';
         case 'totalGrossPln':
           return 'Kwota brutto PLN jest wymagana.';
+        case 'distributorPricePln':
+          return 'Cena dystrybutora jest wymagana.';
+        case 'customerPricePln':
+          return 'Cena kontrahenta jest wymagana.';
         default:
           break;
       }
@@ -387,6 +438,15 @@ export class OrderFormComponent {
       if (controlName === 'totalGrossPln') {
         return 'Kwota brutto PLN nie może być ujemna.';
       }
+      if (controlName === 'catalogUnitGrossPln') {
+        return 'Cena katalogowa brutto nie może być ujemna.';
+      }
+      if (controlName === 'distributorPricePln') {
+        return 'Cena dystrybutora nie może być ujemna.';
+      }
+      if (controlName === 'customerPricePln') {
+        return 'Cena kontrahenta nie może być ujemna.';
+      }
     }
 
     if (control.hasError('max')) {
@@ -408,11 +468,15 @@ export class OrderFormComponent {
       orderDate: raw.orderDate,
       itemName: raw.itemName.trim(),
       quantity: Number(raw.quantity),
+      catalogUnitGrossPln: Number(raw.catalogUnitGrossPln),
       producerDiscountPct: Number(raw.producerDiscountPct),
       distributorDiscountPct: Number(raw.distributorDiscountPct),
       vatRatePct: Number(raw.vatRatePct),
       totalNetPln: Number(raw.totalNetPln),
       totalGrossPln: Number(raw.totalGrossPln),
+      distributorPricePln: Number(raw.distributorPricePln),
+      customerPricePln: Number(raw.customerPricePln),
+      profitPln: Number(raw.profitPln),
       comment: raw.comment ?? undefined,
     };
   }

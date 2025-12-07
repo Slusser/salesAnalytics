@@ -9,8 +9,13 @@ export interface AnalyticsRangeQuery {
 
 export interface AnalyticsKpiDto {
   sumNetPln: number
+  sumGrossPln: number
+  sumDistributorPln: number
+  sumCustomerPln: number
+  sumProfitPln: number
   ordersCount: number
   avgOrderValue: number
+  avgMarginPct: number
 }
 
 export interface AnalyticsTrendEntryDto {
@@ -21,6 +26,11 @@ export interface AnalyticsTrendEntryDto {
 export interface AnalyticsDailyEntryDto {
   date: string
   sumNetPln: number
+  sumGrossPln: number
+  sumDistributorPln: number
+  sumCustomerPln: number
+  sumProfitPln: number
+  avgMarginPct: number
   ordersCount: number
 }
 

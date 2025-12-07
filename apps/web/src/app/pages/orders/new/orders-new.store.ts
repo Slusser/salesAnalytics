@@ -16,11 +16,15 @@ const DEFAULT_FORM_MODEL: OrderFormModel = {
   orderDate: '',
   itemName: '',
   quantity: 1,
+  catalogUnitGrossPln: 0,
   producerDiscountPct: 0,
   distributorDiscountPct: 0,
   vatRatePct: 23,
   totalNetPln: 0,
   totalGrossPln: 0,
+  distributorPricePln: 0,
+  customerPricePln: 0,
+  profitPln: 0,
   comment: '',
 };
 
@@ -87,14 +91,7 @@ export class OrdersNewStore {
     }
   }
 
-  updateCalculationFromForm(): void {
-    const model = this.formModelSignal();
-    const input: OrderCalculationInput = {
-      net: model.totalNetPln,
-      producerDiscountPct: model.producerDiscountPct,
-      distributorDiscountPct: model.distributorDiscountPct,
-      vatRatePct: model.vatRatePct,
-    };
+  updateCalculationFromInput(input: OrderCalculationInput): void {
     const result = computeOrderTotals(input);
     this.calculationSignal.set(result);
   }

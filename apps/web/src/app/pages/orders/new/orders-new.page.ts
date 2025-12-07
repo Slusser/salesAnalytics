@@ -13,7 +13,11 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { OrdersNewStore } from './orders-new.store';
 import { OrderFormComponent } from '../../../shared/components/orders/order-form/order-form.component';
 import { OrderCalculationPreviewComponent } from '../../../shared/components/orders/order-calculation-preview/order-calculation-preview.component';
-import type { OrderCalculationResult, OrderFormModel } from './orders-new.types';
+import type {
+  OrderCalculationInput,
+  OrderCalculationResult,
+  OrderFormModel,
+} from './orders-new.types';
 import type { OrderResponse } from '@shared/dtos/orders.dto';
 import { OrdersCreateService } from '../../../service/orders/orders-create.service';
 
@@ -34,12 +38,12 @@ import { OrdersCreateService } from '../../../service/orders/orders-create.servi
 })
 export class OrdersNewPageComponent {
   public static readonly EMPTY_CALCULATION: OrderCalculationResult = {
-    netAfterProducer: 0,
-    netAfterDistributor: 0,
+    totalGrossPln: 0,
+    totalNetPln: 0,
+    distributorPricePln: 0,
+    customerPricePln: 0,
+    profitPln: 0,
     vatAmount: 0,
-    grossPln: 0,
-    differencePln: 0,
-    withinTolerance: true,
   };
 
   private readonly store = inject(OrdersNewStore);
@@ -84,8 +88,8 @@ export class OrdersNewPageComponent {
     this.store.resetDirty();
   }
 
-  protected onRecalculate(_input: any): void {
-    this.store.updateCalculationFromForm();
+  protected onRecalculate(input: OrderCalculationInput): void {
+    this.store.updateCalculationFromInput(input);
   }
 
   private handleCreateSuccess(response: OrderResponse): void {
@@ -113,11 +117,15 @@ export class OrdersNewPageComponent {
       orderDate: model.orderDate,
       itemName: model.itemName,
       quantity: model.quantity,
+      catalogUnitGrossPln: model.catalogUnitGrossPln,
       producerDiscountPct: model.producerDiscountPct,
       distributorDiscountPct: model.distributorDiscountPct,
       vatRatePct: model.vatRatePct,
       totalNetPln: model.totalNetPln,
       totalGrossPln: model.totalGrossPln,
+      distributorPricePln: model.distributorPricePln,
+      customerPricePln: model.customerPricePln,
+      profitPln: model.profitPln,
       comment: model.comment,
     };
   }

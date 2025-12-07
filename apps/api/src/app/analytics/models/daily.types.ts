@@ -19,6 +19,11 @@ export interface DailyOrdersAnalyticsQuery {
 export interface DailyOrdersAnalyticsItem {
   date: string;
   sumNetPln: number;
+  sumGrossPln: number;
+  sumDistributorPln: number;
+  sumCustomerPln: number;
+  sumProfitPln: number;
+  avgMarginPct: number;
   ordersCount: number;
 }
 

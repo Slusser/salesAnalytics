@@ -32,11 +32,15 @@ describe('OrderFormComponent', () => {
     orderDate: '2024-05-20',
     itemName: 'Produkt testowy',
     quantity: 5,
+    catalogUnitGrossPln: 300,
     producerDiscountPct: 10,
     distributorDiscountPct: 5,
     vatRatePct: 23,
     totalNetPln: 1000,
     totalGrossPln: 1230,
+    distributorPricePln: 950,
+    customerPricePln: 1200,
+    profitPln: 250,
   };
 
   const createComponent = (model: OrderFormModel = baseModel) => {
@@ -130,11 +134,15 @@ describe('OrderFormComponent', () => {
       orderDate: baseModel.orderDate,
       itemName: baseModel.itemName,
       quantity: baseModel.quantity,
+      catalogUnitGrossPln: baseModel.catalogUnitGrossPln,
       producerDiscountPct: baseModel.producerDiscountPct,
       distributorDiscountPct: baseModel.distributorDiscountPct,
       vatRatePct: baseModel.vatRatePct,
       totalNetPln: baseModel.totalNetPln,
       totalGrossPln: baseModel.totalGrossPln,
+      distributorPricePln: baseModel.distributorPricePln,
+      customerPricePln: baseModel.customerPricePln,
+      profitPln: baseModel.profitPln,
       comment: null,
     });
     expect(componentApi.form.pristine).toBe(true);
@@ -180,11 +188,15 @@ describe('OrderFormComponent', () => {
       orderDate: baseModel.orderDate,
       itemName: 'Lampa biurkowa',
       quantity: 2,
+      catalogUnitGrossPln: baseModel.catalogUnitGrossPln,
       producerDiscountPct: 15,
       distributorDiscountPct: 5,
       vatRatePct: 8,
       totalNetPln: 500,
       totalGrossPln: 540,
+      distributorPricePln: baseModel.distributorPricePln,
+      customerPricePln: baseModel.customerPricePln,
+      profitPln: baseModel.profitPln,
       comment: 'Notatka wewnętrzna',
     });
   });
@@ -282,7 +294,8 @@ describe('OrderFormComponent', () => {
 
     const recalcSpy = vi.spyOn(component.recalculate, 'emit');
 
-    componentApi.form.controls.totalNetPln.setValue(1500);
+    componentApi.form.controls.catalogUnitGrossPln.setValue(420);
+    componentApi.form.controls.quantity.setValue(7);
     componentApi.form.controls.producerDiscountPct.setValue(12);
     componentApi.form.controls.distributorDiscountPct.setValue(3);
     componentApi.form.controls.vatRatePct.setValue(8);
@@ -290,7 +303,8 @@ describe('OrderFormComponent', () => {
     vi.advanceTimersByTime(350);
 
     const expected: OrderCalculationInput = {
-      net: 1500,
+      catalogUnitGrossPln: 420,
+      quantity: 7,
       producerDiscountPct: 12,
       distributorDiscountPct: 3,
       vatRatePct: 8,

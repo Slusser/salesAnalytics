@@ -61,13 +61,43 @@ describe('OrdersService', () => {
     orderDate: '2024-05-10',
     itemName: '  Produkt  ',
     quantity: 10,
+    catalogUnitGrossPln: 50,
     producerDiscountPct: 12,
     distributorDiscountPct: 5,
     vatRatePct: 23,
     totalNetPln: 100,
     totalGrossPln: 123,
+    distributorPricePln: 95,
+    customerPricePln: 90,
+    profitPln: 5,
     comment: '  testowy komentarz  ',
   };
+
+  const createOrderDetailDto = (
+    overrides: Partial<OrderDetailDto> = {}
+  ): OrderDetailDto => ({
+    id: 'order-1',
+    orderNo: 'ORDER-1',
+    customerId: 'customer-1',
+    orderDate: '2024-01-01',
+    itemName: 'Produkt',
+    quantity: 1,
+    catalogUnitGrossPln: 50,
+    producerDiscountPct: 0,
+    distributorDiscountPct: 0,
+    vatRatePct: 23,
+    totalNetPln: 100,
+    totalGrossPln: 123,
+    distributorPricePln: 95,
+    customerPricePln: 90,
+    profitPln: 5,
+    comment: 'Komentarz',
+    createdBy: 'user-3',
+    createdAt: '2024-01-01T00:00:00Z',
+    updatedAt: '2024-01-01T00:00:00Z',
+    deletedAt: null,
+    ...overrides,
+  });
 
   const createRepositoryMock = (): OrdersRepositoryMock => ({
     list: vi.fn(),
@@ -183,24 +213,7 @@ describe('OrdersService', () => {
   });
 
   describe('getById', () => {
-    const order: OrderDetailDto = {
-      id: 'order-1',
-      orderNo: 'ORDER-1',
-      customerId: 'customer-1',
-      orderDate: '2024-01-01',
-      itemName: 'Produkt',
-      quantity: 1,
-      producerDiscountPct: 0,
-      distributorDiscountPct: 0,
-      vatRatePct: 23,
-      totalNetPln: 100,
-      totalGrossPln: 123,
-      comment: 'Komentarz',
-      createdBy: 'user-3',
-      createdAt: '2024-01-01T00:00:00Z',
-      updatedAt: '2024-01-01T00:00:00Z',
-      deletedAt: null,
-    };
+    const order: OrderDetailDto = createOrderDetailDto();
 
     it('rzuca ForbiddenException gdy użytkownik nie jest przekazany', async () => {
       await expect(
@@ -275,24 +288,27 @@ describe('OrdersService', () => {
         totalNetPln: -100,
         totalGrossPln: -120,
       };
-      const normalizedResponse: OrderDetailDto = {
+      const normalizedResponse: OrderDetailDto = createOrderDetailDto({
         id: 'order-id',
         orderNo: 'ABC-123',
         customerId: 'customer-1',
         orderDate: '2024-05-10',
         itemName: 'Produkt',
-      quantity: 10,
+        quantity: 10,
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
+        catalogUnitGrossPln: 50,
         totalNetPln: 0,
         totalGrossPln: 0,
+        distributorPricePln: 0,
+        customerPricePln: 0,
+        profitPln: 0,
         comment: 'testowy komentarz',
         createdBy: 'user-1',
         createdAt: '2024-05-10T12:00:00Z',
         updatedAt: '2024-05-10T12:00:00Z',
-        deletedAt: null,
-      };
+      });
       repository.create.mockResolvedValue(normalizedResponse);
 
       const result = await service.create(
@@ -313,24 +329,53 @@ describe('OrdersService', () => {
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
-        totalNetPln: 0,
-        totalGrossPln: 0,
+        totalNetPln: 250,
+        totalGrossPln: 500,
       });
     });
 
-    it('waliduje spójność kwot netto/brutto', async () => {
+    it('nadpisuje niespójne kwoty wartościami wyliczonymi', async () => {
       const command: CreateOrderCommand = {
         ...baseCommand,
+        catalogUnitGrossPln: 50,
         totalNetPln: 100,
         totalGrossPln: 150,
-        vatRatePct: 23,
+        distributorPricePln: 10,
+        customerPricePln: 5,
+        profitPln: 5,
       };
+      const createdOrder = createOrderDetailDto({
+        id: 'order-id',
+        orderNo: 'ABC-123',
+        customerId: 'customer-1',
+        orderDate: '2024-05-10',
+        itemName: 'Produkt',
+        quantity: 10,
+        catalogUnitGrossPln: 50,
+        producerDiscountPct: 12,
+        distributorDiscountPct: 5,
+        vatRatePct: 23,
+        totalNetPln: 406.5,
+        totalGrossPln: 500,
+        distributorPricePln: 386.18,
+        customerPricePln: 357.72,
+        profitPln: 28.46,
+        comment: 'Komentarz',
+        createdBy: 'user-1',
+        createdAt: '2024-05-10T12:00:00Z',
+        updatedAt: '2024-05-10T12:00:00Z',
+      });
+      repository.create.mockResolvedValue(createdOrder);
 
-      await expect(service.create(command, elevatedUser)).rejects.toBeInstanceOf(
-        BadRequestException
-      );
+      const result = await service.create(command, elevatedUser);
 
-      expect(repository.create).not.toHaveBeenCalled();
+      expect(result).toBe(createdOrder);
+      const payload = repository.create.mock.calls[0][1];
+      expect(payload.command.totalGrossPln).toBeCloseTo(500, 2);
+      expect(payload.command.totalNetPln).toBeCloseTo(406.5, 2);
+      expect(payload.command.distributorPricePln).toBeCloseTo(386.18, 1);
+      expect(payload.command.customerPricePln).toBeCloseTo(357.72, 1);
+      expect(payload.command.profitPln).toBeCloseTo(28.46, 1);
     });
 
     it('propaguje ConflictException z repozytorium', async () => {
@@ -368,8 +413,7 @@ describe('OrdersService', () => {
       deletedAt: '2024-05-01T00:00:00Z',
     };
 
-    const updatedOrder: OrderDetailDto = {
-      id: 'order-1',
+    const updatedOrder: OrderDetailDto = createOrderDetailDto({
       orderNo: 'ABC-123',
       customerId: 'customer-1',
       orderDate: '2024-05-10',
@@ -380,12 +424,15 @@ describe('OrdersService', () => {
       vatRatePct: 23,
       totalNetPln: 100,
       totalGrossPln: 123,
+      distributorPricePln: 95,
+      customerPricePln: 90,
+      profitPln: 5,
       comment: 'Komentarz',
       createdBy: 'user-1',
       createdAt: '2024-05-10T00:00:00Z',
       updatedAt: '2024-05-10T00:00:00Z',
       deletedAt: null,
-    };
+    });
 
     it('rzuca ForbiddenException gdy użytkownik nie ma wymaganej roli', async () => {
       await expect(
@@ -452,8 +499,8 @@ describe('OrdersService', () => {
         producerDiscountPct: 100,
         distributorDiscountPct: 0,
         vatRatePct: 100,
-        totalNetPln: 0,
-        totalGrossPln: 0,
+        totalNetPln: 250,
+        totalGrossPln: 500,
         deletedAt: new Date(updateCommand.deletedAt).toISOString(),
       });
     });
@@ -527,9 +574,9 @@ describe('OrdersService', () => {
     });
 
     it('kończy sukcesem gdy soft-delete się powodzi', async () => {
-      repository.findActiveById.mockResolvedValue({
-        id: 'order-1',
-      } as OrderDetailDto);
+      repository.findActiveById.mockResolvedValue(
+        createOrderDetailDto({ id: 'order-1' })
+      );
       repository.softDelete.mockResolvedValue(undefined);
 
       await expect(service.delete('order-1', elevatedUser)).resolves.toBeUndefined();
@@ -541,9 +588,9 @@ describe('OrdersService', () => {
     });
 
     it('opakowuje błędy softDelete w InternalServerErrorException', async () => {
-      repository.findActiveById.mockResolvedValue({
-        id: 'order-1',
-      } as OrderDetailDto);
+      repository.findActiveById.mockResolvedValue(
+        createOrderDetailDto({ id: 'order-1' })
+      );
       repository.softDelete.mockRejectedValue(new Error('boom'));
 
       await expect(service.delete('order-1', elevatedUser)).rejects.toBeInstanceOf(

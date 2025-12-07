@@ -6,11 +6,15 @@ export interface OrderFormModel {
   orderDate: string;
   itemName: string;
   quantity: number;
+  catalogUnitGrossPln: number;
   producerDiscountPct: number;
   distributorDiscountPct: number;
   vatRatePct: number;
   totalNetPln: number;
   totalGrossPln: number;
+  distributorPricePln: number;
+  customerPricePln: number;
+  profitPln: number;
   comment?: string;
 }
 
@@ -21,19 +25,20 @@ export interface OrderFormServerErrors {
 }
 
 export interface OrderCalculationInput {
-  net: number;
+  catalogUnitGrossPln: number;
+  quantity: number;
+  vatRatePct: number;
   producerDiscountPct: number;
   distributorDiscountPct: number;
-  vatRatePct: number;
 }
 
 export interface OrderCalculationResult {
-  netAfterProducer: number;
-  netAfterDistributor: number;
+  totalGrossPln: number;
+  totalNetPln: number;
+  distributorPricePln: number;
+  customerPricePln: number;
+  profitPln: number;
   vatAmount: number;
-  grossPln: number;
-  differencePln: number;
-  withinTolerance: boolean;
 }
 
 export interface ImportValidationIssue {

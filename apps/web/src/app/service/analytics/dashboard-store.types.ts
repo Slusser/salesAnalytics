@@ -15,7 +15,13 @@ export type DashboardQueryParams = Partial<DashboardFilters> & {
   month?: number;
 };
 
-export type KpiViewModelKey = 'sumNet' | 'ordersCount' | 'avgOrder';
+export type KpiViewModelKey =
+  | 'sumNet'
+  | 'sumGross'
+  | 'sumProfit'
+  | 'ordersCount'
+  | 'avgOrder'
+  | 'avgMargin';
 
 export type KpiViewModel = {
   key: KpiViewModelKey;
@@ -44,8 +50,18 @@ export type DailyPointViewModel = {
   date: string;
   day: number;
   netPln: number;
+  grossPln: number;
+  distributorPln: number;
+  customerPln: number;
+  profitPln: number;
+  avgMarginPct: number;
   ordersCount: number;
   formattedNet: string;
+  formattedGross: string;
+  formattedDistributor: string;
+  formattedCustomer: string;
+  formattedProfit: string;
+  formattedAvgMargin: string;
 };
 
 export type EmptyStateConfig = {

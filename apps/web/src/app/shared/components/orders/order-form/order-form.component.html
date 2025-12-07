@@ -76,6 +76,21 @@
     </nz-form-item>
 
     <nz-form-item>
+      <nz-form-label nzRequired for="catalogUnitGrossPln"
+        >Cena katalogowa brutto (PLN)</nz-form-label
+      >
+      <nz-form-control [nzErrorTip]="catalogUnitGrossError()">
+        <nz-input-number
+          id="catalogUnitGrossPln"
+          formControlName="catalogUnitGrossPln"
+          [nzMin]="0"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
       <nz-form-label for="producerDiscountPct"
         >Rabat producenta (%)</nz-form-label
       >
@@ -130,6 +145,7 @@
           [nzMin]="0"
           [nzStep]="0.01"
           [nzPrecision]="2"
+          [nzDisabled]="true"
         />
       </nz-form-control>
     </nz-form-item>
@@ -143,6 +159,52 @@
           [nzMin]="0"
           [nzStep]="0.01"
           [nzPrecision]="2"
+          [nzDisabled]="true"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="distributorPricePln"
+        >Cena dystrybutora (PLN)</nz-form-label
+      >
+      <nz-form-control [nzErrorTip]="distributorPriceError()">
+        <nz-input-number
+          id="distributorPricePln"
+          formControlName="distributorPricePln"
+          [nzMin]="0"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+          [nzDisabled]="true"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label nzRequired for="customerPricePln"
+        >Cena kontrahenta (PLN)</nz-form-label
+      >
+      <nz-form-control [nzErrorTip]="customerPriceError()">
+        <nz-input-number
+          id="customerPricePln"
+          formControlName="customerPricePln"
+          [nzMin]="0"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+          [nzDisabled]="true"
+        />
+      </nz-form-control>
+    </nz-form-item>
+
+    <nz-form-item>
+      <nz-form-label for="profitPln">Marża (PLN)</nz-form-label>
+      <nz-form-control>
+        <nz-input-number
+          id="profitPln"
+          formControlName="profitPln"
+          [nzStep]="0.01"
+          [nzPrecision]="2"
+          [nzDisabled]="true"
         />
       </nz-form-control>
     </nz-form-item>

@@ -1,32 +1,35 @@
 <nz-card class="order-calculation-preview">
   <div class="order-calculation-preview__header">
     <h3>Podgląd kalkulacji</h3>
-    <nz-tag [nzColor]="statusTag().type === 'success' ? 'green' : 'volcano'">
-      {{ statusTag().label }}
+    <nz-tag [nzColor]="profitState().color">
+      {{ profitState().label }}
     </nz-tag>
   </div>
 
   <div class="order-calculation-preview__grid">
     <div class="order-calculation-preview__item">
-      <span>Netto po rabacie producenta</span>
-      <strong>{{ (calculation()?.netAfterProducer ?? 0) | number : '1.2-2' }} PLN</strong>
+      <span>Suma brutto (PLN)</span>
+      <strong>{{ (calculation()?.totalGrossPln ?? 0) | number : '1.2-2' }} PLN</strong>
     </div>
     <div class="order-calculation-preview__item">
-      <span>Netto po rabacie dystrybutora</span>
-      <strong>{{ (calculation()?.netAfterDistributor ?? 0) | number : '1.2-2' }} PLN</strong>
+      <span>Suma netto (PLN)</span>
+      <strong>{{ (calculation()?.totalNetPln ?? 0) | number : '1.2-2' }} PLN</strong>
     </div>
     <div class="order-calculation-preview__item">
       <span>Kwota VAT</span>
       <strong>{{ (calculation()?.vatAmount ?? 0) | number : '1.2-2' }} PLN</strong>
     </div>
     <div class="order-calculation-preview__item">
-      <span>Brutto PLN</span>
-      <strong>{{ (calculation()?.grossPln ?? 0) | number : '1.2-2' }} PLN</strong>
+      <span>Cena dystrybutora (PLN)</span>
+      <strong>{{ (calculation()?.distributorPricePln ?? 0) | number : '1.2-2' }} PLN</strong>
     </div>
-
     <div class="order-calculation-preview__item">
-      <span>Różnica PLN</span>
-      <strong>{{ (calculation()?.differencePln ?? 0) | number : '1.2-2' }} PLN</strong>
+      <span>Cena kontrahenta (PLN)</span>
+      <strong>{{ (calculation()?.customerPricePln ?? 0) | number : '1.2-2' }} PLN</strong>
+    </div>
+    <div class="order-calculation-preview__item">
+      <span>Marża (PLN)</span>
+      <strong>{{ (calculation()?.profitPln ?? 0) | number : '1.2-2' }} PLN</strong>
     </div>
   </div>
 </nz-card>

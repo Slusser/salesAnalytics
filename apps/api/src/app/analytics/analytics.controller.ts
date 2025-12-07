@@ -69,8 +69,13 @@ export class AnalyticsController {
 
     return {
       sumNetPln: result.sumNetPln,
+      sumGrossPln: result.sumGrossPln,
+      sumDistributorPln: result.sumDistributorPln,
+      sumCustomerPln: result.sumCustomerPln,
+      sumProfitPln: result.sumProfitPln,
       ordersCount: result.ordersCount,
       avgOrderValue: result.avgOrderValue,
+      avgMarginPct: result.avgMarginPct,
     };
   }
 

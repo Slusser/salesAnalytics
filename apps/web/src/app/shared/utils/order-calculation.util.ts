@@ -3,39 +3,37 @@ import type {
   OrderCalculationResult,
 } from '../../pages/orders/new/orders-new.types';
 
-const TOLERANCE = 0.01;
-
 export function computeOrderTotals(
   input: OrderCalculationInput
 ): OrderCalculationResult {
-  const net = normalizeNumber(input.net);
+  const unitGross = normalizeNumber(input.catalogUnitGrossPln);
+  const quantity = Math.max(0, normalizeNumber(input.quantity));
   const producerDiscount = clampPercentage(input.producerDiscountPct);
   const distributorDiscount = clampPercentage(input.distributorDiscountPct);
   const vatRate = clampPercentage(input.vatRatePct);
 
-  const netAfterProducer = roundCurrency(net * (1 - producerDiscount / 100));
-  const netAfterDistributor = roundCurrency(
-    netAfterProducer * (1 - distributorDiscount / 100)
+  const totalGrossPln = roundCurrency(unitGross * quantity);
+  const vatMultiplier = 1 + vatRate / 100;
+  const totalNetPln =
+    vatMultiplier <= 0 ? totalGrossPln : roundCurrency(totalGrossPln / vatMultiplier);
+  const vatAmount = roundCurrency(totalGrossPln - totalNetPln);
+
+  const distributorPricePln = roundCurrency(
+    totalNetPln * (1 - distributorDiscount / 100)
   );
-  const vatAmount = roundCurrency(netAfterDistributor * (vatRate / 100));
-  const grossPln = roundCurrency(netAfterDistributor + vatAmount);
-
-  const differencePln = roundCurrency(grossPln - net);
-
-  const withinTolerance = Math.abs(differencePln) <= TOLERANCE;
+  const customerPricePln = roundCurrency(
+    totalNetPln * (1 - producerDiscount / 100)
+  );
+  const profitPln = roundCurrency(distributorPricePln - customerPricePln);
 
   return {
-    netAfterProducer,
-    netAfterDistributor,
+    totalGrossPln,
+    totalNetPln,
+    distributorPricePln,
+    customerPricePln,
+    profitPln,
     vatAmount,
-    grossPln,
-    differencePln,
-    withinTolerance,
   };
-}
-
-export function isWithinTolerance(expected: number, actual: number): boolean {
-  return Math.abs(roundCurrency(actual) - roundCurrency(expected)) <= TOLERANCE;
 }
 
 function clampPercentage(value: number | undefined): number {

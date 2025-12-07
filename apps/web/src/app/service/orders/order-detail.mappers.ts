@@ -24,11 +24,15 @@ export function mapOrderDetailDtoToFormValue(
     orderDate: dto.orderDate,
     itemName: dto.itemName,
     quantity: dto.quantity,
+    catalogUnitGrossPln: dto.catalogUnitGrossPln,
     producerDiscountPct: dto.producerDiscountPct,
     distributorDiscountPct: dto.distributorDiscountPct,
     vatRatePct: dto.vatRatePct,
     totalNetPln: dto.totalNetPln,
     totalGrossPln: dto.totalGrossPln,
+    distributorPricePln: dto.distributorPricePln,
+    customerPricePln: dto.customerPricePln,
+    profitPln: dto.profitPln,
     comment: dto.comment ?? null,
   };
 }

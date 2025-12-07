@@ -152,7 +152,22 @@
       </nz-form-item>
 
       <nz-form-item>
-        <nz-form-label for="producerDiscountPct">Rabat producenta (%)</nz-form-label>
+        <nz-form-label nzRequired for="catalogUnitGrossPln"
+          >Cena katalogowa brutto (PLN)</nz-form-label
+        >
+        <nz-form-control [nzErrorTip]="resolveError('catalogUnitGrossPln')">
+          <nz-input-number
+            id="catalogUnitGrossPln"
+            formControlName="catalogUnitGrossPln"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label for="producerDiscountPct">Rabat dla dystrybutora (%)</nz-form-label>
         <nz-form-control>
           <nz-input-number
             id="producerDiscountPct"
@@ -166,7 +181,7 @@
       </nz-form-item>
 
       <nz-form-item>
-        <nz-form-label for="distributorDiscountPct">Rabat dystrybutora (%)</nz-form-label>
+        <nz-form-label for="distributorDiscountPct">Rabat dla kontrahenta (%)</nz-form-label>
         <nz-form-control>
           <nz-input-number
             id="distributorDiscountPct"
@@ -202,6 +217,7 @@
             [nzMin]="0"
             [nzStep]="0.01"
             [nzPrecision]="2"
+          [nzDisabled]="true"
           />
         </nz-form-control>
       </nz-form-item>
@@ -215,6 +231,52 @@
             [nzMin]="0"
             [nzStep]="0.01"
             [nzPrecision]="2"
+          [nzDisabled]="true"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="distributorPricePln"
+          >Cena dystrybutora (PLN)</nz-form-label
+        >
+        <nz-form-control [nzErrorTip]="resolveError('distributorPricePln')">
+          <nz-input-number
+            id="distributorPricePln"
+            formControlName="distributorPricePln"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+            [nzDisabled]="true"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired for="customerPricePln"
+          >Cena kontrahenta (PLN)</nz-form-label
+        >
+        <nz-form-control [nzErrorTip]="resolveError('customerPricePln')">
+          <nz-input-number
+            id="customerPricePln"
+            formControlName="customerPricePln"
+            [nzMin]="0"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+            [nzDisabled]="true"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label for="profitPln">Marża (PLN)</nz-form-label>
+        <nz-form-control>
+          <nz-input-number
+            id="profitPln"
+            formControlName="profitPln"
+            [nzStep]="0.01"
+            [nzPrecision]="2"
+            [nzDisabled]="true"
           />
         </nz-form-control>
       </nz-form-item>

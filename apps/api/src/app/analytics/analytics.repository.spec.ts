@@ -49,8 +49,20 @@ describe('AnalyticsRepository', () => {
     const createBuilder = () => {
       const returns = vi.fn().mockResolvedValue({
         data: [
-          { total_net_pln: 100.123 },
-          { total_net_pln: null },
+          {
+            total_net_pln: 60.111,
+            total_gross_pln: 73,
+            distributor_price_pln: 58,
+            customer_price_pln: 49,
+            profit_pln: 9,
+          },
+          {
+            total_net_pln: 40.012,
+            total_gross_pln: 49,
+            distributor_price_pln: 38,
+            customer_price_pln: 30,
+            profit_pln: 8,
+          },
         ],
         error: null,
       });
@@ -79,11 +91,21 @@ describe('AnalyticsRepository', () => {
       );
 
       expect(supabase.from).toHaveBeenCalledWith('orders');
-      expect(builder.select).toHaveBeenCalledWith('total_net_pln', { head: false });
+      expect(builder.select).toHaveBeenCalledWith(
+        'total_net_pln,total_gross_pln,distributor_price_pln,customer_price_pln,profit_pln',
+        { head: false }
+      );
       expect(builder.is).toHaveBeenCalledWith('deleted_at', null);
       expect(builder.gte).toHaveBeenCalled();
       expect(builder.lte).toHaveBeenCalled();
-      expect(result).toEqual({ sumNetPln: 100.123, ordersCount: 2 });
+      expect(result).toMatchObject({
+        sumGrossPln: 122,
+        sumDistributorPln: 96,
+        sumCustomerPln: 79,
+        sumProfitPln: 17,
+        ordersCount: 2,
+      });
+      expect(result.sumNetPln).toBeCloseTo(100.123, 6);
     });
 
     it('filtruje po customerId i propaguje błąd', async () => {
@@ -128,10 +150,18 @@ describe('AnalyticsRepository', () => {
           {
             order_date: '2024-05-02T00:00:00.000Z',
             total_net_pln: 120.222,
+            total_gross_pln: 147.873,
+            distributor_price_pln: 110,
+            customer_price_pln: 95,
+            profit_pln: 15,
           },
           {
             order_date: '2024-05-02T12:00:00.000Z',
             total_net_pln: 80.333,
+            total_gross_pln: 98.009,
+            distributor_price_pln: 70,
+            customer_price_pln: 60,
+            profit_pln: 10,
           },
         ],
         error: null,
@@ -166,13 +196,25 @@ describe('AnalyticsRepository', () => {
       );
 
       expect(supabase.from).toHaveBeenCalledWith('orders');
-      expect(builder.select).toHaveBeenCalledWith('order_date,total_net_pln', {
-        head: false,
-      });
+      expect(builder.select).toHaveBeenCalledWith(
+        'order_date,total_net_pln,total_gross_pln,distributor_price_pln,customer_price_pln,profit_pln',
+        {
+          head: false,
+        }
+      );
       expect(builder.eq).toHaveBeenCalledWith('customer_id', 'customer-1');
       expect(builder.order).toHaveBeenCalledWith('order_date', { ascending: true });
       expect(result).toEqual([
-        { date: '2024-05-02', sumNetPln: 200.56, ordersCount: 2 },
+        {
+          date: '2024-05-02',
+          sumNetPln: 200.56,
+          sumGrossPln: 245.88,
+          sumDistributorPln: 180,
+          sumCustomerPln: 155,
+          sumProfitPln: 25,
+          avgMarginPct: 12.47,
+          ordersCount: 2,
+        },
       ]);
     });
 

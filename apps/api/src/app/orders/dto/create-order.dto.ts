@@ -116,6 +116,19 @@ export class CreateOrderDto implements CreateOrderCommand {
   quantity!: number;
 
   @ApiProperty({
+    description: 'Cena katalogowa brutto za jednostkę (PLN)',
+    minimum: 0,
+    type: Number,
+  })
+  @Transform(({ value }) => toNumber(value))
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'Pole catalogUnitGrossPln musi być liczbą.' }
+  )
+  @Min(0, { message: 'Cena katalogowa brutto nie może być ujemna.' })
+  catalogUnitGrossPln!: number;
+
+  @ApiProperty({
     description: 'Rabat producenta w procentach',
     minimum: 0,
     maximum: MAX_DISCOUNT,
@@ -183,6 +196,41 @@ export class CreateOrderDto implements CreateOrderCommand {
   )
   @Min(0, { message: 'Suma brutto nie może być ujemna.' })
   totalGrossPln!: number;
+
+  @ApiProperty({
+    description: 'Cena dystrybutora w PLN (po rabacie dystrybutora)',
+    type: Number,
+  })
+  @Transform(({ value }) => toNumber(value))
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'Pole distributorPricePln musi być liczbą.' }
+  )
+  @Min(0, { message: 'Cena dystrybutora nie może być ujemna.' })
+  distributorPricePln!: number;
+
+  @ApiProperty({
+    description: 'Cena kontrahenta w PLN (po rabacie kontrahenta)',
+    type: Number,
+  })
+  @Transform(({ value }) => toNumber(value))
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'Pole customerPricePln musi być liczbą.' }
+  )
+  @Min(0, { message: 'Cena kontrahenta nie może być ujemna.' })
+  customerPricePln!: number;
+
+  @ApiProperty({
+    description: 'Marża (profit) w PLN',
+    type: Number,
+  })
+  @Transform(({ value }) => toNumber(value))
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false },
+    { message: 'Pole profitPln musi być liczbą.' }
+  )
+  profitPln!: number;
 
   @ApiPropertyOptional({
     description: 'Dodatkowy komentarz do zamówienia',

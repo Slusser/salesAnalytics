@@ -23,8 +23,23 @@ type TrendRpcRow = {
 };
 
 type OrdersRow = Database['public']['Tables']['orders']['Row'];
-type OrderNetRow = Pick<OrdersRow, 'order_date' | 'total_net_pln'>;
-type OrderAmountRow = Pick<OrdersRow, 'total_net_pln'>;
+type OrderNetRow = Pick<
+  OrdersRow,
+  | 'order_date'
+  | 'total_net_pln'
+  | 'total_gross_pln'
+  | 'distributor_price_pln'
+  | 'customer_price_pln'
+  | 'profit_pln'
+>;
+type OrderAmountRow = Pick<
+  OrdersRow,
+  | 'total_net_pln'
+  | 'total_gross_pln'
+  | 'distributor_price_pln'
+  | 'customer_price_pln'
+  | 'profit_pln'
+>;
 
 type TrendFallbackParams = {
   dateFromIso: string;
@@ -47,9 +62,12 @@ export class AnalyticsRepository {
 
     let builder = client
       .from('orders')
-      .select('total_net_pln', {
+      .select(
+        'total_net_pln,total_gross_pln,distributor_price_pln,customer_price_pln,profit_pln',
+        {
         head: false,
-      })
+        }
+      )
       .is('deleted_at', null)
       .gte('order_date', dateFromIso)
       .lte('order_date', dateToIso);
@@ -77,7 +95,10 @@ export class AnalyticsRepository {
 
     let builder = client
       .from('orders')
-      .select('order_date,total_net_pln', { head: false })
+      .select(
+        'order_date,total_net_pln,total_gross_pln,distributor_price_pln,customer_price_pln,profit_pln',
+        { head: false }
+      )
       .is('deleted_at', null)
       .gte('order_date', monthStartIso)
       .lte('order_date', monthEndIso)
@@ -141,7 +162,10 @@ export class AnalyticsRepository {
   ): Promise<AnalyticsTrendResult> {
     let builder = client
       .from('orders')
-      .select('order_date,total_net_pln', { head: false })
+      .select(
+        'order_date,total_net_pln,total_gross_pln,distributor_price_pln,customer_price_pln,profit_pln',
+        { head: false }
+      )
       .is('deleted_at', null)
       .gte('order_date', params.dateFromIso)
       .lte('order_date', params.dateToIso);
@@ -205,7 +229,17 @@ export class AnalyticsRepository {
       return [];
     }
 
-    const buckets = new Map<string, { sum: number; count: number }>();
+    const buckets = new Map<
+      string,
+      {
+        net: number;
+        gross: number;
+        distributor: number;
+        customer: number;
+        profit: number;
+        count: number;
+      }
+    >();
 
     for (const row of rows) {
       const date = this.normalizeDate(row.order_date);
@@ -214,20 +248,41 @@ export class AnalyticsRepository {
         continue;
       }
 
-      const current = buckets.get(date) ?? { sum: 0, count: 0 };
-      const addition = Number(row.total_net_pln ?? 0);
+      const current =
+        buckets.get(date) ?? {
+          net: 0,
+          gross: 0,
+          distributor: 0,
+          customer: 0,
+          profit: 0,
+          count: 0,
+        };
       buckets.set(date, {
-        sum: current.sum + addition,
+        net: current.net + Number(row.total_net_pln ?? 0),
+        gross: current.gross + Number(row.total_gross_pln ?? 0),
+        distributor: current.distributor + Number(row.distributor_price_pln ?? 0),
+        customer: current.customer + Number(row.customer_price_pln ?? 0),
+        profit: current.profit + Number(row.profit_pln ?? 0),
         count: current.count + 1,
       });
     }
 
     return Array.from(buckets.entries())
       .sort((a, b) => a[0].localeCompare(b[0]))
-      .map(([date, { sum, count }]) => ({
+      .map(([date, bucket]) => ({
         date,
-        sumNetPln: this.roundCurrency(sum),
-        ordersCount: Math.max(0, Math.trunc(count)),
+        sumNetPln: this.roundCurrency(bucket.net),
+        sumGrossPln: this.roundCurrency(bucket.gross),
+        sumDistributorPln: this.roundCurrency(bucket.distributor),
+        sumCustomerPln: this.roundCurrency(bucket.customer),
+        sumProfitPln: this.roundCurrency(bucket.profit),
+        avgMarginPct:
+          bucket.net > 0
+            ? this.roundCurrency(
+                ((bucket.distributor - bucket.customer) / bucket.net) * 100
+              )
+            : 0,
+        ordersCount: Math.max(0, Math.trunc(bucket.count)),
       }));
   }
 
@@ -275,20 +330,26 @@ export class AnalyticsRepository {
   }
 
   private aggregateKpiRows(rows: OrderAmountRow[]): AnalyticsKpiAggregate {
-    if (rows.length === 0) {
-      return { sumNetPln: 0, ordersCount: 0 };
-    }
-
-    let sum = 0;
-
-    for (const row of rows) {
-      sum += Number(row.total_net_pln ?? 0);
-    }
-
-    return {
-      sumNetPln: sum,
-      ordersCount: rows.length,
-    };
+    return rows.reduce<AnalyticsKpiAggregate>(
+      (acc, row) => ({
+        sumNetPln: acc.sumNetPln + Number(row.total_net_pln ?? 0),
+        sumGrossPln: acc.sumGrossPln + Number(row.total_gross_pln ?? 0),
+        sumDistributorPln:
+          acc.sumDistributorPln + Number(row.distributor_price_pln ?? 0),
+        sumCustomerPln:
+          acc.sumCustomerPln + Number(row.customer_price_pln ?? 0),
+        sumProfitPln: acc.sumProfitPln + Number(row.profit_pln ?? 0),
+        ordersCount: acc.ordersCount + 1,
+      }),
+      {
+        sumNetPln: 0,
+        sumGrossPln: 0,
+        sumDistributorPln: 0,
+        sumCustomerPln: 0,
+        sumProfitPln: 0,
+        ordersCount: 0,
+      }
+    );
   }
 
   private isMissingTrendRpc(error: PostgrestError): boolean {

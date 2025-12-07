@@ -27,6 +27,12 @@ export class OrderListItemResponseDto implements OrderListItemDto {
   @ApiProperty({ description: 'Ilość zamówionych sztuk', type: Number })
   quantity!: number;
 
+  @ApiProperty({
+    description: 'Cena katalogowa brutto za jednostkę (PLN)',
+    type: Number,
+  })
+  catalogUnitGrossPln!: number;
+
   @ApiProperty({ description: 'Rabat producenta w procentach', type: Number })
   producerDiscountPct!: number;
 
@@ -41,6 +47,21 @@ export class OrderListItemResponseDto implements OrderListItemDto {
 
   @ApiProperty({ description: 'Suma brutto w PLN', type: Number })
   totalGrossPln!: number;
+
+  @ApiProperty({
+    description: 'Cena dystrybutora w PLN po rabacie dystrybutora',
+    type: Number,
+  })
+  distributorPricePln!: number;
+
+  @ApiProperty({
+    description: 'Cena kontrahenta w PLN po rabacie kontrahenta',
+    type: Number,
+  })
+  customerPricePln!: number;
+
+  @ApiProperty({ description: 'Marża (profit) w PLN', type: Number })
+  profitPln!: number;
 
   @ApiProperty({
     description: 'Identyfikator użytkownika tworzącego zamówienie',

@@ -28,8 +28,6 @@ const DEFAULT_LIMIT = 25;
 const DEFAULT_SORT_FIELD: NonNullable<ListOrdersQuery['sort']> =
   'createdAt:desc';
 
-const AMOUNT_TOLERANCE = 0.01;
-
 const SORT_PARSER: Record<
   string,
   { field: NonNullable<ListOrdersQuery['sort']>; direction: 'asc' | 'desc' }
@@ -365,21 +363,24 @@ export class OrdersService {
     const normalizedDeletedAt = command.deletedAt
       ? new Date(command.deletedAt).toISOString()
       : command.deletedAt ?? null;
-    const producerDiscountPct = command.producerDiscountPct != null
-      ? Math.max(0, Math.min(100, command.producerDiscountPct))
-      : null;
-    const distributorDiscountPct = command.distributorDiscountPct != null
-      ? Math.max(0, Math.min(100, command.distributorDiscountPct))
-      : null;
-    const vatRatePct = command.vatRatePct != null
-      ? Math.max(0, Math.min(100, command.vatRatePct))
-      : null;
-    const totalNetPln = command.totalNetPln != null
-      ? Math.max(0, command.totalNetPln)
-      : null;
-    const totalGrossPln = command.totalGrossPln != null
-      ? Math.max(0, command.totalGrossPln)
-      : null;
+    const producerDiscountPct = this.clampPercentage(command.producerDiscountPct);
+    const distributorDiscountPct = this.clampPercentage(
+      command.distributorDiscountPct
+    );
+    const vatRatePct = this.clampPercentage(command.vatRatePct);
+    const catalogUnitGrossPln =
+      command.catalogUnitGrossPln != null
+        ? Math.max(0, command.catalogUnitGrossPln)
+        : 0;
+    const quantity = command.quantity != null ? Math.max(0, command.quantity) : 0;
+
+    const amounts = this.calculateAmounts({
+      catalogUnitGrossPln,
+      quantity,
+      vatRatePct,
+      distributorDiscountPct,
+      producerDiscountPct,
+    });
 
     return {
       ...command,
@@ -390,25 +391,92 @@ export class OrdersService {
       producerDiscountPct: producerDiscountPct,
       distributorDiscountPct: distributorDiscountPct,
       vatRatePct: vatRatePct,
-      totalNetPln: totalNetPln,
-      totalGrossPln: totalGrossPln,
+      quantity,
+      catalogUnitGrossPln,
+      totalNetPln: amounts.totalNetPln,
+      totalGrossPln: amounts.totalGrossPln,
+      distributorPricePln: amounts.distributorPricePln,
+      customerPricePln: amounts.customerPricePln,
+      profitPln: amounts.profitPln,
     } as T;
   }
 
   private validateCommand(command: BaseOrderCommand): void {
-    if (
-      !this.areAmountsConsistent(command.totalNetPln, command.totalGrossPln, command.vatRatePct)
-    ) {
+    if (command.quantity <= 0) {
       throw new BadRequestException({
         code: 'ORDERS_CREATE_VALIDATION',
-        message:
-          'Suma brutto w PLN musi mieścić się w tolerancji względem sumy netto.',
+        message: 'Ilość musi być większa od zera.',
+      });
+    }
+
+    if (command.catalogUnitGrossPln < 0) {
+      throw new BadRequestException({
+        code: 'ORDERS_CREATE_VALIDATION',
+        message: 'Cena katalogowa brutto nie może być ujemna.',
       });
     }
   }
 
-  private areAmountsConsistent(a: number, b: number, vatRate: number): boolean {
-    return Math.abs(a*(1+vatRate/100) - b) <= AMOUNT_TOLERANCE;
+  private clampPercentage(value: number | null | undefined): number {
+    if (value == null) {
+      return 0;
+    }
+
+    if (!Number.isFinite(value)) {
+      return 0;
+    }
+
+    if (value < 0) {
+      return 0;
+    }
+
+    if (value > 100) {
+      return 100;
+    }
+
+    return value;
+  }
+
+  private calculateAmounts(params: {
+    catalogUnitGrossPln: number;
+    quantity: number;
+    vatRatePct: number;
+    distributorDiscountPct: number;
+    producerDiscountPct: number;
+  }): {
+    totalGrossPln: number;
+    totalNetPln: number;
+    distributorPricePln: number;
+    customerPricePln: number;
+    profitPln: number;
+  } {
+    const quantity = Math.max(0, params.quantity);
+    const unitGross = Math.max(0, params.catalogUnitGrossPln);
+
+    const totalGrossPln = this.roundCurrency(unitGross * quantity);
+    const vatMultiplier = 1 + params.vatRatePct / 100;
+    const safeVatMultiplier = vatMultiplier <= 0 ? 1 : vatMultiplier;
+    const totalNetPln = this.roundCurrency(totalGrossPln / safeVatMultiplier);
+
+    const distributorPricePln = this.roundCurrency(
+      totalNetPln * (1 - params.distributorDiscountPct / 100)
+    );
+    const customerPricePln = this.roundCurrency(
+      totalNetPln * (1 - params.producerDiscountPct / 100)
+    );
+    const profitPln = this.roundCurrency(distributorPricePln - customerPricePln);
+
+    return {
+      totalGrossPln,
+      totalNetPln,
+      distributorPricePln,
+      customerPricePln,
+      profitPln,
+    };
+  }
+
+  private roundCurrency(value: number): number {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
   }
 
   async delete(

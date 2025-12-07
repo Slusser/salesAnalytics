@@ -19,7 +19,13 @@ import {
 } from '../../../../service/analytics/dashboard-store.types';
 import { EmptyStateComponent } from '../../../../shared/components/empty-state/empty-state.component';
 
-type SortKey = 'day' | 'netPln' | 'ordersCount';
+type SortKey =
+  | 'day'
+  | 'netPln'
+  | 'grossPln'
+  | 'profitPln'
+  | 'avgMarginPct'
+  | 'ordersCount';
 
 @Component({
   selector: 'app-dashboard-daily-breakdown',
@@ -60,6 +66,10 @@ export class DailyBreakdownComponent {
     }
 
     return {
+      legend: {
+        data: ['Netto', 'Marża'],
+        bottom: 0,
+      },
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'line' },
@@ -69,11 +79,16 @@ export class DailyBreakdownComponent {
           return `
             ${datum.date}<br/>
             Netto: ${datum.formattedNet}<br/>
+            Brutto: ${datum.formattedGross}<br/>
+            Cena dystrybutora: ${datum.formattedDistributor}<br/>
+            Cena kontrahenta: ${datum.formattedCustomer}<br/>
+            Marża: ${datum.formattedProfit}<br/>
+            Średnia marża: ${datum.formattedAvgMargin}<br/>
             Zamówienia: ${datum.ordersCount}
           `;
         },
       },
-      grid: { left: 48, right: 24, top: 24, bottom: 48 },
+      grid: { left: 48, right: 24, top: 24, bottom: 72 },
       xAxis: {
         type: 'category',
         data: seriesData.map((point) => point.day),
@@ -87,6 +102,7 @@ export class DailyBreakdownComponent {
       },
       series: [
         {
+          name: 'Netto',
           type: 'line',
           smooth: true,
           areaStyle: { opacity: 0.15 },
@@ -95,6 +111,14 @@ export class DailyBreakdownComponent {
             color: '#2563eb',
           },
           data: seriesData.map((point) => point.netPln),
+        },
+        {
+          name: 'Marża',
+          type: 'line',
+          smooth: true,
+          lineStyle: { width: 2, color: '#16a34a', type: 'dashed' },
+          itemStyle: { color: '#16a34a' },
+          data: seriesData.map((point) => point.profitPln),
         },
       ],
     };
