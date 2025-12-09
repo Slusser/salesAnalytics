@@ -767,22 +767,13 @@ export class DashboardStoreService {
     filters: DashboardFilters,
     month?: MonthSelection
   ): void {
-    const queryParams: DashboardQueryParams = {
+    const queryParams: Params = {
       dateFrom: filters.dateFrom,
       dateTo: filters.dateTo,
-      customerId: this.canFilterByCustomer() ? filters.customerId : undefined,
-      year: month?.year,
-      month: month?.month,
+      customerId: this.canFilterByCustomer() ? filters.customerId ?? null : null,
+      year: month?.year ?? null,
+      month: month?.month ?? null,
     };
-
-    Object.keys(queryParams).forEach((key) => {
-      if (
-        queryParams[key as keyof DashboardQueryParams] === undefined ||
-        queryParams[key as keyof DashboardQueryParams] === null
-      ) {
-        delete queryParams[key as keyof DashboardQueryParams];
-      }
-    });
 
     this.router.navigate([], {
       relativeTo: this.route,

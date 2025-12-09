@@ -2,138 +2,110 @@
   <div class="daily-breakdown__header">
     <div>
       <h3>
-        Dzienny rozkład
-        @if (selectedMonth()) {
-          <span>- {{ selectedMonth()?.label }}</span>
+        Dzienny rozkład @if (selectedMonth()) {
+        <span>- {{ selectedMonth()?.label }}</span>
         }
       </h3>
       <p>Wybierz miesiąc w trendzie, aby zobaczyć szczegóły.</p>
     </div>
 
     @if (selectedMonth()) {
-      <button nz-button nzType="default" (click)="onClear()">
-        Wyczyść wybór
-      </button>
+    <button nz-button nzType="default" (click)="onClear()">
+      Wyczyść wybór
+    </button>
     }
   </div>
 
   @if (isLoading()) {
-    <div class="daily-breakdown__skeleton">
-      <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
-    </div>
+  <div class="daily-breakdown__skeleton">
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  </div>
   } @else if (!hasSelection()) {
-    <app-empty-state
-      icon="📅"
-      title="Wybierz miesiąc"
-      description="Kliknij w słupek na wykresie trendu miesięcznego, aby zobaczyć dane dzienne."
-    />
+  <app-empty-state
+    icon="📅"
+    title="Wybierz miesiąc"
+    description="Kliknij w słupek na wykresie trendu miesięcznego, aby zobaczyć dane dzienne."
+  />
   } @else if (hasError()) {
-    <app-empty-state
-      icon="⚠️"
-      title="Nie udało się pobrać danych dziennych"
-      description="Spróbuj ponownie lub zmień zakres filtrów."
-      actionLabel="Spróbuj ponownie"
-      actionType="primary"
-      (action)="onRetry()"
-    />
+  <app-empty-state
+    icon="⚠️"
+    title="Nie udało się pobrać danych dziennych"
+    description="Spróbuj ponownie lub zmień zakres filtrów."
+    actionLabel="Spróbuj ponownie"
+    actionType="primary"
+    (action)="onRetry()"
+  />
   } @else if (!hasData()) {
-    <app-empty-state
-      icon="📭"
-      title="Brak zamówień"
-      description="Nie znaleziono zamówień w wybranym miesiącu."
-      actionLabel="Wyczyść wybór"
-      (action)="onClear()"
-    />
+  <app-empty-state
+    icon="📭"
+    title="Brak zamówień"
+    description="Nie znaleziono zamówień w wybranym miesiącu."
+    actionLabel="Wyczyść wybór"
+    (action)="onClear()"
+  />
   } @else {
-    <div class="daily-breakdown__content">
-      <div
-        echarts
-        class="daily-breakdown__chart"
-        [options]="chartOptions()"
-        [autoResize]="true"
-      ></div>
+  <div class="daily-breakdown__content">
+    <div
+      echarts
+      class="daily-breakdown__chart"
+      [options]="chartOptions()"
+      [autoResize]="true"
+    ></div>
 
-      <nz-table
-        class="daily-breakdown__table"
-        [nzData]="sortedData()"
-        nzSize="small"
-        nzBordered
-      >
-        <thead>
-          <tr>
-            <th
-              nzShowSort
-              nzColumnKey="day"
-              [nzSortOrder]="sortOrderFor('day')"
-              (nzSortOrderChange)="onSort('day', $event)"
-            >
-              Dzień
-            </th>
-            <th
-              nzShowSort
-              nzColumnKey="net"
-              [nzSortOrder]="sortOrderFor('netPln')"
-              (nzSortOrderChange)="onSort('netPln', $event)"
-            >
-              Suma netto (PLN)
-            </th>
-            <th
-              nzShowSort
-              nzColumnKey="gross"
-              [nzSortOrder]="sortOrderFor('grossPln')"
-              (nzSortOrderChange)="onSort('grossPln', $event)"
-            >
-              Suma brutto (PLN)
-            </th>
-            <th>
-              Cena dystrybutora (PLN)
-            </th>
-            <th>
-              Cena kontrahenta (PLN)
-            </th>
-            <th
-              nzShowSort
-              nzColumnKey="profit"
-              [nzSortOrder]="sortOrderFor('profitPln')"
-              (nzSortOrderChange)="onSort('profitPln', $event)"
-            >
-              Marża (PLN)
-            </th>
-            <th
-              nzShowSort
-              nzColumnKey="margin"
-              [nzSortOrder]="sortOrderFor('avgMarginPct')"
-              (nzSortOrderChange)="onSort('avgMarginPct', $event)"
-            >
-              Średnia marża (%)
-            </th>
-            <th
-              nzShowSort
-              nzColumnKey="orders"
-              [nzSortOrder]="sortOrderFor('ordersCount')"
-              (nzSortOrderChange)="onSort('ordersCount', $event)"
-            >
-              Liczba zamówień
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of sortedData(); track row.date) {
-            <tr>
-              <td>{{ row.day }}</td>
-              <td>{{ row.formattedNet }}</td>
-              <td>{{ row.formattedGross }}</td>
-              <td>{{ row.formattedDistributor }}</td>
-              <td>{{ row.formattedCustomer }}</td>
-              <td>{{ row.formattedProfit }}</td>
-              <td>{{ row.formattedAvgMargin }}</td>
-              <td>{{ row.ordersCount }}</td>
-            </tr>
-          }
-        </tbody>
-      </nz-table>
-    </div>
+    <nz-table
+      class="daily-breakdown__table"
+      [nzData]="sortedData()"
+      nzSize="small"
+      [nzFrontPagination]="false"
+      nzBordered
+    >
+      <thead>
+        <tr>
+          <th
+            nzShowSort
+            nzColumnKey="day"
+            [nzSortOrder]="sortOrderFor('day')"
+            (nzSortOrderChange)="onSort('day', $event)"
+          >
+            Dzień
+          </th>
+          <th
+            nzShowSort
+            nzColumnKey="net"
+            [nzSortOrder]="sortOrderFor('netPln')"
+            (nzSortOrderChange)="onSort('netPln', $event)"
+          >
+            Suma netto (PLN)
+          </th>
+          <th
+            nzShowSort
+            nzColumnKey="gross"
+            [nzSortOrder]="sortOrderFor('grossPln')"
+            (nzSortOrderChange)="onSort('grossPln', $event)"
+          >
+            Suma brutto (PLN)
+          </th>
+          <th
+            nzShowSort
+            nzColumnKey="profit"
+            [nzSortOrder]="sortOrderFor('profitPln')"
+            (nzSortOrderChange)="onSort('profitPln', $event)"
+          >
+            Marża (PLN)
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of sortedData(); track row.date) {
+        <tr>
+          <td>{{ row.day }}</td>
+          <td>{{ row.formattedNet }}</td>
+          <td>{{ row.formattedGross }}</td>
+          <td>{{ row.formattedProfit }}</td>
+        </tr>
+        }
+      </tbody>
+    </nz-table>
+  </div>
   }
 </div>
-
-

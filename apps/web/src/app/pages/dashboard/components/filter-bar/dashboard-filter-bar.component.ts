@@ -8,7 +8,7 @@ import {
   input,
   output,
 } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -58,7 +58,7 @@ export class DashboardFilterBarComponent {
 
   protected readonly form = this.fb.group({
     customerId: [null as string | null],
-    dateRange: [null as [Date, Date] | null, Validators.required],
+    dateRange: [null as [Date, Date] | null],
   });
   protected readonly customerSelectDisabled = computed(
     () => this.isDisabled() || !this.canFilterByCustomer()
@@ -81,24 +81,6 @@ export class DashboardFilterBarComponent {
         }
         this.filtersChanged.emit(filters);
       });
-  }
-
-  protected onSubmit(): void {
-    const filters = this.getNormalizedFilters();
-    if (!filters) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.filtersSubmitted.emit(filters);
-  }
-
-  protected onResetClick(): void {
-    this.filtersReset.emit();
-  }
-
-  protected isApplyDisabled(): boolean {
-    return this.isLoading() || this.isDisabled() || !this.form.valid;
   }
 
   private syncFormWithValue(filters: DashboardFilters): void {
@@ -130,14 +112,12 @@ export class DashboardFilterBarComponent {
 
   private getNormalizedFilters(): DashboardFilters | null {
     const raw = this.form.getRawValue() as FilterFormValue;
-    if (!raw.dateRange) {
+    const dateRange = this.resolveDateRange(raw.dateRange);
+    if (!dateRange) {
       return null;
     }
 
-    const [from, to] = raw.dateRange;
-    if (!from || !to) {
-      return null;
-    }
+    const [from, to] = dateRange;
 
     const dateFrom = this.formatIsoDate(
       Date.UTC(from.getUTCFullYear(), from.getUTCMonth(), 1)
@@ -163,8 +143,35 @@ export class DashboardFilterBarComponent {
     return [from, to];
   }
 
+  private resolveDateRange(
+    range: FilterFormValue['dateRange']
+  ): [Date, Date] | null {
+    if (
+      !range ||
+      (Array.isArray(range) && range.every((date) => date == null))
+    ) {
+      const fallback = this.createDefaultDateRange();
+      this.form.patchValue({ dateRange: fallback }, { emitEvent: false });
+      return fallback;
+    }
+
+    const [from, to] = range;
+    if (!from || !to) {
+      return null;
+    }
+
+    return range;
+  }
+
   private parseIso(value: string): Date {
     return new Date(`${value}T00:00:00Z`);
+  }
+
+  private createDefaultDateRange(): [Date, Date] {
+    const today = new Date();
+    const start = new Date(Date.UTC(today.getUTCFullYear(), 0, 1));
+    const end = new Date(Date.UTC(today.getUTCFullYear(), 11, 31));
+    return [start, end];
   }
 
   private formatIsoDate(timestamp: number): string {
