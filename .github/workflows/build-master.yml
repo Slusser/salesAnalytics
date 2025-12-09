@@ -66,7 +66,7 @@ jobs:
     needs:
       - lint
       - unit_tests
-    if: ${{ github.event_name == 'pull_request' && success() || github.event_name == 'push' }}
+    if: ${{ success() }}
     permissions:
       contents: read
       pull-requests: write
@@ -86,10 +86,21 @@ jobs:
               '',
               'Wszystkie kroki zakończone powodzeniem – można kontynuować.'
             ];
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.payload.pull_request?.number || context.payload.ref,
-              body: messageLines.join('\n')
-            });
+            const isPullRequest = Boolean(context.payload.pull_request);
+
+            if (isPullRequest) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: messageLines.join('\n')
+              });
+            } else {
+              await github.rest.repos.createCommitComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                commit_sha: context.payload.after,
+                body: messageLines.join('\n')
+              });
+            }
 
