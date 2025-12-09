@@ -18,6 +18,9 @@ jobs:
     env:
       CI: true
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Prepare workspace
         uses: ./.github/actions/install-deps
         with:
@@ -37,6 +40,9 @@ jobs:
     env:
       CI: true
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Prepare workspace
         uses: ./.github/actions/install-deps
         with:
