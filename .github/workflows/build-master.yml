@@ -1,10 +1,12 @@
-name: Pull Request Quality Gates
+name: Build and Deploy Main
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
     branches:
       - main
-      - master
 
 jobs:
   lint:
