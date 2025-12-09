@@ -36,7 +36,6 @@ import { AnalyticsDashboardApiService } from './analytics-dashboard-api.service'
 import { AuthSessionService } from '../auth/auth-session.service';
 import {
   DashboardFilters,
-  DashboardQueryParams,
   DashboardState,
   DataState,
   DailyPointViewModel,
