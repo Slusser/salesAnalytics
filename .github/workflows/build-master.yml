@@ -68,7 +68,7 @@ jobs:
       - unit_tests
     if: ${{ success() }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
     steps:
       - name: Post consolidated status
