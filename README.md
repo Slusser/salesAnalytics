@@ -36,7 +36,7 @@ This repository is an Nx monorepo containing:
   - RxJS 7.8, zone.js
   - Swagger (`@nestjs/swagger`, `swagger-ui-express`)
   - Axios
-- Playwright (Chromium-only E2E suite for `apps/web`), Jest for `api-e2e`
+- Playwright (zunifikowany projekt `apps/e2e` obejmujący testy API, UI i scenariusze flow)
 
 ## 4. Getting started locally
 
@@ -96,16 +96,19 @@ npx nx test api --coverage
 
 #### End-to-End
 ```bash
-# Frontend UI (Playwright, Chromium only)
-npx nx e2e web-e2e
+# Wszystkie testy (API + UI + flows)
+npx nx e2e e2e
 
-# Run headed / specific project
-npx nx e2e web-e2e --headed --project=chromium-desktop
+# Tylko API (request context)
+npx nx e2e e2e --project=api
 
-# API contract tests (Jest + Supertest)
-npx nx e2e api-e2e
+# UI na Chromium desktop
+npx nx e2e e2e --project=chromium
+
+# Pełne przepływy biznesowe
+npx nx e2e e2e --project=flows
 ```
-Playwright artefacts (screenshots, traces, HTML report) are stored under `apps/web-e2e/dist/apps/web-e2e`. Set `BASE_URL` to run against a deployed frontend instead of the local dev server.
+Playwright artefakty (screenshots, traces, HTML report) są przechowywane w `dist/apps/e2e/playwright-report`. Ustaw `BASE_URL` i `API_URL`, aby uruchomić testy przeciwko wdrożonym usługom zamiast lokalnych serwerów.
 
 #### Unit testing assumptions
 - Vitest 3 is the unit-test runner for both Angular (`@analogjs/vitest-angular`) and NestJS projects.
@@ -131,8 +134,10 @@ This workspace uses Nx targets instead of root npm scripts. Common commands:
 | Lint | `npx nx lint api` / `npx nx lint web` | ESLint rules configured per project. |
 | Test (web) | `npx nx test web` | Vitest + @analogjs/vitest-angular (watch/coverage supported). |
 | Test (api) | `npx nx test api` | Vitest (Node env, NestJS testing utilities). |
-| E2E (web) | `npx nx e2e web-e2e` | Playwright, Chromium desktop, auto-dev-server. |
-| E2E (api) | `npx nx e2e api-e2e` | Jest + Supertest contract checks. |
+| E2E (all) | `npx nx e2e e2e` | Uruchamia pełny pakiet Playwright (API + UI + flows). |
+| E2E (api) | `npx nx e2e e2e --project=api` | Testy request-context dla backendu (logowanie, zamówienia, analityka). |
+| E2E (ui) | `npx nx e2e e2e --project=chromium` | Scenariusze UI w Chromium z automatycznym serwerem web/api. |
+| E2E (flows) | `npx nx e2e e2e --project=flows` | Pełne przepływy biznesowe (UI + weryfikacja API). |
 | Show project | `npx nx show project <name>` | Inspect available targets for a project. |
 | Graph | `npx nx graph` | Visualize project dependencies. |
 
@@ -158,12 +163,12 @@ Out of scope (for now):
   - API runs at `http://localhost:3000/api` with Swagger docs at `/api/docs`
   - Web app scaffold runs at `http://localhost:4200`
   - Linting oraz testy jednostkowe Vitest dla web i api
-  - `web-e2e` (Playwright, Chromium) oraz `api-e2e` (Jest + Supertest) dostępne jako cele Nx
+  - Zunifikowany projekt `apps/e2e` (Playwright) z testami API, UI (Chromium) i scenariuszami flow
 - Next:
   - Implement data model, storage (e.g., Supabase) and environment configuration
   - Implement XLSX import and validation pipeline
   - Implement amount calculation algorithm and dashboard metrics
-  - Rozszerzyć scenariusze Playwright (`web-e2e`) o logowanie, zamówienia i klientów
+  - Rozszerzyć scenariusze Playwright (`e2e:api/chromium/flows`) o kolejne przypadki biznesowe (importy, journey klientów)
   - Add CI and a `LICENSE` file
 
 ## 8. License

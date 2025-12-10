@@ -1,0 +1,26 @@
+{
+  "name": "e2e",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/e2e/src",
+  "implicitDependencies": ["web", "api"],
+  "targets": {
+    "e2e": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/e2e/playwright.config.ts"
+      }
+    },
+    "e2e-ui": {
+      "executor": "@nx/playwright:playwright",
+      "options": {
+        "config": "apps/e2e/playwright.config.ts"
+      },
+      "configurations": {
+        "production": {
+          "config": "apps/e2e/playwright.config.ts"
+        }
+      }
+    }
+  }
+}

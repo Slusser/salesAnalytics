@@ -20,6 +20,7 @@ Testy:
 - Backend: priorytet testowania dla `OrdersService`, `CustomersService`, `AuthService`, warstwy mapperów domenowych, guardów (`JwtAuthGuard`, `RolesGuard`), pipes walidacyjnych i pomocniczych utili.
 - Frontend: pokrycie usług stanu (`OrdersListService`, `AuthSessionService`, `CustomersService`), komponentów formularzy, logiki prezentacyjnej, pipes i niestandardowych walidatorów.
 - Kluczowe kalkulacje (np. `totalGrossPln = totalNetPln * (1 + vatRatePct/100)`) muszą być weryfikowane z tolerancją 0,01.
+- Playwright jako zunifikowany projekt `apps/e2e` (targets: `api`, `chromium`, `flows`) obejmujący testy API, UI i pełne przepływy biznesowe.
 
 CI/CD i Hosting:
 - Github Actions do tworzenia pipeline’ów CI/CD
