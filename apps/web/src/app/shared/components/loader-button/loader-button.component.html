@@ -3,6 +3,7 @@
   [nzType]="nzType"
   [disabled]="disabled || loading"
   [attr.type]="htmlType"
+  [attr.data-testid]="testId ?? null"
 >
   @if (loading) {
     <span class="loader-button__spinner" aria-hidden="true">

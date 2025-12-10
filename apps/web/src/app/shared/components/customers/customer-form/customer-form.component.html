@@ -1,5 +1,12 @@
 <!-- eslint-disable @angular-eslint/template/label-has-associated-control -->
-<form nz-form [formGroup]="form" (ngSubmit)="onSubmit()" [nzNoColon]="true" novalidate>
+<form
+  nz-form
+  [formGroup]="form"
+  (ngSubmit)="onSubmit()"
+  [nzNoColon]="true"
+  novalidate
+  data-testid="customer-form"
+>
   @if (generalError()) {
     <nz-alert nzType="error" [nzMessage]="generalError()" nzShowIcon class="customer-form__alert"></nz-alert>
   }
@@ -17,6 +24,7 @@
         autocomplete="off"
         placeholder="Wpisz nazwę"
         required
+        data-testid="customer-name-input"
       />
       @if (nameError()) {
         <div class="customer-form__error" nz-form-explain>{{ nameError() }}</div>
@@ -76,6 +84,7 @@
         [nzStep]="0.5"
         [nzDisabled]="isReadonly()"
         [nzPrecision]="2"
+        data-testid="customer-default-discount-input"
       ></nz-input-number>
       @if (defaultDiscountError()) {
         <div class="customer-form__error" nz-form-explain>
@@ -92,6 +101,7 @@
       [disabled]="form.invalid || isReadonly()"
       htmlType="submit"
       nzType="primary"
+      testId="customer-submit-button"
     ></app-loader-button>
 
     @if (showRestoreButton()) {
@@ -126,6 +136,7 @@
         nzType="default"
         (click)="onCancel()"
         [disabled]="isSubmitting()"
+        data-testid="customer-cancel-button"
       >
         Anuluj
       </button>

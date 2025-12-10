@@ -3,6 +3,7 @@
   [nzData]="items()"
   [nzLoading]="loading()"
   nzSize="middle"
+  data-testid="customers-table"
 >
   <thead>
     <tr>
@@ -17,7 +18,10 @@
 
   <tbody>
     @for (item of items(); track item.id) {
-      <tr [ngClass]="{ 'customers-table__row--deleted': item.deleted }">
+      <tr
+        [ngClass]="{ 'customers-table__row--deleted': item.deleted }"
+        data-testid="customers-table-row"
+      >
         <td>
           <div class="customers-table__name">
             <span>{{ item.name }}</span>
@@ -69,7 +73,7 @@
         </td>
       </tr>
     } @empty {
-      <tr>
+      <tr data-testid="customers-table-empty">
         <td colspan="6" class="customers-table__empty">
           Brak danych
         </td>

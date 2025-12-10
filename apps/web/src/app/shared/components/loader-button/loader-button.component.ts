@@ -24,4 +24,5 @@ export class LoaderButtonComponent {
   @Input() disabled = false;
   @Input() htmlType: 'button' | 'submit' = 'button';
   @Input() nzType: LoaderButtonType = 'primary';
+  @Input() testId?: string;
 }

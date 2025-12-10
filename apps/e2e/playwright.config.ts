@@ -1,6 +1,10 @@
 import { defineConfig, devices } from '@playwright/test';
 import { nxE2EPreset } from '@nx/playwright/preset';
 import { workspaceRoot } from '@nx/devkit';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+
+dotenv.config({ path: path.resolve(process.cwd(), '.env.test') });
 
 const baseURL = process.env['BASE_URL'] || 'http://localhost:4200';
 const apiURL = process.env['API_URL'] || 'http://localhost:3000';
